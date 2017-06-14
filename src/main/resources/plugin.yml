@@ -1,0 +1,5 @@
+name: uneiConfiguration
+main: me.unei.configuration.UneiConfiguration
+version: 0.0.1
+description: A Bukkit & Bungee configuration loader plugin
+authors: ["JesFot", "Au2001"]
