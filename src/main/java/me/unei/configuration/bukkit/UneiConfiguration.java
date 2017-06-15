@@ -1,4 +1,4 @@
-package me.unei.configuration;
+package me.unei.configuration.bukkit;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
