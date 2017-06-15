@@ -1,5 +1,5 @@
 name: uneiConfiguration
-main: me.unei.configuration.UneiConfiguration
+main: me.unei.configuration.bukkit.BukkitPlugin
 version: 0.0.1
-description: A Bukkit & Bungee configuration loader plugin
+description: A Bukkit configuration loader plugin
 authors: ["JesFot", "Au2001"]

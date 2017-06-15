@@ -11,12 +11,17 @@
   <properties>
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   	<project.version.minecraft>1.12-R0.1-SNAPSHOT</project.version.minecraft>
+  	<project.version.bungeecord>1.12-SNAPSHOT</project.version.bungeecord>
   </properties>
   
   <repositories>
   	<repository>
   		<id>spigot-repo</id>
   		<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+  	</repository>
+  	<repository>
+  		<id>bungeecord-repo</id>
+  		<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
   	</repository>
   </repositories>
   
@@ -31,6 +36,12 @@
   		<groupId>org.bukkit</groupId>
   		<artifactId>bukkit</artifactId>
   		<version>${project.version.minecraft}</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>net.md-5</groupId>
+  		<artifactId>bungeecord-api</artifactId>
+  		<version>${project.version.bungeecord}</version>
   		<scope>provided</scope>
   	</dependency>
   </dependencies>
