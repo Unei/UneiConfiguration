@@ -32,7 +32,6 @@ public final class BukkitPlugin extends JavaPlugin implements IPlugin
 		plugin.onDisable();
 	}
 
-	@Override
 	public IPlugin.Type getType()
 	{
 		return IPlugin.Type.BUKKIT;

@@ -2,9 +2,10 @@ package me.unei.configuration.bungee;
 
 import java.io.InputStream;
 
+import net.md_5.bungee.api.plugin.Plugin;
+
 import me.unei.configuration.plugin.IPlugin;
 import me.unei.configuration.plugin.UneiConfiguration;
-import net.md_5.bungee.api.plugin.Plugin;
 
 public final class BungeePlugin extends Plugin implements IPlugin
 {
@@ -33,13 +34,11 @@ public final class BungeePlugin extends Plugin implements IPlugin
 		plugin.onDisable();
 	}
 
-	@Override
 	public InputStream getResource(String path)
 	{
 		return this.getResourceAsStream(path);
 	}
 
-	@Override
 	public IPlugin.Type getType()
 	{
 		return IPlugin.Type.BUNGEECORD;
