@@ -1,7 +1,5 @@
 package me.unei.configuration.reflection;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.bukkit.Bukkit;
 
 public final class NMSReflection
@@ -27,12 +25,18 @@ public final class NMSReflection
 		
 		NBTBaseReflection.setBaseClass(NMSReflection.nbtTagBase);
 		NBTListReflection.setListClass(NMSReflection.nbtTagList);
+		NBTStringReflection.setStringClass(NMSReflection.nbtTagString);
+		NBTCompoundReflection.setCompoundClass(NMSReflection.nbtTagCompound);
+		NBTCompressedStreamToolsReflection.setCSTClass(NMSReflection.nbtCompressedStreamTools);
 	}
 	
 	public static String getVersion()
 	{
 		return NMSReflection.VERSION;
 	}
+	
+	public static void doNothing()
+	{}
 	
 	public static Class<?> getNMSClass(String name)
 	{
@@ -51,25 +55,17 @@ public final class NMSReflection
 		return null;
 	}
 	
-	public static Object getNewNBTCompound()
+	public static Class<?> getOBCClass(String name)
 	{
+		if(name == null || name.isEmpty() || NMSReflection.getVersion().isEmpty())
+		{
+			return null;
+		}
 		try
 		{
-			return NMSReflection.nbtTagCompound.getConstructor().newInstance();
+			return Class.forName("org.bukkit.craftbukkit." + NMSReflection.getVersion() + "." + name);
 		}
-		catch (InvocationTargetException e)
-		{
-			e.printStackTrace();
-		}
-		catch (InstantiationException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IllegalAccessException e)
-		{
-			e.printStackTrace();
-		}
-		catch (NoSuchMethodException e)
+		catch(ClassNotFoundException e)
 		{
 			e.printStackTrace();
 		}

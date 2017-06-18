@@ -57,7 +57,7 @@ public class NBTListReflection
 		return null;
 	}
 	
-	public static void add(Object list, Object nbtBase)
+	public static void add(Object list, Object nbtBase)//TODO some methods to add directly strings/numbers...
 	{
 		if(NBTBaseReflection.isNBTTag(nbtBase) && NBTListReflection.isNBTList(list))
 		{

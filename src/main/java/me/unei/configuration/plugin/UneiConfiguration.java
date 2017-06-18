@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
+import me.unei.configuration.reflection.NMSReflection;
+
 public final class UneiConfiguration implements IPlugin {
 	
 	private static UneiConfiguration Instance = null;
@@ -12,6 +14,7 @@ public final class UneiConfiguration implements IPlugin {
 	
 	public UneiConfiguration(IPlugin plugin) {
 		this.source = plugin;
+		NMSReflection.doNothing();
 		UneiConfiguration.Instance = this;
 	}
 	

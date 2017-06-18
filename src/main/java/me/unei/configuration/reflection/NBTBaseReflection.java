@@ -18,7 +18,8 @@ public final class NBTBaseReflection
 			TagListId = 9,
 			TagCompoundId = 10,
 			TagIntArrayId = 11,
-			TagLongArray = 12;
+			TagLongArray = 12,
+			TagNumber = 99;
 	
 	private static String[] tagList = null;
 	
