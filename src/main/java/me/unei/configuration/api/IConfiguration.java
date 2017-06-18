@@ -50,4 +50,6 @@ public interface IConfiguration
 	public void setIntegerList(String key, List<Integer> value);
 	
 	public void setSubSection(String path, IConfiguration value);
+	
+	public void remove(String key);
 }
