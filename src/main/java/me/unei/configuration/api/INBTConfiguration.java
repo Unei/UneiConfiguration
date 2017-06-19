@@ -1,8 +1,10 @@
 package me.unei.configuration.api;
 
+import me.unei.configuration.formats.nbtlib.TagCompound;
+
 public interface INBTConfiguration extends IConfiguration
 {
-	public Object getTagCopy();
+	public TagCompound getTagCopy();
 	
-	public void setTagCopy(Object tag);
+	public void setTagCopy(TagCompound tag);
 }

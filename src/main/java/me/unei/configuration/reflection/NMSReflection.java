@@ -4,30 +4,37 @@ import org.bukkit.Bukkit;
 
 public final class NMSReflection
 {
-	private static Class<?> nbtCompressedStreamTools;
-	private static Class<?> nbtTagBase;
-	private static Class<?> nbtTagCompound;
-	private static Class<?> nbtTagList;
-	private static Class<?> nbtTagString;
+	private static Class<?> nbtCompressedStreamTools = null;
+	private static Class<?> nbtTagBase = null;
+	private static Class<?> nbtTagCompound = null;
+	private static Class<?> nbtTagList = null;
+	private static Class<?> nbtTagString = null;
 	
 	private static final String VERSION;
 	
 	static
 	{
-		String[] array = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",");
-		VERSION = (array.length == 4 ? array[3] : "");
-		
-		NMSReflection.nbtCompressedStreamTools = NMSReflection.getNMSClass("NBTCompressedStreamTools");
-		NMSReflection.nbtTagBase = NMSReflection.getNMSClass("NBTBase");
-		NMSReflection.nbtTagCompound = NMSReflection.getNMSClass("NBTTagCompound");
-		NMSReflection.nbtTagList = NMSReflection.getNMSClass("NBTTagList");
-		NMSReflection.nbtTagString = NMSReflection.getNMSClass("NBTTagString");
-		
-		NBTBaseReflection.setBaseClass(NMSReflection.nbtTagBase);
-		NBTListReflection.setListClass(NMSReflection.nbtTagList);
-		NBTStringReflection.setStringClass(NMSReflection.nbtTagString);
-		NBTCompoundReflection.setCompoundClass(NMSReflection.nbtTagCompound);
-		NBTCompressedStreamToolsReflection.setCSTClass(NMSReflection.nbtCompressedStreamTools);
+		if (NMSReflection.canUseNMS())
+		{
+			String[] array = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",");
+			VERSION = (array.length == 4 ? array[3] : "");
+			
+			NMSReflection.nbtCompressedStreamTools = NMSReflection.getNMSClass("NBTCompressedStreamTools");
+			NMSReflection.nbtTagBase = NMSReflection.getNMSClass("NBTBase");
+			NMSReflection.nbtTagCompound = NMSReflection.getNMSClass("NBTTagCompound");
+			NMSReflection.nbtTagList = NMSReflection.getNMSClass("NBTTagList");
+			NMSReflection.nbtTagString = NMSReflection.getNMSClass("NBTTagString");
+			
+			NBTBaseReflection.setBaseClass(NMSReflection.nbtTagBase);
+			NBTListReflection.setListClass(NMSReflection.nbtTagList);
+			NBTStringReflection.setStringClass(NMSReflection.nbtTagString);
+			NBTCompoundReflection.setCompoundClass(NMSReflection.nbtTagCompound);
+			NBTCompressedStreamToolsReflection.setCSTClass(NMSReflection.nbtCompressedStreamTools);
+		}
+		else
+		{
+			VERSION = "";
+		}
 	}
 	
 	public static String getVersion()
@@ -37,6 +44,19 @@ public final class NMSReflection
 	
 	public static void doNothing()
 	{}
+	
+	public static boolean canUseNMS()
+	{
+		try
+		{
+			Class.forName("org.bukkit.Bukkit");
+			return true;
+		}
+		catch (ClassNotFoundException e)
+		{
+			return false;
+		}
+	}
 	
 	public static Class<?> getNMSClass(String name)
 	{
