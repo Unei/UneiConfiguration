@@ -1,9 +1,18 @@
-# Maven files
-target/
+### Custom.gitignore ###
+
+# Javadoc subfolder
+*-javadoc/
+
+# IntelliJ files
+*.eml
+*.iml
 
 # Eclipse files
 .project
 .classpath
+
+# Maven files
+target/
 
 ### macOS.gitignore ###
 
