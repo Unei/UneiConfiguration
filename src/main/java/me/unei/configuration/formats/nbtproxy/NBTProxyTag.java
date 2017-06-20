@@ -1,6 +1,9 @@
 package me.unei.configuration.formats.nbtproxy;
 
 import me.unei.configuration.formats.nbtlib.Tag;
+import me.unei.configuration.formats.nbtlib.TagCompound;
+import me.unei.configuration.formats.nbtlib.TagList;
+import me.unei.configuration.formats.nbtlib.TagString;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NMSReflection;
 
@@ -9,38 +12,12 @@ public abstract class NBTProxyTag
 	public static final LibType Unei_Type_NMS = LibType.NMS;
 	public static final LibType Unei_Type_UNEI = LibType.UNEI;
 	
-	protected Object nms_representation;
-	protected Tag unei_representation;
 	
 	protected final LibType unei_type;
 	
 	protected NBTProxyTag(LibType type)
 	{
 		this.unei_type = type;
-	}
-	
-	protected NBTProxyTag(Object rep)
-	{
-		if (rep == null)
-		{
-			throw new IllegalArgumentException("Tag cannot be null");
-		}
-		if (!NBTBaseReflection.isNBTTag(rep))
-		{
-			throw new IllegalArgumentException("Argument is not NBTTag");
-		}
-		this.nms_representation = rep;
-		this.unei_type = NBTProxyTag.Unei_Type_NMS;
-	}
-	
-	protected NBTProxyTag(Tag rep, int unused)
-	{
-		if (rep == null)
-		{
-			throw new IllegalArgumentException("Tag cannot be null");
-		}
-		this.unei_representation = rep;
-		this.unei_type = NBTProxyTag.Unei_Type_UNEI;
 	}
 	
 	protected static LibType getLibType()
@@ -52,14 +29,55 @@ public abstract class NBTProxyTag
 		return LibType.UNEI;
 	}
 	
+	protected static NBTProxyTag createTag(byte type, Object obj, LibType uneitype)
+	{
+		switch (uneitype)
+		{
+			case NMS:
+			{
+				switch (type)
+				{
+					case NBTBaseReflection.TagStringId:
+						return new NBTProxyString(obj, 0);
+					case NBTBaseReflection.TagCompoundId:
+						return new NBTProxyCompound(obj, 0);
+					case NBTBaseReflection.TagListId:
+						return new NBTProxyList(obj, 0);
+						
+					default:
+						return new NBTProxyUnknownTag(obj, 0);
+				}
+			}
+			case UNEI:
+			{
+				switch (type)
+				{
+					case Tag.TAG_String:
+						return new NBTProxyString(((TagString)obj));
+					case Tag.TAG_Compound:
+						return new NBTProxyCompound((TagCompound)obj);
+					case Tag.TAG_List:
+						return new NBTProxyList((TagList)obj);
+						
+					default:
+						return new NBTProxyUnknownTag((Tag)obj);
+				}
+			}
+		}
+		return null;
+	}
+	
+	protected abstract Object getNMSObject();
+	protected abstract Tag getUNEIObject();
+	
 	public byte getTypeId()
 	{
 		switch (this.unei_type)
 		{
 			case NMS:
-				return NBTBaseReflection.getTypeId(nms_representation);
+				return NBTBaseReflection.getTypeId(this.getNMSObject());
 			case UNEI:
-				return this.unei_representation.getTypeId();
+				return this.getUNEIObject().getTypeId();
 		}
 		
 		return -1;
@@ -70,9 +88,9 @@ public abstract class NBTProxyTag
 		switch (this.unei_type)
 		{
 			case NMS:
-				return NBTBaseReflection.isEmpty(nms_representation);
+				return NBTBaseReflection.isEmpty(this.getNMSObject());
 			case UNEI:
-				return this.unei_representation.isEmpty();
+				return this.getUNEIObject().isEmpty();
 		}
 		
 		return true;
@@ -87,9 +105,9 @@ public abstract class NBTProxyTag
 		switch (this.unei_type)
 		{
 			case NMS:
-				return nms_representation.toString();
+				return getNMSObject().toString();
 			case UNEI:
-				return unei_representation.toString();
+				return getUNEIObject().toString();
 		}
 		
 		return "";
@@ -101,9 +119,9 @@ public abstract class NBTProxyTag
 		switch (this.unei_type)
 		{
 			case NMS:
-				return nms_representation.hashCode();
+				return getNMSObject().hashCode();
 			case UNEI:
-				return unei_representation.hashCode();
+				return getUNEIObject().hashCode();
 		}
 		
 		return 0;
@@ -115,9 +133,9 @@ public abstract class NBTProxyTag
 		switch (this.unei_type)
 		{
 			case NMS:
-				return nms_representation.equals(other);
+				return getNMSObject().equals(other);
 			case UNEI:
-				return unei_representation.equals(other);
+				return getUNEIObject().equals(other);
 		}
 		
 		return false;

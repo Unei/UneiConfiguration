@@ -1,10 +1,10 @@
 package me.unei.configuration.api;
 
-import me.unei.configuration.formats.nbtlib.TagCompound;
+import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 
 public interface INBTConfiguration extends IConfiguration
 {
-	public TagCompound getTagCopy();
+	public NBTProxyCompound getTagCopy();
 	
-	public void setTagCopy(TagCompound tag);
+	public void setTagCopy(NBTProxyCompound tag);
 }

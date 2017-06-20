@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class TagList<T extends Tag> extends Tag
+public class TagList extends Tag
 {
 	private List<Tag> list = new ArrayList<Tag>();
 	private byte type = 0;
@@ -78,7 +78,7 @@ public class TagList<T extends Tag> extends Tag
 		return builder.append(']').toString();
 	}
 	
-	public void add(T elem)
+	public void add(Tag elem)
 	{
 		if (elem.getTypeId() != Tag.TAG_End)
 		{
@@ -137,9 +137,9 @@ public class TagList<T extends Tag> extends Tag
 	}
 	
 	@Override
-	public TagList<T> clone()
+	public TagList clone()
 	{
-		TagList<T> copy = new TagList<T>();
+		TagList copy = new TagList();
 		copy.type = this.type;
 		Iterator<Tag> it = this.list.iterator();
 		
@@ -157,7 +157,7 @@ public class TagList<T extends Tag> extends Tag
 	{
 		if(super.equals(other))
 		{
-			TagList<?> taglist = (TagList<?>)other;
+			TagList taglist = (TagList)other;
 			
 			if(this.type == taglist.type)
 			{

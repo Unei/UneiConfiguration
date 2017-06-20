@@ -58,7 +58,7 @@ public abstract class Tag implements Cloneable
 			case TAG_String:
 				return new TagString();
 			case TAG_List:
-				return new TagList<Tag>();
+				return new TagList();
 			case TAG_Compound:
 				return new TagCompound();
 			case TAG_Long_Array:

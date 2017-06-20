@@ -6,19 +6,24 @@ import me.unei.configuration.reflection.NBTStringReflection;
 
 public class NBTProxyString extends NBTProxyTag
 {
-	NBTProxyString(TagString copy, int unused)
+	private Object nms_representation;
+	private TagString unei_representation;
+	
+	NBTProxyString(TagString copy)
 	{
-		super(copy, unused);
+		super(NBTProxyTag.Unei_Type_UNEI);
+		this.unei_representation = copy;
 	}
 	
-	NBTProxyString(Object copy)
+	NBTProxyString(Object copy, int unused)
 	{
-		super(copy);
+		super(NBTProxyTag.Unei_Type_NMS);
+		this.nms_representation = copy;
 	}
 	
 	public NBTProxyString()
 	{
-		super(NBTProxyTag.getLibType().equals(LibType.NMS));
+		super(NBTProxyTag.getLibType());
 		if (NBTProxyTag.getLibType().equals(LibType.NMS))
 		{
 			this.nms_representation = NBTStringReflection.newInstance();
@@ -31,7 +36,7 @@ public class NBTProxyString extends NBTProxyTag
 	
 	public NBTProxyString(String orig)
 	{
-		super(NBTProxyTag.getLibType().equals(LibType.NMS));
+		super(NBTProxyTag.getLibType());
 		if (NBTProxyTag.getLibType().equals(LibType.NMS))
 		{
 			this.nms_representation = NBTStringReflection.newInstance(orig);
@@ -43,14 +48,26 @@ public class NBTProxyString extends NBTProxyTag
 	}
 	
 	@Override
+	protected Object getNMSObject()
+	{
+		return this.nms_representation;
+	}
+	
+	@Override
+	protected TagString getUNEIObject()
+	{
+		return this.unei_representation;
+	}
+	
+	@Override
 	public NBTProxyString clone()
 	{
 		switch (this.unei_type)
 		{
 			case NMS:
-				return new NBTProxyString(NBTBaseReflection.cloneNBT(nms_representation));
+				return new NBTProxyString(NBTBaseReflection.cloneNBT(nms_representation), 0);
 			case UNEI:
-				return new NBTProxyString(((TagString)unei_representation).clone(), 0);
+				return new NBTProxyString(unei_representation.clone());
 		}
 		return new NBTProxyString(getString());
 	}

@@ -421,6 +421,30 @@ public class NBTCompoundReflection
 		}
 	}
 	
+	public static void setLongArray(Object obj, String key, long[] b0)
+	{
+		if(NBTCompoundReflection.isNBTCompound(obj))
+		{
+			try
+			{
+				Method set = NBTCompoundReflection.nbtTagCompound.getMethod("setLongArray", String.class, long[].class);
+				set.invoke(obj, key, b0);
+			}
+			catch (NoSuchMethodException e)
+			{
+				e.printStackTrace();
+			}
+			catch (InvocationTargetException e)
+			{
+				e.printStackTrace();
+			}
+			catch (IllegalAccessException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static void setBoolean(Object obj, String key, boolean b0)
 	{
 		if(NBTCompoundReflection.isNBTCompound(obj))
@@ -768,6 +792,31 @@ public class NBTCompoundReflection
 			}
 		}
 		return new int[0];
+	}
+
+	public static long[] getLongArray(Object obj, String key)
+	{
+		if(NBTCompoundReflection.isNBTCompound(obj))
+		{
+			try
+			{
+				Method set = NBTCompoundReflection.nbtTagCompound.getMethod("getLongArray", String.class);
+				return (long[])set.invoke(obj, key);
+			}
+			catch (NoSuchMethodException e)
+			{
+				e.printStackTrace();
+			}
+			catch (InvocationTargetException e)
+			{
+				e.printStackTrace();
+			}
+			catch (IllegalAccessException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return new long[0];
 	}
 	
 	public static Object getCompound(Object obj, String key)

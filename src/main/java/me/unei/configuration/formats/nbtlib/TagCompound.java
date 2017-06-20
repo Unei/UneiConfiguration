@@ -49,12 +49,12 @@ public class TagCompound extends Tag
 		}
 	}
 	
-	public Set<String> c()
+	public Set<String> keySet()
 	{
 		return this.tags.keySet();
 	}
 	
-	public int d()
+	public int size()
 	{
 		return this.tags.size();
 	}
@@ -130,7 +130,7 @@ public class TagCompound extends Tag
 		return this.tags.get(key);
 	}
 	
-	public byte d(String key)
+	public byte getTypeOf(String key)
 	{
 		Tag t = this.tags.get(key);
 		return (t != null ? t.getTypeId() : Tag.TAG_End);
@@ -143,7 +143,7 @@ public class TagCompound extends Tag
 	
 	public boolean hasKeyOfType(String key, byte type)
 	{
-		byte other = this.d(key);
+		byte other = this.getTypeOf(key);
 		if (other == type)
 		{
 			return true;
@@ -291,20 +291,19 @@ public class TagCompound extends Tag
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public TagList<? extends Tag> getList(String key, int type)
+	public TagList getList(String key, int type)
 	{
 		try
 		{
-			if(this.d(key) != Tag.TAG_List)
+			if(!this.hasKeyOfType(key, Tag.TAG_List))
 			{
-				return new TagList<Tag>();
+				return new TagList();
 			}
 			else
 			{
-				TagList<? extends Tag> taglist = (TagList<? extends Tag>)this.tags.get(key);
+				TagList taglist = (TagList)this.tags.get(key);
 				
-				return taglist.size() > 0 && taglist.getTagType() != type ? new TagList<Tag>() : taglist;
+				return taglist.size() > 0 && taglist.getTagType() != type ? new TagList() : taglist;
 			}
 		}
 		catch(ClassCastException exception)
