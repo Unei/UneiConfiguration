@@ -5,95 +5,81 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class TagIntArray extends Tag
-{
-	private int[] data;
-	
-	TagIntArray()
-	{}
-	
-	public TagIntArray(int[] value)
-	{
-		this.data = value;
-	}
-	
-	@Override
-	void write(DataOutput output) throws IOException
-	{
-		output.writeInt(this.data.length);
-		for (int i = 0; i < this.data.length; i++)
-		{
-			output.writeInt(this.data[i]);
-		}
-	}
-	
-	@Override
-	void read(DataInput input) throws IOException
-	{
-		int len = input.readInt();
-		this.data = new int[len];
-		for (int i = 0; i < this.data.length; i++)
-		{
-			this.data[i] = input.readInt();
-		}
-	}
-	
-	@Override
-	public byte getTypeId()
-	{
-		return Tag.TAG_Int_Array;
-	}
-	
-	@Override
-	public String toString()
-	{
-		String result = "[";
-		int[] aint = this.data;
-		int lgh = aint.length;
-		
-		for(int j = 0; j < lgh; ++j)
-		{
-			int k = aint[j];
-			
-			result += k + ",";
-		}
-		
-		return result + "]";
-	}
-	
-	@Override
-	public int hashCode()
-	{
-		return super.hashCode() ^ Arrays.hashCode(this.data);
-	}
-	
-	public int size()
-	{
-		return this.data.length;
-	}
-	
-	public int[] getIntArray()
-	{
-		return this.data;
-	}
-	
-	@Override
-	public boolean equals(Object other)
-	{
-		if (!super.equals(other))
-		{
-			return false;
-		}
-		TagIntArray tb = (TagIntArray)other;
-		return Arrays.equals(this.data, tb.data);
-	}
-	
-	@Override
-	public TagIntArray clone()
-	{
-		int[] copy = new int[this.data.length];
-		
-		System.arraycopy(this.data, 0, copy, 0, this.data.length);
-		return new TagIntArray(copy);
-	}
+public class TagIntArray extends Tag {
+
+    private int[] data;
+
+    TagIntArray() {
+    }
+
+    public TagIntArray(int[] value) {
+        this.data = value;
+    }
+
+    @Override
+    void write(DataOutput output) throws IOException {
+        output.writeInt(this.data.length);
+        for (int i = 0; i < this.data.length; i++) {
+            output.writeInt(this.data[i]);
+        }
+    }
+
+    @Override
+    void read(DataInput input) throws IOException {
+        int len = input.readInt();
+        this.data = new int[len];
+        for (int i = 0; i < this.data.length; i++) {
+            this.data[i] = input.readInt();
+        }
+    }
+
+    @Override
+    public byte getTypeId() {
+        return Tag.TAG_Int_Array;
+    }
+
+    @Override
+    public String toString() {
+        String result = "[";
+        int[] aint = this.data;
+        int lgh = aint.length;
+
+        for (int j = 0; j < lgh; ++j) {
+            int k = aint[j];
+
+            result += k + ",";
+        }
+
+        return result + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() ^ Arrays.hashCode(this.data);
+    }
+
+    public int size() {
+        return this.data.length;
+    }
+
+    public int[] getIntArray() {
+        return this.data;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!super.equals(other)) {
+            return false;
+        }
+        TagIntArray tb = (TagIntArray) other;
+        return Arrays.equals(this.data, tb.data);
+    }
+
+    @Override
+    public TagIntArray clone() {
+        int[] copy = new int[this.data.length];
+
+        System.arraycopy(this.data, 0, copy, 0, this.data.length);
+        return new TagIntArray(copy);
+    }
 }
