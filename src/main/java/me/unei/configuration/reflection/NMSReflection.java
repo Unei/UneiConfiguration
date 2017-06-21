@@ -50,6 +50,7 @@ public final class NMSReflection
 		try
 		{
 			Class.forName("org.bukkit.Bukkit");
+			Package.getPackage("net.minecraft.server");
 			return true;
 		}
 		catch (ClassNotFoundException e)

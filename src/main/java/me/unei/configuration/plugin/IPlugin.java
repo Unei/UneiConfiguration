@@ -23,6 +23,7 @@ public interface IPlugin
 	public static enum Type
 	{
 		BUKKIT,
-		BUNGEECORD;
+		BUNGEECORD,
+		SPONGE;
 	}
 }

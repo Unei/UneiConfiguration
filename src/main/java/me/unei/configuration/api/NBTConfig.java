@@ -15,8 +15,8 @@ import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 
 public final class NBTConfig implements INBTConfiguration
 {
-	public static final String NBT_FILE_EXT = new String(".dat");
-	public static final String NBT_TMP_EXT = new String(NBTConfig.NBT_FILE_EXT + ".tmp");
+	public static final String NBT_FILE_EXT = ".dat";
+	public static final String NBT_TMP_EXT = NBTConfig.NBT_FILE_EXT + ".tmp";
 	
 	private NBTProxyCompound rootCompound = null;
 

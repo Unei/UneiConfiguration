@@ -4,7 +4,12 @@ import java.util.HashMap;
 
 import org.yaml.snakeyaml.Yaml;
 
-public class YamlConfig implements IYamlConfiguration
+/**
+ * Development in progress
+ */
+@SuppressWarnings("unused")
+@Deprecated
+abstract class YamlConfig implements IYamlConfiguration
 {
 	public static final String YAML_FILE_EXT = new String(".yml");
 	

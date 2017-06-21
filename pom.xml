@@ -12,6 +12,7 @@
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   	<project.version.minecraft>1.12-R0.1-SNAPSHOT</project.version.minecraft>
   	<project.version.bungeecord>1.12-SNAPSHOT</project.version.bungeecord>
+  	<project.version.sponge>6.0.0</project.version.sponge>
   </properties>
   
   <repositories>
@@ -22,6 +23,10 @@
   	<repository>
   		<id>bungeecord-repo</id>
   		<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+  	</repository>
+  	<repository>
+  		<id>sponge-repo</id>
+  		<url>https://repo.spongepowered.org/maven/</url>
   	</repository>
   </repositories>
   
@@ -42,6 +47,12 @@
   		<groupId>net.md-5</groupId>
   		<artifactId>bungeecord-api</artifactId>
   		<version>${project.version.bungeecord}</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.spongepowered</groupId>
+  		<artifactId>spongeapi</artifactId>
+  		<version>${project.version.sponge}</version>
   		<scope>provided</scope>
   	</dependency>
   </dependencies>
