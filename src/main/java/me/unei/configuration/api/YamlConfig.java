@@ -19,4 +19,5 @@ abstract class YamlConfig implements IYamlConfiguration
 	public YamlConfig()
 	{
 	}
+
 }
