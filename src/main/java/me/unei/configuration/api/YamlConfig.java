@@ -175,7 +175,8 @@ public class YamlConfig implements IYamlConfiguration {
                 InputStream in = new FileInputStream(this.configFile.getFile());
                 tmpData = YAML.load(in);
                 in.close();
-                UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpData == null? "(null)" : tmpData.toString()));
+                UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+                UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -191,7 +192,8 @@ public class YamlConfig implements IYamlConfiguration {
 
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from provided string...");
             tmpData = YAML.load(this.datum);
-            UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpData == null? "(null)" : tmpData.toString()));
+            UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+            UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
 
             if (tmpData != null && tmpData instanceof Map) {
                 this.data = (Map<String, Object>) tmpData;
@@ -368,6 +370,6 @@ public class YamlConfig implements IYamlConfiguration {
     }
 
     public String toString() {
-        return "YamlConfig : " + this.data.toString();
+        return "YamlConfig=" + this.data.toString();
     }
 }

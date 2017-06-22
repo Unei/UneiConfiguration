@@ -22,21 +22,21 @@ public final class UneiConfiguration implements IPlugin {
     }
 
     public void onLoad() {
-        this.getLogger().info("Loading UNEI Configuration API...");
+        this.getLogger().fine("Loading UNEI Configuration API...");
 
         if (NMSReflection.canUseNMS()) {
             this.getLogger().fine("NMS detected for NBT");
         } else {
-            this.getLogger().fine("Using Unei NBTLib");
+            this.getLogger().fine("Using Unei's NBTLib");
         }
     }
 
     public void onEnable() {
-        this.getLogger().info("Enabling UNEI Configuration API...");
+        this.getLogger().fine("Enabling UNEI Configuration API...");
     }
 
     public void onDisable() {
-        this.getLogger().info("Disabling UNEI Configuration API...");
+        this.getLogger().fine("Disabling UNEI Configuration API...");
     }
 
     public File getDataFolder() {

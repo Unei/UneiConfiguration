@@ -176,7 +176,8 @@ public final class NBTConfig implements INBTConfiguration {
             try {
                 UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + getFileName() + "...");
                 tmpCompound = NBTProxyCST.readCompressed(new FileInputStream(this.configFile.getFile()));
-                UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpCompound == null? "(null)" : tmpCompound.toString()));
+                UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+                UneiConfiguration.getInstance().getLogger().finest(tmpCompound == null? "(null)" : tmpCompound.toString());
                 if (tmpCompound != null)
                     UneiConfiguration.getInstance().getLogger().fine("Type is " + tmpCompound.getUneiType());
             } catch (IOException e) {
@@ -350,6 +351,6 @@ public final class NBTConfig implements INBTConfiguration {
     }
 
     public String toString() {
-        return "NBTConfig : " + this.getTagCopy().toString();
+        return "NBTConfig=" + this.getTagCopy().toString();
     }
 }

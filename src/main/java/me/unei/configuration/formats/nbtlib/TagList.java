@@ -57,13 +57,13 @@ public class TagList extends Tag {
 
         for (int i = 0; i < this.list.size(); ++i) {
             if (i != 0) {
-                builder.append(',');
+                builder.append(",");
             }
 
-            builder.append(i).append(':').append(this.list.get(i));
+            builder.append(i).append(":").append(this.list.get(i));
         }
 
-        return builder.append(']').toString();
+        return builder.append("]").toString();
     }
 
     public void add(Tag elem) {
