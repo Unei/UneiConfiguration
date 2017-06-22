@@ -40,6 +40,17 @@ public final class NBTConfig implements INBTConfiguration
         this.parent = p_parent;
         this.tagName = p_tagName;
         this.fullPath = NBTConfig.buildPath(p_parent.fullPath, p_tagName);
+
+        this.init();
+    }
+
+    private void init() {
+        if (this.parent != null) {
+            this.parent.init();
+        } else {
+            this.configFile.init();
+            this.reload();
+        }
     }
 
     public String getFileName() {
@@ -115,20 +126,12 @@ public final class NBTConfig implements INBTConfiguration
         return this.configFile.canAccess();
     }
 
-    public void init() {
-        if (this.parent != null) {
-            this.parent.init();
-        } else {
-            this.configFile.init();
-        }
-    }
-
-    public void load() {
+    public void reload() {
         if (!this.canAccess()) {
             return;
         }
         if (this.parent != null) {
-            this.parent.load();
+            this.parent.reload();
         } else {
             if (!this.configFile.getFile().exists()) {
                 this.save();
@@ -230,7 +233,7 @@ public final class NBTConfig implements INBTConfiguration
     }
 
     private static String[] splitPath(String path) {
-        return path.split(".");
+        return path.split("\\.");
     }
 
     public static NBTConfig getForPath(File folder, String fileName, String path) {

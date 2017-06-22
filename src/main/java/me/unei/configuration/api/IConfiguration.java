@@ -5,25 +5,17 @@ import java.util.List;
 public interface IConfiguration {
 
     public String getFileName();
-
     public String getName();
-
     public String getCurrentPath();
 
     public boolean canAccess();
     public void lock();
 
     public IConfiguration getRoot();
-
     public IConfiguration getParent();
 
     public void save();
-
-    public void load();
-
-    public void reset();
-
-    public void init();
+    public void reload();
 
     public boolean contains(String key);
 
