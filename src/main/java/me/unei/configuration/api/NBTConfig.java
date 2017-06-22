@@ -93,7 +93,7 @@ public final class NBTConfig implements INBTConfiguration {
         if (this.configFile == null && this.parent != null) {
             return this.parent.getFileName();
         }
-        return this.configFile != null? this.configFile.getFile().getName() : null;
+        return this.configFile.getFileName();
     }
 
     public String getName() {
@@ -360,7 +360,8 @@ public final class NBTConfig implements INBTConfiguration {
         this.setTagCp(tag);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "NBTConfig=" + this.getTagCopy().toString();
     }
 }

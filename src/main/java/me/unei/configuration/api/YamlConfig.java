@@ -1,12 +1,22 @@
 package me.unei.configuration.api;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import org.yaml.snakeyaml.Yaml;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.plugin.UneiConfiguration;
-import org.yaml.snakeyaml.Yaml;
 
 public class YamlConfig implements IYamlConfiguration {
 
@@ -17,7 +27,6 @@ public class YamlConfig implements IYamlConfiguration {
     private Map<String, Object> data = null;
 
     private SavedFile configFile = null;
-    private String datum = null;
 
     private String fullPath = "";
     private String nodeName = "";
@@ -30,10 +39,10 @@ public class YamlConfig implements IYamlConfiguration {
     }
 
     public YamlConfig(String datum) {
-        this.datum = datum;
         this.configFile = new SavedFile();
 
         this.init();
+        this.loadFromString(datum);
     }
 
     YamlConfig(File folder, String fileName, String p_tagName) {
@@ -94,7 +103,7 @@ public class YamlConfig implements IYamlConfiguration {
         if (this.parent != null) {
             return this.parent.getFileName();
         }
-        return this.configFile.getFile().getName();
+        return this.configFile.getFileName();
     }
 
     public String getName() {
@@ -108,17 +117,15 @@ public class YamlConfig implements IYamlConfiguration {
     public boolean canAccess() {
         if (this.parent != null) {
             return this.parent.canAccess();
-        } else if (this.configFile != null) {
-            return this.configFile.canAccess();
         }
-        return true;
+        return this.configFile.canAccess();
     }
 
     public void lock() {
         if (this.parent != null) {
             this.parent.lock();
-        } else if (this.configFile != null) {
-            this.configFile.lock();
+        } else {
+        	this.configFile.lock();
         }
     }
 
@@ -141,43 +148,42 @@ public class YamlConfig implements IYamlConfiguration {
             this.parent.save();
             return;
         }
+        if (this.configFile.getFile() == null) {
+        	return ;
+        }
         File tmp = new File(this.configFile.getFolder(), this.configFile.getFileName() + YamlConfig.YAML_TMP_EXT);
-        String tmpData = YAML.dump(this.data);
+        String tmpData = YamlConfig.YAML.dump(this.data);
         try {
             OutputStream out = new FileOutputStream(tmp);
             out.write(tmpData.getBytes());
             out.close();
-            if (this.configFile.getFile() != null) {
-            	if (this.configFile.getFile().exists()) {
-            	}
+            if (this.configFile.getFile().exists()) {
             	this.configFile.getFile().delete();
-            	tmp.renameTo(this.configFile.getFile());
             }
-            this.datum = tmpData;
+            tmp.renameTo(this.configFile.getFile());
             tmp.delete();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void reload() {
         if (!this.canAccess()) {
             return;
         }
         if (this.parent != null) {
             this.parent.reload();
-        } else if (this.configFile != null) {
+        } else {
             if (!this.configFile.getFile().exists()) {
                 this.data = new HashMap<String, Object>();
                 this.save();
                 return;
             }
-            Object tmpData;
+            Map<?, ?> tmpData;
             try {
                 UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
                 InputStream in = new FileInputStream(this.configFile.getFile());
-                tmpData = YAML.load(in);
+                tmpData = YamlConfig.YAML.loadAs(in, Map.class);
                 in.close();
                 UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
                 UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
@@ -185,25 +191,14 @@ public class YamlConfig implements IYamlConfiguration {
                 e.printStackTrace();
                 return;
             }
-            if (tmpData != null && tmpData instanceof Map) {
-                this.data = (Map<String, Object>) tmpData;
-                this.datum = YAML.dump(this.data);
-            } else {
-                this.data = new HashMap<String, Object>();
+            if (this.data == null) {
+            	this.data = new HashMap<String, Object>();
             }
-        } else if (this.datum != null) {
-            Object tmpData;
-
-            UneiConfiguration.getInstance().getLogger().fine("Reading YAML from provided string...");
-            tmpData = YAML.load(this.datum);
-            UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
-            UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
-
-            if (tmpData != null && tmpData instanceof Map) {
-                this.data = (Map<String, Object>) tmpData;
-                this.datum = YAML.dump(this.data);
-            } else {
-                this.data = new HashMap<String, Object>();
+            this.data.clear();
+            if (tmpData != null && !tmpData.isEmpty()) {
+            	for (Entry<?, ?> e : tmpData.entrySet()) {
+            		this.data.put(e.getKey().toString(), e.getValue());
+            	}
             }
         }
     }
@@ -368,12 +363,15 @@ public class YamlConfig implements IYamlConfiguration {
     }
     
     public String saveToString() {
-    	return YAML.dump(this.data);
+    	return YamlConfig.YAML.dump(this.data);
     }
     
     public void loadFromString(String p_data) {
+    	if (!this.canAccess()) {
+    		return ;
+    	}
     	this.data.clear();
-    	Map<?, ?> tmpMap = (Map<?, ?>)YAML.loadAs(p_data, Map.class);
+    	Map<?, ?> tmpMap = YamlConfig.YAML.loadAs(p_data, Map.class);
     	for (Entry<?, ?> e : tmpMap.entrySet()) {
     		if (e.getKey() instanceof String) {
     			this.data.put((String)e.getKey(), e.getValue());
@@ -381,7 +379,8 @@ public class YamlConfig implements IYamlConfiguration {
     	}
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "YamlConfig=" + this.data.toString();
     }
 }
