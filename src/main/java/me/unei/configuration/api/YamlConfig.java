@@ -1,11 +1,6 @@
 package me.unei.configuration.api;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,11 +33,11 @@ public class YamlConfig implements IYamlConfiguration {
         this.init();
     }
 
-    public YamlConfig(String datum) {
+    public YamlConfig(String data) {
         this.configFile = new SavedFile();
 
         this.init();
-        this.loadFromString(datum);
+        this.loadFromString(data);
     }
 
     YamlConfig(File folder, String fileName, String p_tagName) {
@@ -211,8 +206,12 @@ public class YamlConfig implements IYamlConfiguration {
         return this.data.containsKey(key);
     }
 
-    public Object get(String key) {
-        return this.data.get(key);
+    public Serializable get(String key) {
+        Object obj = this.data.get(key);
+        if (obj instanceof Serializable) {
+            return (Serializable) obj;
+        }
+        return null;
     }
 
     public String getString(String key) {
@@ -302,7 +301,7 @@ public class YamlConfig implements IYamlConfiguration {
         return sub;
     }
 
-    public void set(String key, Object value) {
+    public void set(String key, Serializable value) {
         if (value == null) {
             this.data.remove(key);
         } else {
@@ -339,11 +338,19 @@ public class YamlConfig implements IYamlConfiguration {
     }
 
     public void setByteList(String key, List<Byte> value) {
-        set(key, value);
+        if (value == null) {
+            this.data.remove(key);
+        } else {
+            this.data.put(key, value);
+        }
     }
 
     public void setIntegerList(String key, List<Integer> value) {
-        set(key, value);
+        if (value == null) {
+            this.data.remove(key);
+        } else {
+            this.data.put(key, value);
+        }
     }
 
     public void setSubSection(String path, IConfiguration value) {
