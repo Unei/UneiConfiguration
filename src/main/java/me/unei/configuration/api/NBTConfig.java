@@ -30,6 +30,8 @@ public final class NBTConfig implements INBTConfiguration {
     public NBTConfig(File folder, String fileName) {
         this.configFile = new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT);
         this.rootCompound = new NBTProxyCompound();
+
+        this.init();
     }
 
     NBTConfig(File folder, String fileName, String p_tagName) {
