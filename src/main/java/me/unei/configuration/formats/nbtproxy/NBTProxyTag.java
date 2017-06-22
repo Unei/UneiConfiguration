@@ -19,7 +19,7 @@ public abstract class NBTProxyTag {
     }
 
     protected static LibType getLibType() {
-        if (NMSReflection.canUseNMS()) {
+        if (NMSReflection.canUseNMS()/* && !UneiConfiguration.getInstance().shouldForceUneiLib()*/) {
             return LibType.NMS;
         }
         return LibType.UNEI;

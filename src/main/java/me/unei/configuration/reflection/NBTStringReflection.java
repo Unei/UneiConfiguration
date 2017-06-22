@@ -27,7 +27,10 @@ public class NBTStringReflection {
         try {
             return NBTStringReflection.nbtTagString.getConstructor().newInstance();
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+        		throw (RuntimeException)e.getCause();
+        	else
+                e.printStackTrace();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -42,7 +45,10 @@ public class NBTStringReflection {
         try {
             return NBTStringReflection.nbtTagString.getConstructor(String.class).newInstance(orig);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+        		throw (RuntimeException)e.getCause();
+        	else
+                e.printStackTrace();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -61,7 +67,10 @@ public class NBTStringReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-                e.printStackTrace();
+            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+            		throw (RuntimeException)e.getCause();
+            	else
+                    e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

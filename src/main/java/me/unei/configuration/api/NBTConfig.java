@@ -26,7 +26,7 @@ public final class NBTConfig implements INBTConfiguration
     private String fullPath = "";
     private String tagName = "";
     private NBTConfig parent = null;
-
+    
     public NBTConfig(File folder, String fileName) {
         this.configFile = new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT);
         this.rootCompound = new NBTProxyCompound();
@@ -338,5 +338,10 @@ public final class NBTConfig implements INBTConfiguration
         NBTProxyCompound tag = this.getTagCopy();
         tag.setIntArray(key, ArrayUtils.toPrimitive(value.toArray(new Integer[value.size()]), 0));
         this.setTagCopy(tag);
+    }
+    
+    public String toString()
+    {
+    	return "NBTConfig : " + this.getTagCopy().toString();
     }
 }

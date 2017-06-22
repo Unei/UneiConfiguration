@@ -14,7 +14,7 @@ public class TagString extends Tag {
 
     public TagString(String s) {
         if (s == null) {
-            throw new IllegalArgumentException("Null string not allowed");
+            throw new NullPointerException("Null string not allowed");
         }
         this.data = s;
     }
@@ -60,6 +60,20 @@ public class TagString extends Tag {
     @Override
     public int hashCode() {
         return super.hashCode() ^ this.data.hashCode();
+    }
+    
+    public static String toStr(String content)
+    {
+    	StringBuilder sb = new StringBuilder("\"");
+    	for (int i = 0; i < content.length(); ++i)
+    	{
+    		char c = content.charAt(i);
+    		
+    		if (c == '\\' || c == '"')
+    			sb.append('\\');
+    		sb.append(c);
+    	}
+    	return sb.append("\"").toString();
     }
 
     @Override

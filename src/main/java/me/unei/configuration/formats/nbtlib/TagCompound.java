@@ -8,10 +8,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class TagCompound extends Tag {
 
     private Map<String, Tag> tags = new HashMap<String, Tag>();
+    private static final Pattern name_conventions = Pattern.compile("[A-Za-z0-9._+-]+"); 
 
     public TagCompound() {
     }
@@ -253,7 +255,7 @@ public class TagCompound extends Tag {
             if (builder.length() != 1) {
                 builder.append(',');
             }
-            builder.append(entry.getKey()).append(':').append(entry.getValue());
+            builder.append(checkName(entry.getKey())).append(':').append(entry.getValue());
         }
 
         return builder.append('}').toString();
@@ -311,6 +313,13 @@ public class TagCompound extends Tag {
                 this.set(key, base.clone());
             }
         }
+    }
+    
+    private static String checkName(String name)
+    {
+    	if (TagCompound.name_conventions.matcher(name).matches())
+    		return name;
+    	return TagString.toStr(name);
     }
 
     private static void writeEntry(String key, Tag base, DataOutput output) throws IOException {

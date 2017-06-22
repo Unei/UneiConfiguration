@@ -11,13 +11,16 @@ public final class UneiConfiguration implements IPlugin {
     private static UneiConfiguration Instance = null;
 
     private final IPlugin source;
+    
+    @SuppressWarnings("unused")
+	private boolean forceNbtUneiLib = false;
 
     public UneiConfiguration(IPlugin plugin) {
         this.source = plugin;
         NMSReflection.doNothing();
         UneiConfiguration.Instance = this;
     }
-
+    
     public void onLoad() {
         this.getLogger().info("Loading UNEI Configuration API...");
         
