@@ -15,22 +15,24 @@ import me.unei.configuration.formats.nbtproxy.NBTProxyCST;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public final class NBTConfig implements INBTConfiguration
-{
-	public static final String NBT_FILE_EXT = ".dat";
-	public static final String NBT_TMP_EXT = NBTConfig.NBT_FILE_EXT + ".tmp";
-	
-	private NBTProxyCompound rootCompound = null;
+public final class NBTConfig implements INBTConfiguration {
+
+    public static final String NBT_FILE_EXT = ".dat";
+    public static final String NBT_TMP_EXT = ".tmp";
+
+    private NBTProxyCompound rootCompound = null;
 
     private SavedFile configFile = null;
 
     private String fullPath = "";
     private String tagName = "";
     private NBTConfig parent = null;
-    
+
     public NBTConfig(File folder, String fileName) {
         this.configFile = new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT);
         this.rootCompound = new NBTProxyCompound();
+
+        this.init();
     }
 
     NBTConfig(File folder, String fileName, String p_tagName) {
@@ -54,11 +56,44 @@ public final class NBTConfig implements INBTConfiguration
         }
     }
 
+    private static String buildPath(String parent, String child) {
+        if (parent == null || parent.isEmpty() || child == null) {
+            return child;
+        }
+        return parent + "." + child;
+    }
+
+    private static String[] splitPath(String path) {
+        return path.split("\\.");
+    }
+
+    public static NBTConfig getForPath(File folder, String fileName, String path) {
+        return NBTConfig.getForPath(new NBTConfig(folder, fileName), path);
+    }
+
+    public static NBTConfig getForPath(NBTConfig root, String path) {
+        if (path == null || path.isEmpty()) {
+            return root;
+        }
+        if (!path.contains(".")) {
+            return root.getSubSection(path);
+        }
+        NBTConfig last = root;
+        for (String part : NBTConfig.splitPath(path)) {
+            last = last.getSubSection(part);
+        }
+        return last;
+    }
+
+    public SavedFile getFile() {
+        return this.configFile;
+    }
+
     public String getFileName() {
         if (this.configFile == null && this.parent != null) {
             return this.parent.getFileName();
         }
-        return this.configFile.getFileName();
+        return this.configFile != null? this.configFile.getFile().getName() : null;
     }
 
     public String getName() {
@@ -149,11 +184,12 @@ public final class NBTConfig implements INBTConfiguration
             }
             NBTProxyCompound tmpCompound = null;
             try {
-            	UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + this.configFile.getFileName() + "...");
+                UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + getFileName() + "...");
                 tmpCompound = NBTProxyCST.readCompressed(new FileInputStream(this.configFile.getFile()));
-                UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpCompound == null ? "(null)" : tmpCompound.toString()));
+                UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+                UneiConfiguration.getInstance().getLogger().finest(tmpCompound == null? "(null)" : tmpCompound.toString());
                 if (tmpCompound != null)
-                	UneiConfiguration.getInstance().getLogger().fine("Type is " + tmpCompound.getUneiType());
+                    UneiConfiguration.getInstance().getLogger().fine("Type is " + tmpCompound.getUneiType());
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -161,7 +197,7 @@ public final class NBTConfig implements INBTConfiguration
             if (tmpCompound != null) {
                 this.rootCompound = tmpCompound.clone();
             } else {
-            	this.rootCompound = new NBTProxyCompound();
+                this.rootCompound = new NBTProxyCompound();
             }
         }
     }
@@ -233,35 +269,6 @@ public final class NBTConfig implements INBTConfiguration
         }
         NBTConfig sub = new NBTConfig(this, path);
         return sub;
-    }
-
-    private static String buildPath(String parent, String child) {
-        if (parent == null || parent.isEmpty() || child == null) {
-            return child;
-        }
-        return new String(parent + "." + child);
-    }
-
-    private static String[] splitPath(String path) {
-        return path.split("\\.");
-    }
-
-    public static NBTConfig getForPath(File folder, String fileName, String path) {
-        return NBTConfig.getForPath(new NBTConfig(folder, fileName), path);
-    }
-
-    public static NBTConfig getForPath(NBTConfig root, String path) {
-        if (path == null || path.isEmpty()) {
-            return root;
-        }
-        if (!path.contains(".")) {
-            return root.getSubSection(path);
-        }
-        NBTConfig last = root;
-        for (String part : NBTConfig.splitPath(path)) {
-            last = last.getSubSection(part);
-        }
-        return last;
     }
 
     public double getDouble(String key) {
@@ -352,9 +359,8 @@ public final class NBTConfig implements INBTConfiguration
         tag.setIntArray(key, ArrayUtils.toPrimitive(value.toArray(new Integer[value.size()]), 0));
         this.setTagCp(tag);
     }
-    
-    public String toString()
-    {
-    	return "NBTConfig : " + this.getTagCopy().toString();
+
+    public String toString() {
+        return "NBTConfig=" + this.getTagCopy().toString();
     }
 }

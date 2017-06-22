@@ -36,7 +36,7 @@ class TagByteArray extends Tag {
 
     @Override
     public String toString() {
-        return '[' + Integer.toString(this.data.length) + " bytes]";
+        return "[" + Integer.toString(this.data.length) + " bytes]";
     }
 
     @Override

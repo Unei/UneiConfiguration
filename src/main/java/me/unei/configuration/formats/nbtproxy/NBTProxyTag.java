@@ -60,10 +60,9 @@ abstract class NBTProxyTag implements INBTTag {
 
     protected abstract Object getNMSObject();
     protected abstract Tag getUNEIObject();
-    
-    public LibType getUneiType()
-    {
-    	return this.unei_type;
+
+    public LibType getUneiType() {
+        return this.unei_type;
     }
 
     public byte getTypeId() {

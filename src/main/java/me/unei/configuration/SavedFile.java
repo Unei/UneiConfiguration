@@ -38,7 +38,7 @@ public final class SavedFile {
             if (this.folder.mkdirs()) {
                 UneiConfiguration.getInstance().getLogger().finest("Successfully created configuration tree. (" + this.folder.getPath() + ")");
             } else {
-                UneiConfiguration.getInstance().getLogger().warning("Enable to create the configuration tree : " + this.folder.getAbsolutePath());
+                UneiConfiguration.getInstance().getLogger().warning("Unable to create the configuration tree : " + this.folder.getAbsolutePath());
                 return false;
             }
         }

@@ -1,9 +1,12 @@
 package me.unei.configuration.api;
 
+import me.unei.configuration.SavedFile;
+
 import java.util.List;
 
 public interface IConfiguration {
 
+    public SavedFile getFile();
     public String getFileName();
     public String getName();
     public String getCurrentPath();
