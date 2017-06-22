@@ -10,6 +10,6 @@ public interface IYamlConfiguration extends IConfiguration {
 
     public void set(String key, Object value);
 
-    public String toYAMLString();
-
+    public String saveToString();
+    public void loadFromString(String data);
 }

@@ -2,6 +2,7 @@ package me.unei.configuration.api;
 
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.plugin.UneiConfiguration;
@@ -30,6 +31,7 @@ public class YamlConfig implements IYamlConfiguration {
 
     public YamlConfig(String datum) {
         this.datum = datum;
+        this.configFile = new SavedFile();
 
         this.init();
     }
@@ -59,11 +61,11 @@ public class YamlConfig implements IYamlConfiguration {
         if (parent == null || parent.isEmpty() || child == null) {
             return child;
         }
-        return parent + "." + child;
+        return parent + IConfiguration.PathSeparator + child;
     }
 
     private static String[] splitPath(String path) {
-        return path.split("\\.");
+        return IConfiguration.PathSeparatorRegexp.split(path);
     }
 
     public static YamlConfig getForPath(File folder, String fileName, String path) {
@@ -74,7 +76,7 @@ public class YamlConfig implements IYamlConfiguration {
         if (path == null || path.isEmpty()) {
             return root;
         }
-        if (!path.contains(".")) {
+        if (!path.contains(IConfiguration.PathSeparator)) {
             return root.getSubSection(path);
         }
         YamlConfig last = root;
@@ -89,10 +91,10 @@ public class YamlConfig implements IYamlConfiguration {
     }
 
     public String getFileName() {
-        if (this.configFile == null && this.parent != null) {
+        if (this.parent != null) {
             return this.parent.getFileName();
         }
-        return this.configFile != null? this.configFile.getFile().getName() : null;
+        return this.configFile.getFile().getName();
     }
 
     public String getName() {
@@ -145,10 +147,12 @@ public class YamlConfig implements IYamlConfiguration {
             OutputStream out = new FileOutputStream(tmp);
             out.write(tmpData.getBytes());
             out.close();
-            if (this.configFile.getFile().exists()) {
-                this.configFile.getFile().delete();
+            if (this.configFile.getFile() != null) {
+            	if (this.configFile.getFile().exists()) {
+            	}
+            	this.configFile.getFile().delete();
+            	tmp.renameTo(this.configFile.getFile());
             }
-            tmp.renameTo(this.configFile.getFile());
             this.datum = tmpData;
             tmp.delete();
         } catch (IOException e) {
@@ -272,7 +276,6 @@ public class YamlConfig implements IYamlConfiguration {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<Byte> getByteList(String key) {
         try {
             List<Byte> bList = new ArrayList<Byte>();
@@ -284,7 +287,6 @@ public class YamlConfig implements IYamlConfiguration {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<Integer> getIntegerList(String key) {
         try {
             List<Integer> iList = new ArrayList<Integer>();
@@ -364,9 +366,19 @@ public class YamlConfig implements IYamlConfiguration {
     public void remove(String key) {
         this.data.remove(key);
     }
-
-    public String toYAMLString() {
-        return YAML.dump(this.data);
+    
+    public String saveToString() {
+    	return YAML.dump(this.data);
+    }
+    
+    public void loadFromString(String p_data) {
+    	this.data.clear();
+    	Map<?, ?> tmpMap = (Map<?, ?>)YAML.loadAs(p_data, Map.class);
+    	for (Entry<?, ?> e : tmpMap.entrySet()) {
+    		if (e.getKey() instanceof String) {
+    			this.data.put((String)e.getKey(), e.getValue());
+    		}
+    	}
     }
 
     public String toString() {

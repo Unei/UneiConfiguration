@@ -60,11 +60,11 @@ public final class NBTConfig implements INBTConfiguration {
         if (parent == null || parent.isEmpty() || child == null) {
             return child;
         }
-        return parent + "." + child;
+        return parent + IConfiguration.PathSeparator + child;
     }
 
     private static String[] splitPath(String path) {
-        return path.split("\\.");
+        return IConfiguration.PathSeparatorRegexp.split(path);
     }
 
     public static NBTConfig getForPath(File folder, String fileName, String path) {
@@ -75,7 +75,7 @@ public final class NBTConfig implements INBTConfiguration {
         if (path == null || path.isEmpty()) {
             return root;
         }
-        if (!path.contains(".")) {
+        if (!path.contains(IConfiguration.PathSeparator)) {
             return root.getSubSection(path);
         }
         NBTConfig last = root;

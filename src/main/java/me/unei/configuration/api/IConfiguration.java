@@ -3,9 +3,13 @@ package me.unei.configuration.api;
 import me.unei.configuration.SavedFile;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public interface IConfiguration {
 
+	public static final String PathSeparator = ".";
+	public static final Pattern PathSeparatorRegexp = Pattern.compile("\\.");
+	
     public SavedFile getFile();
     public String getFileName();
     public String getName();
