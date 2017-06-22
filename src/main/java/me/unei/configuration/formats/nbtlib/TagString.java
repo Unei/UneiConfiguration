@@ -61,19 +61,16 @@ public class TagString extends Tag {
     public int hashCode() {
         return super.hashCode() ^ this.data.hashCode();
     }
-    
-    public static String toStr(String content)
-    {
-    	StringBuilder sb = new StringBuilder("\"");
-    	for (int i = 0; i < content.length(); ++i)
-    	{
-    		char c = content.charAt(i);
-    		
-    		if (c == '\\' || c == '"')
-    			sb.append('\\');
-    		sb.append(c);
-    	}
-    	return sb.append("\"").toString();
+
+    public static String toStr(String content) {
+        StringBuilder sb = new StringBuilder("\"");
+        for (int i = 0; i < content.length(); ++i) {
+            char c = content.charAt(i);
+
+            if (c == '\\' || c == '"') sb.append('\\');
+            sb.append(c);
+        }
+        return sb.append("\"").toString();
     }
 
     @Override

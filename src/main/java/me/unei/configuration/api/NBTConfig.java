@@ -14,19 +14,19 @@ import me.unei.configuration.formats.nbtproxy.NBTProxyCST;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public final class NBTConfig implements INBTConfiguration
-{
-	public static final String NBT_FILE_EXT = ".dat";
-	public static final String NBT_TMP_EXT = NBTConfig.NBT_FILE_EXT + ".tmp";
-	
-	private NBTProxyCompound rootCompound = null;
+public final class NBTConfig implements INBTConfiguration {
+
+    public static final String NBT_FILE_EXT = ".dat";
+    public static final String NBT_TMP_EXT = NBTConfig.NBT_FILE_EXT + ".tmp";
+
+    private NBTProxyCompound rootCompound = null;
 
     private SavedFile configFile = null;
 
     private String fullPath = "";
     private String tagName = "";
     private NBTConfig parent = null;
-    
+
     public NBTConfig(File folder, String fileName) {
         this.configFile = new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT);
         this.rootCompound = new NBTProxyCompound();
@@ -139,11 +139,11 @@ public final class NBTConfig implements INBTConfiguration
             }
             NBTProxyCompound tmpCompound = null;
             try {
-            	UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + this.configFile.getFileName() + "...");
+                UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + this.configFile.getFileName() + "...");
                 tmpCompound = NBTProxyCST.readCompressed(new FileInputStream(this.configFile.getFile()));
-                UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpCompound == null ? "(null)" : tmpCompound.toString()));
+                UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpCompound == null? "(null)" : tmpCompound.toString()));
                 if (tmpCompound != null)
-                	UneiConfiguration.getInstance().getLogger().fine("Type is " + tmpCompound.getUneiType());
+                    UneiConfiguration.getInstance().getLogger().fine("Type is " + tmpCompound.getUneiType());
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -151,7 +151,7 @@ public final class NBTConfig implements INBTConfiguration
             if (tmpCompound != null) {
                 this.rootCompound = tmpCompound.clone();
             } else {
-            	this.rootCompound = new NBTProxyCompound();
+                this.rootCompound = new NBTProxyCompound();
             }
         }
     }
@@ -342,9 +342,8 @@ public final class NBTConfig implements INBTConfiguration
         tag.setIntArray(key, ArrayUtils.toPrimitive(value.toArray(new Integer[value.size()]), 0));
         this.setTagCopy(tag);
     }
-    
-    public String toString()
-    {
-    	return "NBTConfig : " + this.getTagCopy().toString();
+
+    public String toString() {
+        return "NBTConfig : " + this.getTagCopy().toString();
     }
 }

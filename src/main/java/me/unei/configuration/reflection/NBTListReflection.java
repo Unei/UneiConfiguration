@@ -32,10 +32,9 @@ public class NBTListReflection {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-        	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-        		throw (RuntimeException)e.getCause();
-        	else
-                e.printStackTrace();
+            if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                throw (RuntimeException) e.getCause();
+            else e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -53,10 +52,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -71,10 +69,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -89,10 +86,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -112,10 +108,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -131,10 +126,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -150,10 +144,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -169,10 +162,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -188,10 +180,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -207,10 +198,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -226,10 +216,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -245,10 +234,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -264,10 +252,9 @@ public class NBTListReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

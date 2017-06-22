@@ -30,10 +30,9 @@ public class NBTCompressedStreamToolsReflection {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-            	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-            		throw (RuntimeException)e.getCause();
-            	else
-                    e.printStackTrace();
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -47,10 +46,9 @@ public class NBTCompressedStreamToolsReflection {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-        	if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-        		throw (RuntimeException)e.getCause();
-        	else
-                e.printStackTrace();
+            if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                throw (RuntimeException) e.getCause();
+            else e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
