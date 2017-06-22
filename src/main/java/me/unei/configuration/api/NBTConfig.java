@@ -12,6 +12,7 @@ import org.apache.commons.lang.ArrayUtils;
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCST;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
+import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class NBTConfig implements INBTConfiguration
 {
@@ -135,13 +136,19 @@ public final class NBTConfig implements INBTConfiguration
             }
             NBTProxyCompound tmpCompound = null;
             try {
+            	UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + this.configFile.getFileName() + "...");
                 tmpCompound = NBTProxyCST.readCompressed(new FileInputStream(this.configFile.getFile()));
+                UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpCompound == null ? "(null)" : tmpCompound.toString()));
+                if (tmpCompound != null)
+                	UneiConfiguration.getInstance().getLogger().fine("Type is " + tmpCompound.getUneiType());
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
             }
             if (tmpCompound != null) {
                 this.rootCompound = tmpCompound.clone();
+            } else {
+            	this.rootCompound = new NBTProxyCompound();
             }
         }
     }

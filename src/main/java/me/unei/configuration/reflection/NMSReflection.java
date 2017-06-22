@@ -43,7 +43,7 @@ public final class NMSReflection {
     public static boolean canUseNMS() {
         try {
             Class.forName("org.bukkit.Bukkit");
-            return Package.getPackage("net.minecraft.server") != null;
+            return true;
         } catch (ClassNotFoundException e) {
             return false;
         }

@@ -59,6 +59,11 @@ public abstract class NBTProxyTag {
 
     protected abstract Object getNMSObject();
     protected abstract Tag getUNEIObject();
+    
+    public LibType getUneiType()
+    {
+    	return this.unei_type;
+    }
 
     public byte getTypeId() {
         switch(this.unei_type) {

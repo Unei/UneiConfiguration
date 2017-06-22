@@ -20,6 +20,15 @@ public final class UneiConfiguration implements IPlugin {
 
     public void onLoad() {
         this.getLogger().info("Loading UNEI Configuration API...");
+        
+        if (NMSReflection.canUseNMS())
+        {
+        	this.getLogger().fine("NMS detected for NBT");
+        }
+        else
+        {
+        	this.getLogger().fine("Using Unei NBTLib");
+        }
     }
 
     public void onEnable() {

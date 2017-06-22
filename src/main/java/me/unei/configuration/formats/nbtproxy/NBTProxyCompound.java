@@ -186,8 +186,10 @@ public class NBTProxyCompound extends NBTProxyTag {
         switch(this.unei_type) {
             case NMS:
                 NBTCompoundReflection.setBoolean(nms_representation, key, value);
+                break;
             case UNEI:
                 unei_representation.setBoolean(key, value);
+                break;
         }
     }
 
