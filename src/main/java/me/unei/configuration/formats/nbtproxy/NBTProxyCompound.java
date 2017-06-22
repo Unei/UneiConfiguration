@@ -3,11 +3,14 @@ package me.unei.configuration.formats.nbtproxy;
 import java.util.Collections;
 import java.util.Set;
 
+import me.unei.configuration.api.format.INBTCompound;
+import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.formats.nbtlib.TagCompound;
+import me.unei.configuration.formats.nbtlib.TagList;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NBTCompoundReflection;
 
-public class NBTProxyCompound extends NBTProxyTag {
+public class NBTProxyCompound extends NBTProxyTag implements INBTCompound {
 
     private Object nms_representation;
     private TagCompound unei_representation;
@@ -61,13 +64,13 @@ public class NBTProxyCompound extends NBTProxyTag {
         return 0;
     }
 
-    public void set(String key, NBTProxyTag elem) {
+    public void set(String key, INBTTag elem) {
         switch(this.unei_type) {
             case NMS:
-                NBTCompoundReflection.set(nms_representation, key, elem.getNMSObject());
+                NBTCompoundReflection.set(nms_representation, key, ((NBTProxyTag)elem).getNMSObject());
                 break;
             case UNEI:
-                unei_representation.set(key, elem.getUNEIObject());
+                unei_representation.set(key, ((NBTProxyTag)elem).getUNEIObject());
                 break;
         }
     }
@@ -352,8 +355,16 @@ public class NBTProxyCompound extends NBTProxyTag {
         return new NBTProxyCompound();
     }
 
-    public void getList(String key, byte type) {
-        //
+    public NBTProxyList getList(String key, byte type) {
+        switch(this.unei_type) {
+        case NMS:
+            Object got = NBTCompoundReflection.getList(nms_representation, key, type);
+            return new NBTProxyList(got, 0);
+        case UNEI:
+            TagList got2 = unei_representation.getList(key, type);
+            return new NBTProxyList(got2);
+    }
+    return new NBTProxyList();
     }
 
     public boolean getBoolean(String key) {

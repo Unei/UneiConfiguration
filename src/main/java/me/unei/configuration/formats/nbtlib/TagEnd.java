@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TagEnd extends Tag {
+class TagEnd extends Tag {
 
     public TagEnd() {
         super();

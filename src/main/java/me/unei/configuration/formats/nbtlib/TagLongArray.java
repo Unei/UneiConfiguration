@@ -5,7 +5,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class TagLongArray extends Tag {
+class TagLongArray extends Tag {
 
     private long[] data;
 

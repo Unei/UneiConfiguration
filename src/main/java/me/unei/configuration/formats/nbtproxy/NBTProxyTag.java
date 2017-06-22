@@ -1,5 +1,6 @@
 package me.unei.configuration.formats.nbtproxy;
 
+import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.formats.nbtlib.Tag;
 import me.unei.configuration.formats.nbtlib.TagCompound;
 import me.unei.configuration.formats.nbtlib.TagList;
@@ -7,7 +8,7 @@ import me.unei.configuration.formats.nbtlib.TagString;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NMSReflection;
 
-public abstract class NBTProxyTag {
+abstract class NBTProxyTag implements INBTTag {
 
     public static final LibType Unei_Type_NMS = LibType.NMS;
     public static final LibType Unei_Type_UNEI = LibType.UNEI;

@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TagDouble extends Tag {
+class TagDouble extends Tag {
 
     private double data;
 

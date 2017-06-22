@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCST;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 import me.unei.configuration.plugin.UneiConfiguration;
@@ -85,11 +86,11 @@ public final class NBTConfig implements INBTConfiguration
     public NBTConfig getParent() {
         return this.parent;
     }
-
-    public NBTProxyCompound getTagCopy() {
+    
+    private NBTProxyCompound getTagCp() {
         NBTProxyCompound papa;
         if (this.parent != null) {
-            papa = this.parent.getTagCopy();
+            papa = this.parent.getTagCp();
         } else {
             papa = rootCompound;
         }
@@ -99,24 +100,33 @@ public final class NBTConfig implements INBTConfiguration
         return papa.getCompound(this.tagName).clone();
     }
 
-    public void setTagCopy(NBTProxyCompound compound) {
+    public INBTCompound getTagCopy() {
+        return this.getTagCp();
+    }
+
+    private void setTagCp(NBTProxyCompound compound) {
         if (!this.configFile.canAccess()) {
             return;
         }
         NBTProxyCompound papa;
         if (this.parent != null) {
-            papa = this.parent.getTagCopy();
+            papa = this.parent.getTagCp();
         } else {
             papa = rootCompound;
         }
         if (papa != null) {
             papa.set(this.tagName, compound);
             if (this.parent != null) {
-                this.parent.setTagCopy(papa);
+                this.parent.setTagCp(papa);
             } else {
                 this.rootCompound = papa;
             }
         }
+    }
+    
+    public void setTagCopy(INBTCompound compound)
+    {
+    	this.setTagCp((NBTProxyCompound)compound);
     }
 
     public boolean canAccess() {
@@ -182,19 +192,19 @@ public final class NBTConfig implements INBTConfiguration
     }
 
     public boolean contains(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.hasKey(key);
     }
 
     public String getString(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.getString(key);
     }
 
     public void setString(String key, String value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setString(key, value);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public void setSubSection(String path, IConfiguration value) {
@@ -206,15 +216,15 @@ public final class NBTConfig implements INBTConfiguration
             return;
         }
         NBTConfig cfg = (NBTConfig) value;
-        NBTProxyCompound nbt = this.getTagCopy();
-        nbt.set(path, cfg.getTagCopy());
-        this.setTagCopy(nbt);
+        NBTProxyCompound nbt = this.getTagCp();
+        nbt.set(path, cfg.getTagCp());
+        this.setTagCp(nbt);
     }
 
     public void remove(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.remove(key);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public NBTConfig getSubSection(String path) {
@@ -255,92 +265,92 @@ public final class NBTConfig implements INBTConfiguration
     }
 
     public double getDouble(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.getDouble(key);
     }
 
     public boolean getBoolean(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.getBoolean(key);
     }
 
     public byte getByte(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.getByte(key);
     }
 
     public float getFloat(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.getFloat(key);
     }
 
     public int getInteger(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.getInt(key);
     }
 
     public long getLong(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return tag.getLong(key);
     }
 
     public List<Byte> getByteList(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return Arrays.asList(ArrayUtils.toObject(tag.getByteArray(key)));
     }
 
     public List<Integer> getIntegerList(String key) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         return Arrays.asList(ArrayUtils.toObject(tag.getIntArray(key)));
     }
 
     public void setDouble(String key, double value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setDouble(key, value);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public void setBoolean(String key, boolean value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setBoolean(key, value);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public void setByte(String key, byte value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setByte(key, value);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public void setFloat(String key, float value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setFloat(key, value);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public void setInteger(String key, int value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setInt(key, value);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public void setLong(String key, long value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setLong(key, value);
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
 
     public void setByteList(String key, List<Byte> value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setByteArray(key, ArrayUtils.toPrimitive(value.toArray(new Byte[value.size()]), (byte) 0));
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
 
     }
 
     public void setIntegerList(String key, List<Integer> value) {
-        NBTProxyCompound tag = this.getTagCopy();
+        NBTProxyCompound tag = this.getTagCp();
         tag.setIntArray(key, ArrayUtils.toPrimitive(value.toArray(new Integer[value.size()]), 0));
-        this.setTagCopy(tag);
+        this.setTagCp(tag);
     }
     
     public String toString()

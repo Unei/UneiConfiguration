@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TagByte extends Tag {
+class TagByte extends Tag {
 
     private byte data;
 

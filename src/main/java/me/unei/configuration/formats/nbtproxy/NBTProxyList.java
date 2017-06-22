@@ -1,10 +1,12 @@
 package me.unei.configuration.formats.nbtproxy;
 
+import me.unei.configuration.api.format.INBTList;
+import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.formats.nbtlib.TagList;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NBTListReflection;
 
-public class NBTProxyList extends NBTProxyTag {
+class NBTProxyList extends NBTProxyTag implements INBTList {
 
     private Object nms_representation;
     private TagList unei_representation;
@@ -41,24 +43,24 @@ public class NBTProxyList extends NBTProxyTag {
         return this.unei_representation;
     }
 
-    public void add(NBTProxyTag tag) {
+    public void add(INBTTag tag) {
         switch(this.unei_type) {
             case NMS:
-                NBTListReflection.add(nms_representation, tag.getNMSObject());
+                NBTListReflection.add(nms_representation, ((NBTProxyTag)tag).getNMSObject());
                 break;
             case UNEI:
-                unei_representation.add(tag.getUNEIObject());
+                unei_representation.add(((NBTProxyTag)tag).getUNEIObject());
                 break;
         }
     }
 
-    public void set(int idx, NBTProxyTag tag) {
+    public void set(int idx, INBTTag tag) {
         switch(this.unei_type) {
             case NMS:
-                NBTListReflection.set(nms_representation, idx, tag.getNMSObject());
+                NBTListReflection.set(nms_representation, idx, ((NBTProxyTag)tag).getNMSObject());
                 break;
             case UNEI:
-                unei_representation.set(idx, tag.getUNEIObject());
+                unei_representation.set(idx, ((NBTProxyTag)tag).getUNEIObject());
                 break;
         }
     }
@@ -79,16 +81,26 @@ public class NBTProxyList extends NBTProxyTag {
         switch(this.unei_type) {
             case NMS:
                 res = NBTListReflection.remove(nms_representation, idx);
-                return null;
+                break;
             case UNEI:
                 res = unei_representation.remove(idx);
-                return null;
+                break;
         }
         return NBTProxyTag.createTag(type, res, this.unei_type);
     }
 
     public NBTProxyTag get(int idx) {
-        return null;
+    	byte type = this.getTypeInList();
+        Object res = null;
+        switch(this.unei_type) {
+            case NMS:
+                res = NBTListReflection.getAsNBTBase(nms_representation, idx);
+                break;
+            case UNEI:
+                res = unei_representation.get(idx);
+                break;
+        }
+        return NBTProxyTag.createTag(type, res, this.unei_type);
     }
 
     public int size() {

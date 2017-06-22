@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TagLong extends Tag {
+class TagLong extends Tag {
 
     private long data;
 

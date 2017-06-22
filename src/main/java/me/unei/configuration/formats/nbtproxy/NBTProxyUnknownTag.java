@@ -3,7 +3,7 @@ package me.unei.configuration.formats.nbtproxy;
 import me.unei.configuration.formats.nbtlib.Tag;
 import me.unei.configuration.reflection.NBTBaseReflection;
 
-public class NBTProxyUnknownTag extends NBTProxyTag {
+class NBTProxyUnknownTag extends NBTProxyTag {
 
     private Object nms_representation;
     private Tag unei_representation;

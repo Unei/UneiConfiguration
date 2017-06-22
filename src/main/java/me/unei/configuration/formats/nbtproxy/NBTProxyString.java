@@ -1,10 +1,11 @@
 package me.unei.configuration.formats.nbtproxy;
 
+import me.unei.configuration.api.format.INBTString;
 import me.unei.configuration.formats.nbtlib.TagString;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NBTStringReflection;
 
-public class NBTProxyString extends NBTProxyTag {
+class NBTProxyString extends NBTProxyTag implements INBTString {
 
     private Object nms_representation;
     private TagString unei_representation;

@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TagFloat extends Tag {
+class TagFloat extends Tag {
 
     private float data;
 
