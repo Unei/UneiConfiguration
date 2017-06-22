@@ -11,10 +11,16 @@ public final class SavedFile {
 
     private String extension = ".null";
 
+    private boolean dummyFile = false;
     private boolean canAccess;
     private File datFile;
 
     private boolean initialized;
+    
+    public SavedFile() {
+    	this(null, null, null);
+    	this.dummyFile = true;
+    }
 
     public SavedFile(File folder, String fileName, String extension) {
         this.folder = (folder == null? new File(".") : folder);
@@ -32,6 +38,10 @@ public final class SavedFile {
     public boolean init() {
         if (this.folder == null || this.fileName == null || this.fileName.isEmpty()) {
             return false;
+        }
+        if (this.dummyFile) {
+        	this.canAccess = true;
+        	this.initialized = true;
         }
         if (!this.folder.exists()) {
             UneiConfiguration.getInstance().getLogger().finest("Creating Configuration tree... (" + this.folder.getPath() + ")");
@@ -61,7 +71,7 @@ public final class SavedFile {
     }
 
     public File getFile() {
-        if (!this.canAccess()) {
+        if (!this.canAccess() || this.dummyFile) {
             return null;
         }
         return this.datFile;
