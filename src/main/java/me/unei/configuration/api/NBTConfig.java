@@ -17,7 +17,7 @@ import me.unei.configuration.plugin.UneiConfiguration;
 public final class NBTConfig implements INBTConfiguration {
 
     public static final String NBT_FILE_EXT = ".dat";
-    public static final String NBT_TMP_EXT = NBTConfig.NBT_FILE_EXT + ".tmp";
+    public static final String NBT_TMP_EXT = ".tmp";
 
     private NBTProxyCompound rootCompound = null;
 
@@ -55,11 +55,44 @@ public final class NBTConfig implements INBTConfiguration {
         }
     }
 
+    private static String buildPath(String parent, String child) {
+        if (parent == null || parent.isEmpty() || child == null) {
+            return child;
+        }
+        return parent + "." + child;
+    }
+
+    private static String[] splitPath(String path) {
+        return path.split("\\.");
+    }
+
+    public static NBTConfig getForPath(File folder, String fileName, String path) {
+        return NBTConfig.getForPath(new NBTConfig(folder, fileName), path);
+    }
+
+    public static NBTConfig getForPath(NBTConfig root, String path) {
+        if (path == null || path.isEmpty()) {
+            return root;
+        }
+        if (!path.contains(".")) {
+            return root.getSubSection(path);
+        }
+        NBTConfig last = root;
+        for (String part : NBTConfig.splitPath(path)) {
+            last = last.getSubSection(part);
+        }
+        return last;
+    }
+
+    public SavedFile getFile() {
+        return this.configFile;
+    }
+
     public String getFileName() {
         if (this.configFile == null && this.parent != null) {
             return this.parent.getFileName();
         }
-        return this.configFile.getFileName();
+        return this.configFile != null? this.configFile.getFile().getName() : null;
     }
 
     public String getName() {
@@ -141,7 +174,7 @@ public final class NBTConfig implements INBTConfiguration {
             }
             NBTProxyCompound tmpCompound = null;
             try {
-                UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + this.configFile.getFileName() + "...");
+                UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + getFileName() + "...");
                 tmpCompound = NBTProxyCST.readCompressed(new FileInputStream(this.configFile.getFile()));
                 UneiConfiguration.getInstance().getLogger().fine("OK : " + (tmpCompound == null? "(null)" : tmpCompound.toString()));
                 if (tmpCompound != null)
@@ -225,35 +258,6 @@ public final class NBTConfig implements INBTConfiguration {
         }
         NBTConfig sub = new NBTConfig(this, path);
         return sub;
-    }
-
-    private static String buildPath(String parent, String child) {
-        if (parent == null || parent.isEmpty() || child == null) {
-            return child;
-        }
-        return new String(parent + "." + child);
-    }
-
-    private static String[] splitPath(String path) {
-        return path.split("\\.");
-    }
-
-    public static NBTConfig getForPath(File folder, String fileName, String path) {
-        return NBTConfig.getForPath(new NBTConfig(folder, fileName), path);
-    }
-
-    public static NBTConfig getForPath(NBTConfig root, String path) {
-        if (path == null || path.isEmpty()) {
-            return root;
-        }
-        if (!path.contains(".")) {
-            return root.getSubSection(path);
-        }
-        NBTConfig last = root;
-        for (String part : NBTConfig.splitPath(path)) {
-            last = last.getSubSection(part);
-        }
-        return last;
     }
 
     public double getDouble(String key) {
