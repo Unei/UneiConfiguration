@@ -1,13 +1,20 @@
 package me.unei.configuration.api.fs;
 
+import java.util.Iterator;
+
+import me.unei.configuration.api.fs.DestinationDescription.DestinationList;
+import me.unei.configuration.api.fs.DestinationDescription.DestinationType;
+
 public final class OrganizedFs
 {
-	private static final char PATH_SEPARATOR_DEF = '@';
-	private static final char REPLACE_CHAR = '_';
-	public static final char ESCAPE_CHAR = '\\';
-	public static final char PATH_SEP_CHAR = '.';
-	public static final char ROOT_CHAR = '.';
-	public static final String PARENT_DEST = "..";
+	//@formatter:off
+	private static final char   PATH_SEPARATOR_DEF	= '@';
+	private static final char   REPLACE_CHAR		= '_';
+	public static final  char   ESCAPE_CHAR			= '\\';
+	public static final  char   PATH_SEP_CHAR		= '.';
+	public static final  char   ROOT_CHAR			= '.';
+	public static final  String PARENT_DEST			= "..";
+	//@formatter:on
 	
 	private String currentPath;
 	private UneiFsFile currentNode;
@@ -28,26 +35,34 @@ public final class OrganizedFs
 		if (path == null || path.isEmpty())
 			return false;
 		path = path.replace(OrganizedFs.PATH_SEPARATOR_DEF, OrganizedFs.REPLACE_CHAR);
-		for (int i = 0; i < path.length(); i++)
+		return true;
+	}
+	
+	public boolean followPath(DestinationList path)
+	{
+		if (path == null || path.isEmpty())
 		{
-			if (OrganizedFs.hasSemethingAt(path, i))
+			return false;
+		}
+		Iterator<DestinationDescription> it = path.iterator();
+		while (it.hasNext())
+		{
+			DestinationDescription part = it.next();
+			if (part == null)
 			{
-				switch (OrganizedFs.getTypeAt(path, i))
-				{
-					case Root:
-						this.gotoRoot();
-						break;
-					case Parent:
-						this.gotoParent();
-						++i;
-						break;
-					case Separator:
-						this.gotoChild(OrganizedFs.getNodeName(path, i + 1));
-						break;
-						
-					default:
-						break;
-				}
+				return false;
+			}
+			if (part.getType().equals(DestinationType.Root))
+			{
+				this.gotoRoot();
+			}
+			else if (part.getType().equals(DestinationType.Parent))
+			{
+				this.gotoParent();
+			}
+			else
+			{
+				this.gotoChild(part.getValue());
 			}
 		}
 		return true;
@@ -93,20 +108,6 @@ public final class OrganizedFs
 		return current.substring(0, lastIO);
 	}
 	
-	private static String getNodeName(String name, int start)
-	{
-		StringBuilder sb = new StringBuilder();
-		for (int i = start; i < name.length(); i++)
-		{
-			if (OrganizedFs.areParentStr(name, i) || name.charAt(i) == OrganizedFs.PATH_SEP_CHAR)
-			{
-				break;
-			}
-			sb.append(name.charAt(i));
-		}
-		return sb.toString();
-	}
-	
 	private static boolean areParentStr(String str, int index)
 	{
 		return str.startsWith(OrganizedFs.PARENT_DEST, index);
@@ -121,30 +122,84 @@ public final class OrganizedFs
 		return current + OrganizedFs.PATH_SEPARATOR_DEF + child;
 	}
 	
-	private static SeparatorType getTypeAt(String str, int idx)
+	private static boolean isRoot(String str, int idx)
 	{
-		if ((idx > 0 ? str.charAt(idx - 1) == OrganizedFs.ESCAPE_CHAR : false))
+		if (idx > 0)
 		{
-			return SeparatorType.None;
+			return false;
 		}
-		if (OrganizedFs.areParentStr(str, idx))
+		if (str.charAt(idx) != OrganizedFs.ROOT_CHAR)
 		{
-			return SeparatorType.Parent;
+			return false;
 		}
-		if (idx == 0 && str.charAt(idx) == OrganizedFs.ROOT_CHAR)
+		if (str.length() > (idx + 1))
 		{
-			return SeparatorType.Root;
+			if (str.charAt(idx + 1) != OrganizedFs.ROOT_CHAR)
+			{
+				return true;
+			}
+			return false;
 		}
-		if (str.charAt(idx) == OrganizedFs.PATH_SEP_CHAR)
-		{
-			return SeparatorType.Separator;
-		}
-		return SeparatorType.None;
+		return true;
 	}
 	
-	private static boolean hasSemethingAt(String str, int idx)
+	public static DestinationList parsePath(String path)
 	{
-		return OrganizedFs.getTypeAt(str, idx) != SeparatorType.None;
+		if (path == null || path.isEmpty())
+		{
+			return new DestinationList();
+		}
+		path = path.replace(OrganizedFs.PATH_SEPARATOR_DEF, OrganizedFs.REPLACE_CHAR);
+		DestinationList components = new DestinationList();
+		StringBuilder component = new StringBuilder();
+		boolean escaped = false;
+		
+		for (int i = 0; i < path.length(); ++i)
+		{
+			char sel = path.charAt(i);
+			
+			if (escaped)
+			{
+				component.append(sel);
+				escaped = false;
+				continue;
+			}
+			if (OrganizedFs.isRoot(path, i))
+			{
+				components.add(DestinationType.Root, String.valueOf(OrganizedFs.ROOT_CHAR));
+			}
+			else if (sel == OrganizedFs.ESCAPE_CHAR)
+			{
+				escaped = true;
+			}
+			else if (OrganizedFs.areParentStr(path, i))
+			{
+				if (component.length() > 0)
+				{
+					components.add(DestinationType.Child, component.toString());
+					component.setLength(0);
+				}
+				components.add(DestinationType.Parent, OrganizedFs.PARENT_DEST);
+				++i;
+			}
+			else if (sel == OrganizedFs.PATH_SEP_CHAR)
+			{
+				if (component.length() > 0)
+				{
+					components.add(DestinationType.Child, component.toString());
+					component.setLength(0);
+				}
+			}
+			else
+			{
+				component.append(sel);
+			}
+		}
+		if (component.length() > 0)
+		{
+			components.add(DestinationType.Child, component.toString());
+		}
+		return components;
 	}
 	
 	protected static enum SeparatorType
