@@ -28,6 +28,7 @@ public interface IConfiguration {
     public void reload();
 
     public Set<String> getKeys();
+
     public boolean contains(String key);
 
     public Object get(String key);

@@ -38,11 +38,11 @@ public class YamlConfig implements IYamlConfiguration {
         this.init();
     }
 
-    public YamlConfig(String datum) {
+    public YamlConfig(String data) {
         this.configFile = new SavedFile();
 
         this.init();
-        this.loadFromString(datum);
+        this.loadFromString(data);
     }
 
     YamlConfig(File folder, String fileName, String p_tagName) {
