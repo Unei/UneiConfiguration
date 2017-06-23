@@ -5,13 +5,10 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.fs.NavigableFile;
+import me.unei.configuration.api.fs.PathNavigator;
 
-public interface IConfiguration {
-
-    public static final char PATH_SEP_CHAR = '.';
-
-    public static final String PATH_SEPARATOR = String.valueOf(IConfiguration.PATH_SEP_CHAR);
-    public static final Pattern PATH_SEP_REGEXP = Pattern.compile(Pattern.quote(IConfiguration.PATH_SEPARATOR));
+public interface IConfiguration extends NavigableFile {
 
     public SavedFile getFile();
     public String getFileName();
@@ -23,6 +20,7 @@ public interface IConfiguration {
 
     public IConfiguration getRoot();
     public IConfiguration getParent();
+    public IConfiguration getChild(String name);
 
     public void save();
     public void reload();

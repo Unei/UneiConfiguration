@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
 import org.apache.commons.lang.ArrayUtils;
 
 import me.unei.configuration.SavedFile;
@@ -41,11 +43,11 @@ public final class NBTConfig implements INBTConfiguration {
         this.init();
     }
 
-    NBTConfig(File folder, String fileName, String p_tagName) {
+    private NBTConfig(File folder, String fileName, String p_tagName) {
         this(new NBTConfig(folder, fileName), p_tagName);
     }
 
-    NBTConfig(NBTConfig p_parent, String p_tagName) {
+    private NBTConfig(NBTConfig p_parent, String p_tagName) {
         this.parent = p_parent;
         this.tagName = p_tagName;
         this.fullPath = NBTConfig.buildPath(p_parent.fullPath, p_tagName);
@@ -62,23 +64,11 @@ public final class NBTConfig implements INBTConfiguration {
         }
     }
 
-    private static String buildPath(String parent, String child) {
-        if (parent == null || parent.isEmpty() || child == null) {
-            return child;
+    private static String buildPath(String path, String child) {
+        if (path == null || path.isEmpty() || child == null) {
+            return PathComponent.escapeComponent(child);
         }
-        return parent + IConfiguration.PATH_SEPARATOR + child;
-    }
-
-    private static String getParentNodeFor(String path) {
-        int lastOccur = path.lastIndexOf(IConfiguration.PATH_SEP_CHAR);
-        if (lastOccur < 0) {
-            return "";
-        }
-        return path.substring(0, lastOccur);
-    }
-
-    private static String[] splitPath(String path) {
-        return IConfiguration.PATH_SEP_REGEXP.split(path);
+        return path + PathNavigator.PATH_SEPARATOR + PathComponent.escapeComponent(child);
     }
 
     public static NBTConfig getForPath(File folder, String fileName, String path) {
@@ -89,14 +79,9 @@ public final class NBTConfig implements INBTConfiguration {
         if (path == null || path.isEmpty()) {
             return root;
         }
-        if (!path.contains(IConfiguration.PATH_SEPARATOR)) {
-            return root.getSubSection(path);
-        }
-        NBTConfig last = root;
-        for (String part : NBTConfig.splitPath(path)) {
-            last = last.getSubSection(part);
-        }
-        return last;
+        PathNavigator navigator = new PathNavigator(root);
+        navigator.navigate(path);
+        return (NBTConfig) navigator.getCurrentNode();
     }
 
     public SavedFile getFile() {
@@ -136,6 +121,14 @@ public final class NBTConfig implements INBTConfiguration {
         return this.parent;
     }
 
+    public NBTConfig getChild(String name) {
+        if (!this.configFile.canAccess()) {
+            return null;
+        }
+        NBTConfig sub = new NBTConfig(this, name);
+        return sub;
+    }
+
     private NBTProxyCompound getTagCp() {
         NBTProxyCompound papa;
         if (this.parent != null) {
@@ -147,13 +140,6 @@ public final class NBTConfig implements INBTConfiguration {
             return null;
         }
         return papa.getCompound(this.tagName).clone();
-    }
-
-    @SuppressWarnings("unused")
-    private NBTProxyCompound getTagFor(String key) {
-        String parent = NBTConfig.getParentNodeFor(key);
-        NBTConfig sel = NBTConfig.getForPath(this, parent);
-        return sel.getTagCp();
     }
 
     public INBTCompound getTagCopy() {
@@ -241,10 +227,6 @@ public final class NBTConfig implements INBTConfiguration {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void reset() {
-        //
     }
 
     public Set<String> getKeys() {

@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
 import org.yaml.snakeyaml.Yaml;
 
 import me.unei.configuration.SavedFile;
@@ -45,11 +47,11 @@ public class YamlConfig implements IYamlConfiguration {
         this.loadFromString(data);
     }
 
-    YamlConfig(File folder, String fileName, String p_tagName) {
+    private YamlConfig(File folder, String fileName, String p_tagName) {
         this(new YamlConfig(folder, fileName), p_tagName);
     }
 
-    YamlConfig(YamlConfig p_parent, String p_nodeName) {
+    private YamlConfig(YamlConfig p_parent, String p_nodeName) {
         this.parent = p_parent;
         this.nodeName = p_nodeName;
         this.fullPath = YamlConfig.buildPath(p_parent.fullPath, p_nodeName);
@@ -66,15 +68,15 @@ public class YamlConfig implements IYamlConfiguration {
         }
     }
 
-    private static String buildPath(String parent, String child) {
-        if (parent == null || parent.isEmpty() || child == null) {
-            return child;
+    private static String buildPath(String path, String child) {
+        if (path == null || path.isEmpty() || child == null) {
+            return PathComponent.escapeComponent(child);
         }
-        return parent + IConfiguration.PATH_SEP_CHAR + child;
+        return path + PathNavigator.PATH_SEPARATOR + PathComponent.escapeComponent(child);
     }
 
     private static String[] splitPath(String path) {
-        return IConfiguration.PATH_SEP_REGEXP.split(path);
+        return PathNavigator.PATH_SEPARATOR_REGEXP.split(path);
     }
 
     public static YamlConfig getForPath(File folder, String fileName, String path) {
@@ -85,14 +87,9 @@ public class YamlConfig implements IYamlConfiguration {
         if (path == null || path.isEmpty()) {
             return root;
         }
-        if (!path.contains(IConfiguration.PATH_SEPARATOR)) {
-            return root.getSubSection(path);
-        }
-        YamlConfig last = root;
-        for (String part : YamlConfig.splitPath(path)) {
-            last = last.getSubSection(part);
-        }
-        return last;
+        PathNavigator navigator = new PathNavigator(root);
+        navigator.navigate(path);
+        return (YamlConfig) navigator.getCurrentNode();
     }
 
     public SavedFile getFile() {
@@ -138,6 +135,15 @@ public class YamlConfig implements IYamlConfiguration {
 
     public IConfiguration getParent() {
         return this.parent;
+    }
+
+    public YamlConfig getChild(String name) {
+        if (!this.configFile.canAccess()) {
+            return null;
+        }
+
+        YamlConfig sub = new YamlConfig(this, name);
+        return sub;
     }
 
     public void save() {
