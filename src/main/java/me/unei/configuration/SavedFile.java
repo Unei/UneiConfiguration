@@ -16,10 +16,10 @@ public final class SavedFile {
     private File datFile;
 
     private boolean initialized;
-    
+
     public SavedFile() {
-    	this(null, null, null);
-    	this.dummyFile = true;
+        this(null, null, null);
+        this.dummyFile = true;
     }
 
     public SavedFile(File folder, String fileName, String extension) {
@@ -40,8 +40,8 @@ public final class SavedFile {
             return false;
         }
         if (this.dummyFile) {
-        	this.canAccess = true;
-        	this.initialized = true;
+            this.canAccess = true;
+            this.initialized = true;
         }
         if (!this.folder.exists()) {
             UneiConfiguration.getInstance().getLogger().finest("Creating Configuration tree... (" + this.folder.getPath() + ")");

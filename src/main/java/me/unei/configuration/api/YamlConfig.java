@@ -125,7 +125,7 @@ public class YamlConfig implements IYamlConfiguration {
         if (this.parent != null) {
             this.parent.lock();
         } else {
-        	this.configFile.lock();
+            this.configFile.lock();
         }
     }
 
@@ -149,7 +149,7 @@ public class YamlConfig implements IYamlConfiguration {
             return;
         }
         if (this.configFile.getFile() == null) {
-        	return ;
+            return;
         }
         File tmp = new File(this.configFile.getFolder(), this.configFile.getFileName() + YamlConfig.YAML_TMP_EXT);
         String tmpData = YamlConfig.YAML.dump(this.data);
@@ -158,7 +158,7 @@ public class YamlConfig implements IYamlConfiguration {
             out.write(tmpData.getBytes());
             out.close();
             if (this.configFile.getFile().exists()) {
-            	this.configFile.getFile().delete();
+                this.configFile.getFile().delete();
             }
             tmp.renameTo(this.configFile.getFile());
             tmp.delete();
@@ -192,13 +192,13 @@ public class YamlConfig implements IYamlConfiguration {
                 return;
             }
             if (this.data == null) {
-            	this.data = new HashMap<String, Object>();
+                this.data = new HashMap<String, Object>();
             }
             this.data.clear();
             if (tmpData != null && !tmpData.isEmpty()) {
-            	for (Entry<?, ?> e : tmpData.entrySet()) {
-            		this.data.put(e.getKey().toString(), e.getValue());
-            	}
+                for (Entry<?, ?> e : tmpData.entrySet()) {
+                    this.data.put(e.getKey().toString(), e.getValue());
+                }
             }
         }
     }
@@ -361,26 +361,26 @@ public class YamlConfig implements IYamlConfiguration {
     public void remove(String key) {
         this.data.remove(key);
     }
-    
+
     public String saveToString() {
-    	return YamlConfig.YAML.dump(this.data);
+        return YamlConfig.YAML.dump(this.data);
     }
-    
+
     public void loadFromString(String p_data) {
-    	if (!this.canAccess()) {
-    		return ;
-    	}
-    	this.data.clear();
-    	Map<?, ?> tmpMap = YamlConfig.YAML.loadAs(p_data, Map.class);
-    	for (Entry<?, ?> e : tmpMap.entrySet()) {
-    		if (e.getKey() instanceof String) {
-    			this.data.put((String)e.getKey(), e.getValue());
-    		}
-    	}
+        if (!this.canAccess()) {
+            return;
+        }
+        this.data.clear();
+        Map<?, ?> tmpMap = YamlConfig.YAML.loadAs(p_data, Map.class);
+        for (Entry<?, ?> e : tmpMap.entrySet()) {
+            if (e.getKey() instanceof String) {
+                this.data.put((String) e.getKey(), e.getValue());
+            }
+        }
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "YamlConfig=" + this.data.toString();
     }
 }

@@ -68,13 +68,13 @@ public final class NBTConfig implements INBTConfiguration {
         }
         return parent + IConfiguration.PATH_SEPARATOR + child;
     }
-    
+
     private static String getParentNodeFor(String path) {
-    	int lastOccur = path.lastIndexOf(IConfiguration.PATH_SEP_CHAR);
-    	if (lastOccur < 0) {
-    		return "";
-    	}
-    	return path.substring(0, lastOccur);
+        int lastOccur = path.lastIndexOf(IConfiguration.PATH_SEP_CHAR);
+        if (lastOccur < 0) {
+            return "";
+        }
+        return path.substring(0, lastOccur);
     }
 
     private static String[] splitPath(String path) {
@@ -135,7 +135,7 @@ public final class NBTConfig implements INBTConfiguration {
     public NBTConfig getParent() {
         return this.parent;
     }
-    
+
     private NBTProxyCompound getTagCp() {
         NBTProxyCompound papa;
         if (this.parent != null) {
@@ -148,13 +148,12 @@ public final class NBTConfig implements INBTConfiguration {
         }
         return papa.getCompound(this.tagName).clone();
     }
-    
+
     @SuppressWarnings("unused")
-	private NBTProxyCompound getTagFor(String key)
-    {
-    	String parent = NBTConfig.getParentNodeFor(key);
-    	NBTConfig sel = NBTConfig.getForPath(this, parent);
-    	return sel.getTagCp();
+    private NBTProxyCompound getTagFor(String key) {
+        String parent = NBTConfig.getParentNodeFor(key);
+        NBTConfig sel = NBTConfig.getForPath(this, parent);
+        return sel.getTagCp();
     }
 
     public INBTCompound getTagCopy() {
@@ -180,10 +179,9 @@ public final class NBTConfig implements INBTConfiguration {
             }
         }
     }
-    
-    public void setTagCopy(INBTCompound compound)
-    {
-    	this.setTagCp((NBTProxyCompound)compound);
+
+    public void setTagCopy(INBTCompound compound) {
+        this.setTagCp((NBTProxyCompound) compound);
     }
 
     public boolean canAccess() {
@@ -248,37 +246,37 @@ public final class NBTConfig implements INBTConfiguration {
     public void reset() {
         //
     }
-    
+
     public Set<String> getKeys() {
-    	NBTProxyCompound tag = this.getTagCp();
-    	return tag.keySet();
+        NBTProxyCompound tag = this.getTagCp();
+        return tag.keySet();
     }
 
     public boolean contains(String key) {
         NBTProxyCompound tag = this.getTagCp();
         return tag.hasKey(key);
     }
-    
+
     public Object get(String key) {
-    	String serialized = this.getString(key);
-    	InputStream is = new ByteArrayInputStream(serialized.getBytes());
-    	ObjectInputStream ois = null;
-    	Object result = null;
-    	try {
-			ois = new ObjectInputStream(is);
-			result = ois.readObject();
-			ois.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
-    	if (result != null) {
-    		return result;
-    	}
-    	return null;
+        String serialized = this.getString(key);
+        InputStream is = new ByteArrayInputStream(serialized.getBytes());
+        ObjectInputStream ois = null;
+        Object result = null;
+        try {
+            ois = new ObjectInputStream(is);
+            result = ois.readObject();
+            ois.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+        if (result != null) {
+            return result;
+        }
+        return null;
     }
 
     public String getString(String key) {
@@ -359,34 +357,28 @@ public final class NBTConfig implements INBTConfiguration {
         NBTProxyCompound tag = this.getTagCp();
         return Arrays.asList(ArrayUtils.toObject(tag.getIntArray(key)));
     }
-    
-    public void set(String key, Object value)
-    {
-    	if (value == null)
-    	{
-    		return;
-    	}
-    	String serialized = null;
-    	ByteArrayOutputStream baos;
-    	ObjectOutputStream oos;
-    	try
-    	{
-    		baos = new ByteArrayOutputStream();
-    		oos = new ObjectOutputStream(baos);
-    		oos.writeObject(value);
-    		oos.flush();
-    		serialized = new String(baos.toByteArray());
-    		oos.close();
-    		baos.close();
-    	}
-    	catch (IOException e)
-    	{
-    		e.printStackTrace();
-    	}
-    	if (serialized != null)
-    	{
-    		this.setString(key, serialized);
-    	}
+
+    public void set(String key, Object value) {
+        if (value == null) {
+            return;
+        }
+        String serialized = null;
+        ByteArrayOutputStream baos;
+        ObjectOutputStream oos;
+        try {
+            baos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(baos);
+            oos.writeObject(value);
+            oos.flush();
+            serialized = new String(baos.toByteArray());
+            oos.close();
+            baos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (serialized != null) {
+            this.setString(key, serialized);
+        }
     }
 
     public void setDouble(String key, double value) {
@@ -439,7 +431,7 @@ public final class NBTConfig implements INBTConfiguration {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "NBTConfig=" + this.getTagCopy().toString();
     }
 }

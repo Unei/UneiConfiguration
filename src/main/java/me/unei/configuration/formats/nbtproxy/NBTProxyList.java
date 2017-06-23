@@ -46,10 +46,10 @@ class NBTProxyList extends NBTProxyTag implements INBTList {
     public void add(INBTTag tag) {
         switch(this.unei_type) {
             case NMS:
-                NBTListReflection.add(nms_representation, ((NBTProxyTag)tag).getNMSObject());
+                NBTListReflection.add(nms_representation, ((NBTProxyTag) tag).getNMSObject());
                 break;
             case UNEI:
-                unei_representation.add(((NBTProxyTag)tag).getUNEIObject());
+                unei_representation.add(((NBTProxyTag) tag).getUNEIObject());
                 break;
         }
     }
@@ -57,10 +57,10 @@ class NBTProxyList extends NBTProxyTag implements INBTList {
     public void set(int idx, INBTTag tag) {
         switch(this.unei_type) {
             case NMS:
-                NBTListReflection.set(nms_representation, idx, ((NBTProxyTag)tag).getNMSObject());
+                NBTListReflection.set(nms_representation, idx, ((NBTProxyTag) tag).getNMSObject());
                 break;
             case UNEI:
-                unei_representation.set(idx, ((NBTProxyTag)tag).getUNEIObject());
+                unei_representation.set(idx, ((NBTProxyTag) tag).getUNEIObject());
                 break;
         }
     }
@@ -90,7 +90,7 @@ class NBTProxyList extends NBTProxyTag implements INBTList {
     }
 
     public NBTProxyTag get(int idx) {
-    	byte type = this.getTypeInList();
+        byte type = this.getTypeInList();
         Object res = null;
         switch(this.unei_type) {
             case NMS:

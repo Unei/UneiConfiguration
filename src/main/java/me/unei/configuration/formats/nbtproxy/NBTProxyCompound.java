@@ -67,10 +67,10 @@ public class NBTProxyCompound extends NBTProxyTag implements INBTCompound {
     public void set(String key, INBTTag elem) {
         switch(this.unei_type) {
             case NMS:
-                NBTCompoundReflection.set(nms_representation, key, ((NBTProxyTag)elem).getNMSObject());
+                NBTCompoundReflection.set(nms_representation, key, ((NBTProxyTag) elem).getNMSObject());
                 break;
             case UNEI:
-                unei_representation.set(key, ((NBTProxyTag)elem).getUNEIObject());
+                unei_representation.set(key, ((NBTProxyTag) elem).getUNEIObject());
                 break;
         }
     }
@@ -357,14 +357,14 @@ public class NBTProxyCompound extends NBTProxyTag implements INBTCompound {
 
     public NBTProxyList getList(String key, byte type) {
         switch(this.unei_type) {
-        case NMS:
-            Object got = NBTCompoundReflection.getList(nms_representation, key, type);
-            return new NBTProxyList(got, 0);
-        case UNEI:
-            TagList got2 = unei_representation.getList(key, type);
-            return new NBTProxyList(got2);
-    }
-    return new NBTProxyList();
+            case NMS:
+                Object got = NBTCompoundReflection.getList(nms_representation, key, type);
+                return new NBTProxyList(got, 0);
+            case UNEI:
+                TagList got2 = unei_representation.getList(key, type);
+                return new NBTProxyList(got2);
+        }
+        return new NBTProxyList();
     }
 
     public boolean getBoolean(String key) {
