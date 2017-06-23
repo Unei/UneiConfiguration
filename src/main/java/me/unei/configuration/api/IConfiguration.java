@@ -1,14 +1,17 @@
 package me.unei.configuration.api;
 
-import me.unei.configuration.SavedFile;
-
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import me.unei.configuration.SavedFile;
 
 public interface IConfiguration {
 
-	public static final String PathSeparator = ".";
-	public static final Pattern PathSeparatorRegexp = Pattern.compile("\\.");
+	public static final char PATH_SEP_CHAR = '.';
+	
+	public static final String PATH_SEPARATOR = String.valueOf(IConfiguration.PATH_SEP_CHAR);
+	public static final Pattern PATH_SEP_REGEXP = Pattern.compile(Pattern.quote(IConfiguration.PATH_SEPARATOR));
 	
     public SavedFile getFile();
     public String getFileName();
@@ -24,8 +27,11 @@ public interface IConfiguration {
     public void save();
     public void reload();
 
+    public Set<String> getKeys();
     public boolean contains(String key);
 
+    public Object get(String key);
+    
     public String getString(String key);
     public double getDouble(String key);
     public boolean getBoolean(String key);
@@ -38,6 +44,8 @@ public interface IConfiguration {
 
     public IConfiguration getSubSection(String path);
 
+    public void set(String key, Object value);
+    
     public void setString(String key, String value);
     public void setDouble(String key, double value);
     public void setBoolean(String key, boolean value);

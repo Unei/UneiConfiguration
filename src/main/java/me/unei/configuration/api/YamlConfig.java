@@ -70,11 +70,11 @@ public class YamlConfig implements IYamlConfiguration {
         if (parent == null || parent.isEmpty() || child == null) {
             return child;
         }
-        return parent + IConfiguration.PathSeparator + child;
+        return parent + IConfiguration.PATH_SEP_CHAR + child;
     }
 
     private static String[] splitPath(String path) {
-        return IConfiguration.PathSeparatorRegexp.split(path);
+        return IConfiguration.PATH_SEP_REGEXP.split(path);
     }
 
     public static YamlConfig getForPath(File folder, String fileName, String path) {
@@ -85,7 +85,7 @@ public class YamlConfig implements IYamlConfiguration {
         if (path == null || path.isEmpty()) {
             return root;
         }
-        if (!path.contains(IConfiguration.PathSeparator)) {
+        if (!path.contains(IConfiguration.PATH_SEPARATOR)) {
             return root.getSubSection(path);
         }
         YamlConfig last = root;
