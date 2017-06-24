@@ -134,7 +134,10 @@ public class YamlConfig implements IYamlConfiguration {
     }
 
     public IConfiguration getParent() {
-        return this.parent;
+        if (this.parent != null) {
+            return this.parent;
+        }
+        return this;
     }
 
     public YamlConfig getChild(String name) {

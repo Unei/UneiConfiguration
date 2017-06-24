@@ -118,7 +118,10 @@ public final class NBTConfig implements INBTConfiguration {
     }
 
     public NBTConfig getParent() {
-        return this.parent;
+        if (this.parent != null) {
+            return this.parent;
+        }
+        return this;
     }
 
     public NBTConfig getChild(String name) {
