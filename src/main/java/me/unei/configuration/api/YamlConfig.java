@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import me.unei.configuration.api.fs.PathComponent;
-import me.unei.configuration.api.fs.PathNavigator;
 import org.yaml.snakeyaml.Yaml;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public class YamlConfig implements IYamlConfiguration {
@@ -47,10 +47,6 @@ public class YamlConfig implements IYamlConfiguration {
         this.loadFromString(data);
     }
 
-    private YamlConfig(File folder, String fileName, String p_tagName) {
-        this(new YamlConfig(folder, fileName), p_tagName);
-    }
-
     private YamlConfig(YamlConfig p_parent, String p_nodeName) {
         this.parent = p_parent;
         this.nodeName = p_nodeName;
@@ -73,10 +69,6 @@ public class YamlConfig implements IYamlConfiguration {
             return PathComponent.escapeComponent(child);
         }
         return path + PathNavigator.PATH_SEPARATOR + PathComponent.escapeComponent(child);
-    }
-
-    private static String[] splitPath(String path) {
-        return PathNavigator.PATH_SEPARATOR_REGEXP.split(path);
     }
 
     public static YamlConfig getForPath(File folder, String fileName, String path) {

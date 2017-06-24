@@ -2,11 +2,9 @@ package me.unei.configuration.api;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.NavigableFile;
-import me.unei.configuration.api.fs.PathNavigator;
 
 public interface IConfiguration extends NavigableFile {
 

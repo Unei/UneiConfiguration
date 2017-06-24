@@ -1,9 +1,9 @@
 package me.unei.configuration.api.fs;
 
-import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
-import me.unei.configuration.api.fs.PathComponent.PathComponentType;
-
 import java.util.regex.Pattern;
+
+import me.unei.configuration.api.fs.PathComponent.PathComponentType;
+import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 
 public final class PathNavigator {
 
@@ -58,12 +58,15 @@ public final class PathNavigator {
         PathComponentsList components = new PathComponentsList();
         StringBuilder lastComponent = new StringBuilder();
 
+        int i = 0;
+        
         if (PathNavigator.isAbsolute(path)) {
             components.appendComponent(PathComponentType.ROOT, String.valueOf(PathNavigator.ROOT_CHAR));
+            i = 1;
         }
 
         boolean escaped = false;
-        for (int i = 0; i < path.length(); i++) {
+        for ( ; i < path.length(); i++) {
             char c = path.charAt(i);
 
             if (escaped) {
@@ -81,7 +84,7 @@ public final class PathNavigator {
                 }
                 components.appendComponent(PathComponentType.PARENT, PathNavigator.PARENT_CHAR);
                 i++;
-            } else if (PathNavigator.hasParentChar(path, i)) {
+            } else if (PathNavigator.hasSeperatorChar(path, i)) {
                 if (lastComponent.length() > 0) {
                     components.appendComponent(PathComponentType.CHILD, lastComponent.toString());
                     lastComponent.setLength(0);
@@ -126,7 +129,7 @@ public final class PathNavigator {
     }
 
     public boolean navigate(String path) {
-        return followPath(parsePath(path));
+        return followPath(PathNavigator.parsePath(path));
     }
 
     private static boolean isAbsolute(String path) {
@@ -137,6 +140,9 @@ public final class PathNavigator {
             return false;
         }
         if (path.length() > 1) {
+        	if (PathNavigator.hasParentChar(path, 0)) {
+        		return false;
+        	}
             if (path.charAt(1) != PathNavigator.ROOT_CHAR) {
                 return true;
             }

@@ -13,12 +13,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import me.unei.configuration.api.fs.PathComponent;
-import me.unei.configuration.api.fs.PathNavigator;
 import org.apache.commons.lang.ArrayUtils;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.format.INBTCompound;
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCST;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 import me.unei.configuration.plugin.UneiConfiguration;
@@ -41,10 +41,6 @@ public final class NBTConfig implements INBTConfiguration {
         this.rootCompound = new NBTProxyCompound();
 
         this.init();
-    }
-
-    private NBTConfig(File folder, String fileName, String p_tagName) {
-        this(new NBTConfig(folder, fileName), p_tagName);
     }
 
     private NBTConfig(NBTConfig p_parent, String p_tagName) {
