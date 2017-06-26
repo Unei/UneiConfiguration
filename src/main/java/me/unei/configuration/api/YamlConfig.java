@@ -221,7 +221,6 @@ public class YamlConfig implements IYamlConfiguration {
                     if (childData != null && childData instanceof Map) {
                         currentData = (Map<String, Object>) childData;
                     } else {
-                        System.out.println(childData);
                         return;
                     }
                     break;
