@@ -1,24 +1,16 @@
 package me.unei.configuration.api;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.yaml.snakeyaml.Yaml;
-
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.plugin.UneiConfiguration;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class YamlConfig implements IYamlConfiguration {
 
@@ -26,7 +18,7 @@ public class YamlConfig implements IYamlConfiguration {
     public static final String YAML_TMP_EXT = ".tmp";
     private static final Yaml YAML = new Yaml();
 
-    private Map<String, Object> data = null;
+    private Map<String, Object> data = new HashMap<String, Object>();
 
     private SavedFile configFile = null;
 
@@ -58,10 +50,14 @@ public class YamlConfig implements IYamlConfiguration {
     private void init() {
         if (this.parent != null) {
             this.parent.init();
-        } else {
-            this.configFile.init();
-            this.reload();
+            this.synchronize();
+            return;
         }
+        if (this.configFile.isInitialized()) {
+            return;
+        }
+        this.configFile.init();
+        this.reload();
     }
 
     private static String buildPath(String path, String child) {
@@ -76,12 +72,10 @@ public class YamlConfig implements IYamlConfiguration {
     }
 
     public static YamlConfig getForPath(YamlConfig root, String path) {
-        if (path == null || path.isEmpty()) {
-            return root;
+        if (root == null) {
+            return null;
         }
-        PathNavigator navigator = new PathNavigator(root);
-        navigator.navigate(path);
-        return (YamlConfig) navigator.getCurrentNode();
+        return root.getSubSection(path);
     }
 
     public SavedFile getFile() {
@@ -118,14 +112,14 @@ public class YamlConfig implements IYamlConfiguration {
         }
     }
 
-    public IConfiguration getRoot() {
+    public YamlConfig getRoot() {
         if (this.parent != null) {
             return this.parent.getRoot();
         }
         return this;
     }
 
-    public IConfiguration getParent() {
+    public YamlConfig getParent() {
         if (this.parent != null) {
             return this.parent;
         }
@@ -133,12 +127,13 @@ public class YamlConfig implements IYamlConfiguration {
     }
 
     public YamlConfig getChild(String name) {
-        if (!this.configFile.canAccess()) {
+        if (!this.canAccess()) {
             return null;
         }
-
-        YamlConfig sub = new YamlConfig(this, name);
-        return sub;
+        if (name == null || name.isEmpty()) {
+            return this;
+        }
+        return new YamlConfig(this, name);
     }
 
     public void save() {
@@ -153,7 +148,7 @@ public class YamlConfig implements IYamlConfiguration {
             return;
         }
         File tmp = new File(this.configFile.getFolder(), this.configFile.getFileName() + YamlConfig.YAML_TMP_EXT);
-        String tmpData = YamlConfig.YAML.dump(this.data);
+        String tmpData = this.saveToString();
         try {
             OutputStream out = new FileOutputStream(tmp);
             out.write(tmpData.getBytes());
@@ -174,33 +169,71 @@ public class YamlConfig implements IYamlConfiguration {
         }
         if (this.parent != null) {
             this.parent.reload();
-        } else {
-            if (!this.configFile.getFile().exists()) {
-                this.data = new HashMap<String, Object>();
-                this.save();
-                return;
-            }
-            Map<?, ?> tmpData;
-            try {
-                UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
-                InputStream in = new FileInputStream(this.configFile.getFile());
-                tmpData = YamlConfig.YAML.loadAs(in, Map.class);
-                in.close();
-                UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
-                UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-            if (this.data == null) {
-                this.data = new HashMap<String, Object>();
-            }
-            this.data.clear();
+            this.synchronize();
+            return;
+        }
+        if (!this.configFile.getFile().exists()) {
+            this.save();
+            return;
+        }
+        this.data.clear();
+        try {
+            UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
+            InputStream in = new FileInputStream(this.configFile.getFile());
+            Map<?, ?> tmpData = YamlConfig.YAML.loadAs(in, Map.class);
             if (tmpData != null && !tmpData.isEmpty()) {
-                for (Entry<?, ?> e : tmpData.entrySet()) {
-                    this.data.put(e.getKey().toString(), e.getValue());
+                for (Entry<?, ?> entry : tmpData.entrySet()) {
+                    String key = entry.getKey() != null? entry.getKey().toString() : null;
+                    this.data.put(key, entry.getValue());
                 }
             }
+            in.close();
+            UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+            UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void synchronize() {
+        YamlConfig currentNode = this.getRoot();
+        Map<String, Object> currentData = currentNode.data;
+
+        PathComponentsList path = PathNavigator.parsePath(this.fullPath);
+        path = PathNavigator.cleanPath(path);
+        for (PathComponent component : path) {
+            switch(component.getType()) {
+                case ROOT:
+                    currentNode = currentNode.getRoot();
+                    currentData = currentNode.data;
+                    break;
+
+                case PARENT:
+                    currentNode = currentNode.getParent();
+                    currentData = currentNode.data;
+                    break;
+
+                case CHILD:
+                    currentNode = null;
+                    Object childData = currentData.get(component.getValue());
+                    if (childData != null && childData instanceof Map) {
+                        currentData = (Map<String, Object>) childData;
+                    } else {
+                        System.out.println(childData);
+                        return;
+                    }
+                    break;
+            }
+        }
+        this.data = currentData;
+    }
+
+    protected void propagate() {
+        if (this.parent != null) {
+            this.parent.data.put(this.nodeName, this.data);
+            this.parent.propagate();
         }
     }
 
@@ -208,169 +241,199 @@ public class YamlConfig implements IYamlConfiguration {
         return this.data.keySet();
     }
 
-    public boolean contains(String key) {
-        return this.data.containsKey(key);
+    public boolean contains(String path) {
+        if (path == null || path.isEmpty()) {
+            if (this.parent != null) {
+                return this.parent.data.containsKey(this.nodeName);
+            } else {
+                return true;
+            }
+        }
+        PathNavigator navigator = new PathNavigator(this);
+        if (navigator.navigate(path)) {
+            YamlConfig node = (YamlConfig) navigator.getCurrentNode();
+            return node.contains("");
+        }
+        return false;
     }
 
-    public Object get(String key) {
-        return this.data.get(key);
+    public Object get(String path) {
+        if (path == null || path.isEmpty()) {
+            if (this.parent != null) {
+                return this.parent.data.get(this.nodeName);
+            } else {
+                return this.data;
+            }
+        }
+        PathNavigator navigator = new PathNavigator(this);
+        if (navigator.navigate(path)) {
+            return ((YamlConfig) navigator.getCurrentNode()).get("");
+        }
+        return null;
     }
 
-    public String getString(String key) {
+    public String getString(String path) {
         try {
-            return (String) this.data.get(key);
+            return (String) get(path);
         } catch (Exception e) {
             return null;
         }
     }
 
-    public double getDouble(String key) {
+    public double getDouble(String path) {
         try {
-            return ((Number) this.data.get(key)).doubleValue();
+            return ((Number) get(path)).doubleValue();
         } catch (Exception e) {
             return 0.0D;
         }
     }
 
-    public boolean getBoolean(String key) {
+    public boolean getBoolean(String path) {
         try {
-            return ((Boolean) this.data.get(key)).booleanValue();
+            return ((Boolean) get(path)).booleanValue();
         } catch (Exception e) {
             return false;
         }
     }
 
-    public byte getByte(String key) {
+    public byte getByte(String path) {
         try {
-            return ((Number) this.data.get(key)).byteValue();
+            return ((Number) get(path)).byteValue();
         } catch (Exception e) {
             return (byte) 0;
         }
     }
 
-    public float getFloat(String key) {
+    public float getFloat(String path) {
         try {
-            return ((Number) this.data.get(key)).floatValue();
+            return ((Number) get(path)).floatValue();
         } catch (Exception e) {
             return 0.0F;
         }
     }
 
-    public int getInteger(String key) {
+    public int getInteger(String path) {
         try {
-            return ((Number) this.data.get(key)).intValue();
+            return ((Number) get(path)).intValue();
         } catch (Exception e) {
             return 0;
         }
     }
 
-    public long getLong(String key) {
+    public long getLong(String path) {
         try {
-            return ((Number) this.data.get(key)).longValue();
+            return ((Number) get(path)).longValue();
         } catch (Exception e) {
             return 0L;
         }
     }
 
-    public List<Byte> getByteList(String key) {
+    public List<Byte> getByteList(String path) {
         try {
-            List<Byte> bList = new ArrayList<Byte>();
-            List<?> oList = (List<?>) this.data.get(key);
-            for (Object value : oList) bList.add(((Number) value).byteValue());
-            return bList;
+            List<Byte> list = new ArrayList<Byte>();
+            for (Object value : (List<?>) get(path)) {
+                list.add(((Number) value).byteValue());
+            }
+            return list;
         } catch (Exception e) {
             return null;
         }
     }
 
-    public List<Integer> getIntegerList(String key) {
+    public List<Integer> getIntegerList(String path) {
         try {
-            List<Integer> iList = new ArrayList<Integer>();
-            List<?> oList = (List<?>) this.data.get(key);
-            for (Object value : oList) iList.add(((Number) value).intValue());
-            return iList;
+            List<Integer> list = new ArrayList<Integer>();
+            for (Object value : (List<?>) get(path)) {
+                list.add(((Number) value).intValue());
+            }
+            return list;
         } catch (Exception e) {
             return null;
         }
     }
 
     public YamlConfig getSubSection(String path) {
-        if (!this.configFile.canAccess()) {
-            return null;
+        if (path == null || path.isEmpty()) {
+            return this;
         }
-
-        YamlConfig sub = new YamlConfig(this, path);
-        return sub;
+        PathNavigator navigator = new PathNavigator(this);
+        if (navigator.navigate(path)) {
+            return (YamlConfig) navigator.getCurrentNode();
+        }
+        return null;
     }
 
-    public void set(String key, Object value) {
-        if (value == null) {
-            this.data.remove(key);
-        } else {
-            this.data.put(key, value);
+    public void set(String path, Object value) {
+        if (path == null || path.isEmpty()) {
+            if (this.parent != null) {
+                if (value == null) {
+                    this.parent.data.remove(this.nodeName);
+                } else {
+                    this.parent.data.put(this.nodeName, value);
+                }
+                this.parent.propagate();
+            }
+            return;
+        }
+        PathNavigator navigator = new PathNavigator(this);
+        if (navigator.navigate(path)) {
+            ((YamlConfig) navigator.getCurrentNode()).set("", value);
         }
     }
 
-    public void setString(String key, String value) {
-        set(key, value);
+    public void setString(String path, String value) {
+        set(path, value);
     }
 
-    public void setDouble(String key, double value) {
-        set(key, value);
+    public void setDouble(String path, double value) {
+        set(path, value);
     }
 
-    public void setBoolean(String key, boolean value) {
-        set(key, value);
+    public void setBoolean(String path, boolean value) {
+        set(path, value);
     }
 
-    public void setByte(String key, byte value) {
-        set(key, value);
+    public void setByte(String path, byte value) {
+        set(path, value);
     }
 
-    public void setFloat(String key, float value) {
-        set(key, value);
+    public void setFloat(String path, float value) {
+        set(path, value);
     }
 
-    public void setInteger(String key, int value) {
-        set(key, value);
+    public void setInteger(String path, int value) {
+        set(path, value);
     }
 
-    public void setLong(String key, long value) {
-        set(key, value);
+    public void setLong(String path, long value) {
+        set(path, value);
     }
 
-    public void setByteList(String key, List<Byte> value) {
-        set(key, value);
+    public void setByteList(String path, List<Byte> value) {
+        set(path, value);
     }
 
-    public void setIntegerList(String key, List<Integer> value) {
-        set(key, value);
+    public void setIntegerList(String path, List<Integer> value) {
+        set(path, value);
     }
 
     public void setSubSection(String path, IConfiguration value) {
-        if (!this.configFile.canAccess()) {
-            return;
-        }
         if (!(value instanceof YamlConfig)) {
             //TODO ConfigType conversion
             return;
         }
-        YamlConfig cfg = (YamlConfig) value;
-        this.data.put(path, cfg.data);
+        set(path, ((YamlConfig) value).data);
     }
 
-    public void remove(String key) {
-        this.data.remove(key);
+    public void remove(String path) {
+        set(path, null);
     }
 
     public String saveToString() {
-        return YamlConfig.YAML.dump(this.data);
+        return YamlConfig.YAML.dumpAs(this.data, null, FlowStyle.BLOCK);
     }
 
     public void loadFromString(String p_data) {
-        if (!this.canAccess()) {
-            return;
-        }
         this.data.clear();
         Map<?, ?> tmpMap = YamlConfig.YAML.loadAs(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {
