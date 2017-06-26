@@ -1,9 +1,9 @@
 package me.unei.configuration.api.fs;
 
-import java.util.regex.Pattern;
-
 import me.unei.configuration.api.fs.PathComponent.PathComponentType;
 import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
+
+import java.util.regex.Pattern;
 
 public final class PathNavigator {
 
@@ -19,7 +19,7 @@ public final class PathNavigator {
 
     public PathNavigator(NavigableFile rootFile) {
         this.currentNode = rootFile;
-        this.currentPath = new PathComponent.PathComponentsList();
+        this.currentPath = parsePath(rootFile.getCurrentPath());
     }
 
     public void goToRoot() {
@@ -59,14 +59,14 @@ public final class PathNavigator {
         StringBuilder lastComponent = new StringBuilder();
 
         int i = 0;
-        
+
         if (PathNavigator.isAbsolute(path)) {
             components.appendComponent(PathComponentType.ROOT, String.valueOf(PathNavigator.ROOT_CHAR));
             i = 1;
         }
 
         boolean escaped = false;
-        for ( ; i < path.length(); i++) {
+        for (; i < path.length(); i++) {
             char c = path.charAt(i);
 
             if (escaped) {
@@ -99,6 +99,31 @@ public final class PathNavigator {
         }
 
         return components;
+    }
+
+    public static PathComponentsList cleanPath(PathComponentsList path) {
+        PathComponentsList cleanPath = new PathComponentsList();
+        for (PathComponent component : path) {
+            switch(component.getType()) {
+                case ROOT:
+                    cleanPath.clear();
+                    cleanPath.add(component);
+                    break;
+
+                case PARENT:
+                    if (!cleanPath.isEmpty() && cleanPath.get(cleanPath.size() - 1).getType().equals(PathComponentType.CHILD)) {
+                        cleanPath.remove(cleanPath.size() - 1);
+                    } else {
+                        cleanPath.add(component);
+                    }
+                    break;
+
+                case CHILD:
+                    cleanPath.add(component);
+                    break;
+            }
+        }
+        return cleanPath;
     }
 
     public boolean followPath(PathComponentsList path) {
@@ -140,9 +165,9 @@ public final class PathNavigator {
             return false;
         }
         if (path.length() > 1) {
-        	if (PathNavigator.hasParentChar(path, 0)) {
-        		return false;
-        	}
+            if (PathNavigator.hasParentChar(path, 0)) {
+                return false;
+            }
             if (path.charAt(1) != PathNavigator.ROOT_CHAR) {
                 return true;
             }

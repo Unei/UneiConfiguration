@@ -3,6 +3,14 @@ package me.unei.configuration.api.fs;
 public interface NavigableFile {
 
     /**
+     * Returns the path to get from this navigable file's
+     * root to the current node.
+     *
+     * @return the current path of this navigable file
+     */
+    public String getCurrentPath();
+
+    /**
      * Returns this navigable file's direct (first) parent,
      * if it has one, or itself if it doesn't have any parent.
      *
@@ -24,7 +32,6 @@ public interface NavigableFile {
      * and if it can't be created.
      *
      * @param name The name of the child to return
-     *
      * @return this navigable file's child with the provided name
      */
     public NavigableFile getChild(String name);
