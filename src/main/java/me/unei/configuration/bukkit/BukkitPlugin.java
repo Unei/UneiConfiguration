@@ -1,9 +1,8 @@
 package me.unei.configuration.bukkit;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
 import me.unei.configuration.plugin.IPlugin;
 import me.unei.configuration.plugin.UneiConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BukkitPlugin extends JavaPlugin implements IPlugin {
 

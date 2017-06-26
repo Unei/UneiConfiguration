@@ -1,10 +1,10 @@
 package me.unei.configuration.api;
 
-import java.util.List;
-import java.util.Set;
-
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.NavigableFile;
+
+import java.util.List;
+import java.util.Set;
 
 public interface IConfiguration extends NavigableFile {
 

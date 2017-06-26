@@ -1,8 +1,8 @@
 package me.unei.configuration;
 
-import java.io.File;
-
 import me.unei.configuration.plugin.UneiConfiguration;
+
+import java.io.File;
 
 public final class SavedFile {
 

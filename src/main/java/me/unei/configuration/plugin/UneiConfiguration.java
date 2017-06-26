@@ -1,10 +1,10 @@
 package me.unei.configuration.plugin;
 
+import me.unei.configuration.reflection.NMSReflection;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
-
-import me.unei.configuration.reflection.NMSReflection;
 
 public final class UneiConfiguration implements IPlugin {
 

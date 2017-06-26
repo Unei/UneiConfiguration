@@ -1,14 +1,14 @@
 package me.unei.configuration.formats.nbtproxy;
 
-import java.util.Collections;
-import java.util.Set;
-
 import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.formats.nbtlib.TagCompound;
 import me.unei.configuration.formats.nbtlib.TagList;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NBTCompoundReflection;
+
+import java.util.Collections;
+import java.util.Set;
 
 public class NBTProxyCompound extends NBTProxyTag implements INBTCompound {
 

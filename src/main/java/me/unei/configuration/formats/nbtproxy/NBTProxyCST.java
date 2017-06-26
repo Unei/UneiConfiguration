@@ -1,12 +1,12 @@
 package me.unei.configuration.formats.nbtproxy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import me.unei.configuration.formats.nbtlib.NBTIO;
 import me.unei.configuration.formats.nbtproxy.NBTProxyTag.LibType;
 import me.unei.configuration.reflection.NBTCompressedStreamToolsReflection;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class NBTProxyCST {
 

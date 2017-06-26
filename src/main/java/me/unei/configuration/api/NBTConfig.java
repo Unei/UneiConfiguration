@@ -1,20 +1,5 @@
 package me.unei.configuration.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang.ArrayUtils;
-
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.fs.PathComponent;
@@ -22,6 +7,12 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCST;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 import me.unei.configuration.plugin.UneiConfiguration;
+import org.apache.commons.lang.ArrayUtils;
+
+import java.io.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public final class NBTConfig implements INBTConfiguration {
 
