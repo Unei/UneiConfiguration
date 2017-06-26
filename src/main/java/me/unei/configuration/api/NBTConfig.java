@@ -22,7 +22,6 @@ public final class NBTConfig implements INBTConfiguration {
     private NBTProxyCompound rootCompound = null;
 
     private SavedFile configFile = null;
-    private boolean initialized = false;
 
     private String fullPath = "";
     private String tagName = "";
@@ -40,21 +39,16 @@ public final class NBTConfig implements INBTConfiguration {
         this.tagName = p_tagName;
         this.fullPath = NBTConfig.buildPath(p_parent.fullPath, p_tagName);
 
-        this.init();
+        this.configFile = this.parent.configFile;
     }
 
     private void init() {
-        if (initialized) {
-            return;
-        }
         if (this.parent != null) {
             this.parent.init();
-            initialized = true;
             return;
         }
         this.configFile.init();
         this.reload();
-        initialized = true;
     }
 
     private static String buildPath(String path, String child) {

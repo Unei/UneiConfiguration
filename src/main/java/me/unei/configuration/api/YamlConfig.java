@@ -21,7 +21,6 @@ public class YamlConfig implements IYamlConfiguration {
     private Map<String, Object> data = new HashMap<String, Object>();
 
     private SavedFile configFile = null;
-    private boolean initialized = false;
 
     private String fullPath = "";
     private String nodeName = "";
@@ -45,22 +44,18 @@ public class YamlConfig implements IYamlConfiguration {
         this.nodeName = p_nodeName;
         this.fullPath = YamlConfig.buildPath(p_parent.fullPath, p_nodeName);
 
-        this.init();
+        this.configFile = this.parent.configFile;
+        this.synchronize();
     }
 
     private void init() {
-        if (initialized) {
-            return;
-        }
         if (this.parent != null) {
             this.parent.init();
             this.synchronize();
-            initialized = true;
             return;
         }
         this.configFile.init();
         this.reload();
-        initialized = true;
     }
 
     private static String buildPath(String path, String child) {
