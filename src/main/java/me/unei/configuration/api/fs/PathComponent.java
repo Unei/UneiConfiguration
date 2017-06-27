@@ -28,6 +28,25 @@ public final class PathComponent {
         // TODO: Escape depending on PathNavigator's constants
         return component.replace("\\", "\\\\").replace(".", "\\.");
     }
+    
+    @Override
+	public boolean equals(Object other)
+    {
+    	if (!(other instanceof PathComponent))
+    	{
+    		return false;
+    	}
+    	PathComponent pc = (PathComponent)other;
+    	if (pc.getType().equals(this.getType()))
+    	{
+    		if (this.getType().equals(PathComponentType.CHILD))
+    		{
+    			return this.getValue().contentEquals(pc.getValue());
+    		}
+    		return true;
+    	}
+    	return false;
+    }
 
     public static class PathComponentsList extends ArrayList<PathComponent> {
 
@@ -59,9 +78,21 @@ public final class PathComponent {
         	return this.remove(this.size() - 1);
         }
         
+        /**
+         * 
+         * @deprecated use {@link PathNavigator#cleanPath(PathComponentsList)} instead
+         */
+        @Deprecated
         public void cleanPath()
         {
         	ListIterator<PathComponent> it = this.listIterator();
+        	int lr = this.lastIndexOf(new PathComponent(PathComponentType.ROOT, ""));
+        	for (int i = 0; i < lr && it.hasNext(); i++)
+        	{
+        		it.next();
+        		it.remove();
+        	}
+        	it = this.listIterator();
         	while (it.hasNext())
         	{
         		PathComponent curr = it.next();
