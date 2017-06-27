@@ -1,16 +1,26 @@
 package me.unei.configuration.api;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.Yaml;
+
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.plugin.UneiConfiguration;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.*;
-import java.util.*;
-import java.util.Map.Entry;
 
 public class YamlConfig implements IYamlConfiguration {
 
@@ -246,9 +256,9 @@ public class YamlConfig implements IYamlConfiguration {
                 return true;
             }
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
         if (navigator.navigate(path)) {
-            YamlConfig node = (YamlConfig) navigator.getCurrentNode();
+            YamlConfig node = navigator.getCurrentNode();
             return node.contains("");
         }
         return false;
@@ -262,9 +272,9 @@ public class YamlConfig implements IYamlConfiguration {
                 return this.data;
             }
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
         if (navigator.navigate(path)) {
-            return ((YamlConfig) navigator.getCurrentNode()).get("");
+            return navigator.getCurrentNode().get("");
         }
         return null;
     }
@@ -353,9 +363,9 @@ public class YamlConfig implements IYamlConfiguration {
         if (path == null || path.isEmpty()) {
             return this;
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
         if (navigator.navigate(path)) {
-            return (YamlConfig) navigator.getCurrentNode();
+            return navigator.getCurrentNode();
         }
         return null;
     }
@@ -372,9 +382,9 @@ public class YamlConfig implements IYamlConfiguration {
             }
             return;
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
         if (navigator.navigate(path)) {
-            ((YamlConfig) navigator.getCurrentNode()).set("", value);
+            navigator.getCurrentNode().set("", value);
         }
     }
 

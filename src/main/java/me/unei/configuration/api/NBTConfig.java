@@ -3,6 +3,7 @@ package me.unei.configuration.api;
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCST;
 import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
@@ -50,6 +51,26 @@ public final class NBTConfig implements INBTConfiguration {
         this.configFile.init();
         this.reload();
     }
+    
+    private String getLastChildName(String path)
+    {
+    	PathComponentsList list = PathNavigator.parsePath(path);
+    	list.cleanPath();
+    	return (list.last().getValue());
+    }
+    
+    NBTConfig getElementParent(String path)
+    {
+    	PathNavigator<NBTConfig> pn = new PathNavigator<NBTConfig>(this);
+    	PathComponentsList parsedpath = PathNavigator.parsePath(path);
+    	parsedpath.cleanPath();
+    	parsedpath.removeLast();
+    	if (pn.followPath(parsedpath))
+    	{
+    		return pn.getCurrentNode();
+    	}
+    	return this;
+    }
 
     private static String buildPath(String path, String child) {
         if (path == null || path.isEmpty() || child == null) {
@@ -66,9 +87,9 @@ public final class NBTConfig implements INBTConfiguration {
         if (path == null || path.isEmpty()) {
             return root;
         }
-        PathNavigator navigator = new PathNavigator(root);
+        PathNavigator<NBTConfig> navigator = new PathNavigator<NBTConfig>(root);
         navigator.navigate(path);
-        return (NBTConfig) navigator.getCurrentNode();
+        return navigator.getCurrentNode();
     }
 
     public SavedFile getFile() {

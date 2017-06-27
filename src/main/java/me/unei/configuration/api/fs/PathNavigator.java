@@ -1,11 +1,11 @@
 package me.unei.configuration.api.fs;
 
+import java.util.regex.Pattern;
+
 import me.unei.configuration.api.fs.PathComponent.PathComponentType;
 import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 
-import java.util.regex.Pattern;
-
-public final class PathNavigator {
+public final class PathNavigator<T extends NavigableFile> {
 
     public static final char ESCAPE_CHAR = '\\';
     public static final char PATH_SEPARATOR = '.';
@@ -15,22 +15,35 @@ public final class PathNavigator {
     public static final Pattern PATH_SEPARATOR_REGEXP = Pattern.compile(Pattern.quote(String.valueOf(PathNavigator.PATH_SEPARATOR)));
 
     private PathComponentsList currentPath;
-    private NavigableFile currentNode;
+    private T currentNode;
 
-    public PathNavigator(NavigableFile rootFile) {
+    public PathNavigator(T rootFile) {
         this.currentNode = rootFile;
-        this.currentPath = parsePath(rootFile.getCurrentPath());
+        this.currentPath = PathNavigator.parsePath(rootFile.getCurrentPath());
+    }
+    
+    @SuppressWarnings({"unchecked"})
+    private T getChecked(NavigableFile file)
+    {
+    	try
+    	{
+    		return (T)file;
+    	}
+    	catch (ClassCastException e)
+    	{
+    		return null;
+    	}
     }
 
     public void goToRoot() {
         this.currentPath.clear();
-        this.currentNode = this.currentNode.getRoot();
+        this.currentNode = getChecked(this.currentNode.getRoot());
     }
 
     public void goToParent() {
         if (!this.currentPath.isEmpty()) {
             this.currentPath.remove(this.currentPath.size() - 1);
-            this.currentNode = this.currentNode.getParent();
+            this.currentNode = getChecked(this.currentNode.getParent());
         }
     }
 
@@ -39,14 +52,14 @@ public final class PathNavigator {
             return;
         }
         this.currentPath.appendComponent(PathComponentType.CHILD, name);
-        this.currentNode = this.currentNode.getChild(name);
+        this.currentNode = getChecked(this.currentNode.getChild(name));
     }
 
     public String getCurrentPath() {
         return currentPath.toString();
     }
 
-    public NavigableFile getCurrentNode() {
+    public T getCurrentNode() {
         return this.currentNode;
     }
 

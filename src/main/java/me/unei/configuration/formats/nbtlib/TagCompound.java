@@ -194,7 +194,7 @@ public class TagCompound extends Tag {
         try {
             return !this.hasKeyOfType(key, Tag.TAG_Byte_Array)? new byte[0] : ((TagByteArray) this.tags.get(key)).getByteArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") diffenrent as expected (" + Tag.getTagName(Tag.TAG_Byte_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Byte_Array) + ")", exception);
         }
     }
 
@@ -202,7 +202,7 @@ public class TagCompound extends Tag {
         try {
             return !this.hasKeyOfType(key, Tag.TAG_Int_Array)? new int[0] : ((TagIntArray) this.tags.get(key)).getIntArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") diffenrent as expected (" + Tag.getTagName(Tag.TAG_Int_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Int_Array) + ")", exception);
         }
     }
 
@@ -210,7 +210,7 @@ public class TagCompound extends Tag {
         try {
             return !this.hasKeyOfType(key, Tag.TAG_Long_Array)? new long[0] : ((TagLongArray) this.tags.get(key)).getLongArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") diffenrent as expected (" + Tag.getTagName(Tag.TAG_Long_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Long_Array) + ")", exception);
         }
     }
 
@@ -218,7 +218,7 @@ public class TagCompound extends Tag {
         try {
             return !this.hasKeyOfType(key, Tag.TAG_Compound)? new TagCompound() : (TagCompound) this.tags.get(key);
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") diffenrent as expected (" + Tag.getTagName(Tag.TAG_Compound) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Compound) + ")", exception);
         }
     }
 
@@ -255,7 +255,7 @@ public class TagCompound extends Tag {
             if (builder.length() != 1) {
                 builder.append(',');
             }
-            builder.append(checkName(entry.getKey())).append(':').append(entry.getValue());
+            builder.append(TagCompound.checkName(entry.getKey())).append(':').append(entry.getValue());
         }
 
         return builder.append('}').toString();
