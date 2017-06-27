@@ -1,18 +1,32 @@
 package me.unei.configuration.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
+
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.plugin.UneiConfiguration;
-import sun.misc.HexDumpEncoder;
-
-import javax.xml.bind.DatatypeConverter;
-import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.*;
-import java.util.*;
-import java.util.Map.Entry;
 
 public class SQLiteConfig implements ISQLiteConfiguration {
 
@@ -35,10 +49,6 @@ public class SQLiteConfig implements ISQLiteConfiguration {
         this.tableName = tableName;
 
         this.init();
-    }
-
-    private SQLiteConfig(File folder, String fileName, String tableName, String p_tagName) {
-        this(new SQLiteConfig(folder, fileName, tableName), p_tagName);
     }
 
     private SQLiteConfig(SQLiteConfig p_parent, String p_nodeName) {
@@ -280,7 +290,7 @@ public class SQLiteConfig implements ISQLiteConfiguration {
                 objout.close();
                 bitout.close();
 
-                statement.setString(1, getHash(entry.getKey()));
+                statement.setString(1, SQLiteConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
                 statement.setBytes(3, bytes);
                 statement.addBatch();
@@ -450,9 +460,9 @@ public class SQLiteConfig implements ISQLiteConfiguration {
                 return true;
             }
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
         if (navigator.navigate(path)) {
-            return ((SQLiteConfig) navigator.getCurrentNode()).contains("");
+            return navigator.getCurrentNode().contains("");
         }
         return false;
     }
@@ -465,9 +475,9 @@ public class SQLiteConfig implements ISQLiteConfiguration {
                 return this.data;
             }
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
         if (navigator.navigate(path)) {
-            return ((SQLiteConfig) navigator.getCurrentNode()).get("");
+            return navigator.getCurrentNode().get("");
         }
         return null;
     }
@@ -556,9 +566,9 @@ public class SQLiteConfig implements ISQLiteConfiguration {
         if (path == null || path.isEmpty()) {
             return this;
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
         if (navigator.navigate(path)) {
-            return (SQLiteConfig) navigator.getCurrentNode();
+            return navigator.getCurrentNode();
         }
         return null;
     }
@@ -575,9 +585,9 @@ public class SQLiteConfig implements ISQLiteConfiguration {
             }
             return;
         }
-        PathNavigator navigator = new PathNavigator(this);
+        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
         if (navigator.navigate(path)) {
-            ((SQLiteConfig) navigator.getCurrentNode()).set("", value);
+            navigator.getCurrentNode().set("", value);
         }
     }
 
