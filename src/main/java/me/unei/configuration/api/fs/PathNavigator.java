@@ -7,19 +7,31 @@ import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 
 public final class PathNavigator<T extends NavigableFile> {
 
-    public static final char ESCAPE_CHAR = '\\';
-    public static final char PATH_SEPARATOR = '.';
-    public static final char ROOT_CHAR = '.';
-    public static final String PARENT_CHAR = "..";
+	@Deprecated
+    public static final char	ESCAPE_CHAR		= '\\';
+	@Deprecated
+    public static final char	PATH_SEPARATOR	= '.';
+	@Deprecated
+    public static final char	ROOT_CHAR		= '.';
+	@Deprecated
+    public static final String	PARENT_CHAR		= "..";
 
-    public static final Pattern PATH_SEPARATOR_REGEXP = Pattern.compile(Pattern.quote(String.valueOf(PathNavigator.PATH_SEPARATOR)));
+	@Deprecated
+    public static final Pattern	PATH_SEPARATOR_REGEXP = Pattern.compile(Pattern.quote(String.valueOf(PathNavigator.PATH_SEPARATOR)));
 
     private PathComponentsList currentPath;
     private T currentNode;
 
     public PathNavigator(T rootFile) {
         this.currentNode = rootFile;
-        this.currentPath = PathNavigator.parsePath(rootFile.getCurrentPath());
+        this.currentPath = rootFile.getRealListPath();
+        //this.currentPath = PathNavigator.parsePath(rootFile.getCurrentPath(), PathSymbolsType.BUKKIT);
+    }
+    
+    @Deprecated
+    public PathNavigator(T rootFile, PathSymbolsType type) {
+        this.currentNode = rootFile;
+        this.currentPath = PathNavigator.parsePath(rootFile.getCurrentPath(), type);
     }
     
     @SuppressWarnings({"unchecked"})
@@ -51,7 +63,7 @@ public final class PathNavigator<T extends NavigableFile> {
         if (name == null || name.isEmpty()) {
             return;
         }
-        this.currentPath.appendComponent(PathComponentType.CHILD, name);
+        this.currentPath.appendChild(name);
         this.currentNode = getChecked(this.currentNode.getChild(name));
     }
 
@@ -63,18 +75,18 @@ public final class PathNavigator<T extends NavigableFile> {
         return this.currentNode;
     }
 
-    public static PathComponentsList parsePath(String path) {
+    public static PathComponentsList parsePath(String path, PathSymbolsType type) {
         if (path == null || path.isEmpty()) {
-            return new PathComponentsList();
+            return new PathComponentsList(type);
         }
 
-        PathComponentsList components = new PathComponentsList();
+        PathComponentsList components = new PathComponentsList(type);
         StringBuilder lastComponent = new StringBuilder();
 
         int i = 0;
 
-        if (PathNavigator.isAbsolute(path)) {
-            components.appendComponent(PathComponentType.ROOT, String.valueOf(PathNavigator.ROOT_CHAR));
+        if (PathNavigator.isAbsolute(path, type)) {
+            components.appendRoot();
             i = 1;
         }
 
@@ -88,16 +100,16 @@ public final class PathNavigator<T extends NavigableFile> {
                 continue;
             }
 
-            if (c == PathNavigator.ESCAPE_CHAR) {
+            if (c == type.escape) {
                 escaped = true;
-            } else if (PathNavigator.hasParentChar(path, i)) {
+            } else if (PathNavigator.hasParentChar(path, i, type)) {
                 if (lastComponent.length() > 0) {
                     components.appendComponent(PathComponentType.CHILD, lastComponent.toString());
                     lastComponent.setLength(0);
                 }
-                components.appendComponent(PathComponentType.PARENT, PathNavigator.PARENT_CHAR);
+                components.appendParent();
                 i++;
-            } else if (PathNavigator.hasSeperatorChar(path, i)) {
+            } else if (PathNavigator.hasSeperatorChar(path, i, type)) {
                 if (lastComponent.length() > 0) {
                     components.appendComponent(PathComponentType.CHILD, lastComponent.toString());
                     lastComponent.setLength(0);
@@ -115,7 +127,7 @@ public final class PathNavigator<T extends NavigableFile> {
     }
 
     public static PathComponentsList cleanPath(PathComponentsList path) {
-        PathComponentsList cleanPath = new PathComponentsList();
+        PathComponentsList cleanPath = new PathComponentsList(path.getSymbolsType());
         for (PathComponent component : path) {
             switch(component.getType()) {
                 case ROOT:
@@ -166,22 +178,22 @@ public final class PathNavigator<T extends NavigableFile> {
         return true;
     }
 
-    public boolean navigate(String path) {
-        return followPath(PathNavigator.parsePath(path));
+    public boolean navigate(String path, PathSymbolsType type) {
+        return followPath(PathNavigator.parsePath(path, type));
     }
 
-    private static boolean isAbsolute(String path) {
+    private static boolean isAbsolute(String path, PathSymbolsType type) {
         if (path == null || path.isEmpty()) {
             return false;
         }
-        if (path.charAt(0) != PathNavigator.ROOT_CHAR) {
+        if (path.charAt(0) != type.root) {
             return false;
         }
         if (path.length() > 1) {
-            if (PathNavigator.hasParentChar(path, 0)) {
+            if (PathNavigator.hasParentChar(path, 0, type)) {
                 return false;
             }
-            if (path.charAt(1) != PathNavigator.ROOT_CHAR) {
+            if (path.charAt(1) != type.root) {
                 return true;
             }
             return false;
@@ -189,14 +201,51 @@ public final class PathNavigator<T extends NavigableFile> {
         return true;
     }
 
-    private static boolean hasParentChar(String path, int index) {
-        return path.startsWith(PathNavigator.PARENT_CHAR, index);
+    private static boolean hasParentChar(String path, int index, PathSymbolsType type) {
+        return path.startsWith(type.parent, index);
     }
 
-    private static boolean hasSeperatorChar(String path, int index) {
+    private static boolean hasSeperatorChar(String path, int index, PathSymbolsType type) {
         if (index < 0 || index >= path.length()) {
             return false;
         }
-        return path.charAt(index) == PathNavigator.PATH_SEPARATOR;
+        return path.charAt(index) == type.separator;
+    }
+    
+    public static enum PathSymbolsType
+    {
+    	BUKKIT('\\', '.', '.', ".."),
+    	UNIX('\\', '/', '/', "..");
+    	
+    	public final char	escape;
+    	public final char	separator;
+    	public final char	root;
+    	public final String	parent;
+    	
+    	private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent)
+    	{
+    		this.escape = p_escape;
+    		this.separator = p_separator;
+    		this.root = p_root;
+    		this.parent = p_parent;
+    	}
+    	
+    	@Deprecated
+    	public static PathSymbolsType tryDetectType(String apath)
+    	{
+    		int li = apath.lastIndexOf(UNIX.parent);
+    		if (li >= 0)
+    		{
+    			if (li > 0 && apath.charAt(li - 1) == UNIX.separator)
+    			{
+    				return PathSymbolsType.UNIX;
+    			}
+    			else if ((li + 2) < apath.length() && apath.charAt(li + 2) == UNIX.separator)
+    			{
+    				return PathSymbolsType.UNIX;
+    			}
+    		}
+    		return PathSymbolsType.BUKKIT;
+    	}
     }
 }

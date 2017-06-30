@@ -14,9 +14,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -26,44 +24,36 @@ import javax.xml.bind.DatatypeConverter;
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class SQLiteConfig implements ISQLiteConfiguration {
+public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements ISQLiteConfiguration {
 
     public static final String SQLITE_FILE_EXT = ".db";
     public static final String SQLITE_DRIVER = "org.sqlite.JDBC";
 
     private Map<String, Object> data = new HashMap<String, Object>();
 
-    private SavedFile configFile = null;
-
     private Connection connection = null;
     private String tableName = "_";
 
-    private String fullPath = "";
-    private String nodeName = "";
-    private SQLiteConfig parent = null;
-
     public SQLiteConfig(File folder, String fileName, String tableName) {
-        this.configFile = new SavedFile(folder, fileName, SQLiteConfig.SQLITE_FILE_EXT);
+        super(new SavedFile(folder, fileName, SQLiteConfig.SQLITE_FILE_EXT), PathSymbolsType.BUKKIT);
         this.tableName = tableName;
 
-        this.init();
+        this.subinit();
     }
 
     private SQLiteConfig(SQLiteConfig p_parent, String p_nodeName) {
-        this.parent = p_parent;
-        this.nodeName = p_nodeName;
-        this.fullPath = SQLiteConfig.buildPath(p_parent.fullPath, p_nodeName);
+    	super(p_parent, p_nodeName);
 
-        this.configFile = this.parent.configFile;
         this.tableName = this.parent.tableName;
         // this.connection = this.parent.connection;
 
-        this.init();
+        this.subinit();
     }
 
-    private void init() {
+	private void subinit() {
         if (this.parent != null) {
             this.parent.init();
             this.synchronize();
@@ -76,15 +66,8 @@ public class SQLiteConfig implements ISQLiteConfiguration {
             e.printStackTrace();
             return;
         }
-        this.configFile.init();
+        this.file.init();
         this.reload();
-    }
-
-    private static String buildPath(String path, String child) {
-        if (path == null || path.isEmpty() || child == null) {
-            return PathComponent.escapeComponent(child);
-        }
-        return path + PathNavigator.PATH_SEPARATOR + PathComponent.escapeComponent(child);
     }
 
     public static SQLiteConfig getForPath(File folder, String fileName, String tableName, String path) {
@@ -116,52 +99,9 @@ public class SQLiteConfig implements ISQLiteConfiguration {
         return hex;
     }
 
-    public SavedFile getFile() {
-        return this.configFile;
-    }
-
-    public String getFileName() {
-        if (this.parent != null) {
-            return this.parent.getFileName();
-        }
-        return this.configFile.getFileName();
-    }
-
-    public String getName() {
-        return this.nodeName;
-    }
-
-    public String getCurrentPath() {
-        return this.fullPath;
-    }
-
-    public boolean canAccess() {
-        if (this.parent != null) {
-            return this.parent.canAccess();
-        }
-        return this.configFile.canAccess();
-    }
-
-    public void lock() {
-        if (this.parent != null) {
-            this.parent.lock();
-        } else {
-            this.configFile.lock();
-        }
-    }
-
-    public SQLiteConfig getRoot() {
-        if (this.parent != null) {
-            return this.parent.getRoot();
-        }
-        return this;
-    }
-
-    public SQLiteConfig getParent() {
-        if (this.parent != null) {
-            return this.parent;
-        }
-        return this;
+    @Override
+	public SQLiteConfig getRoot() {
+        return (SQLiteConfig) super.getRoot();
     }
 
     public SQLiteConfig getChild(String name) {
@@ -378,7 +318,7 @@ public class SQLiteConfig implements ISQLiteConfiguration {
             }
         } catch (SQLException e) {}
 
-        this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.configFile.getFile().getPath());
+        this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.file.getFile().getPath());
 
         PreparedStatement statement = null;
         try {
@@ -408,12 +348,13 @@ public class SQLiteConfig implements ISQLiteConfiguration {
         this.connection = null;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     protected void synchronize() {
         SQLiteConfig currentNode = this.getRoot();
         Map<String, Object> currentData = currentNode.data;
 
-        PathComponent.PathComponentsList path = PathNavigator.parsePath(this.fullPath);
+        PathComponent.PathComponentsList path = fullPath.clone();
         path = PathNavigator.cleanPath(path);
         for (PathComponent component : path) {
             switch(component.getType()) {
@@ -441,7 +382,8 @@ public class SQLiteConfig implements ISQLiteConfiguration {
         this.data = currentData;
     }
 
-    protected void propagate() {
+    @Override
+	protected void propagate() {
         if (this.parent != null) {
             this.parent.data.put(this.nodeName, this.data);
             this.parent.propagate();
@@ -461,7 +403,7 @@ public class SQLiteConfig implements ISQLiteConfiguration {
             }
         }
         PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
-        if (navigator.navigate(path)) {
+        if (navigator.navigate(path, symType)) {
             return navigator.getCurrentNode().contains("");
         }
         return false;
@@ -476,98 +418,19 @@ public class SQLiteConfig implements ISQLiteConfiguration {
             }
         }
         PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
-        if (navigator.navigate(path)) {
+        if (navigator.navigate(path, symType)) {
             return navigator.getCurrentNode().get("");
         }
         return null;
     }
 
-    public String getString(String path) {
-        try {
-            return (String) get(path);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public double getDouble(String path) {
-        try {
-            return ((Number) get(path)).doubleValue();
-        } catch (Exception e) {
-            return 0.0D;
-        }
-    }
-
-    public boolean getBoolean(String path) {
-        try {
-            return ((Boolean) get(path)).booleanValue();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public byte getByte(String path) {
-        try {
-            return ((Number) get(path)).byteValue();
-        } catch (Exception e) {
-            return (byte) 0;
-        }
-    }
-
-    public float getFloat(String path) {
-        try {
-            return ((Number) get(path)).floatValue();
-        } catch (Exception e) {
-            return 0.0F;
-        }
-    }
-
-    public int getInteger(String path) {
-        try {
-            return ((Number) get(path)).intValue();
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    public long getLong(String path) {
-        try {
-            return ((Number) get(path)).longValue();
-        } catch (Exception e) {
-            return 0L;
-        }
-    }
-
-    public List<Byte> getByteList(String path) {
-        try {
-            List<Byte> list = new ArrayList<Byte>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).byteValue());
-            }
-            return list;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public List<Integer> getIntegerList(String path) {
-        try {
-            List<Integer> list = new ArrayList<Integer>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).intValue());
-            }
-            return list;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public SQLiteConfig getSubSection(String path) {
+    @Override
+	public SQLiteConfig getSubSection(PathComponent.PathComponentsList path) {
         if (path == null || path.isEmpty()) {
             return this;
         }
         PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
-        if (navigator.navigate(path)) {
+        if (navigator.followPath(path)) {
             return navigator.getCurrentNode();
         }
         return null;
@@ -586,45 +449,9 @@ public class SQLiteConfig implements ISQLiteConfiguration {
             return;
         }
         PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
-        if (navigator.navigate(path)) {
+        if (navigator.navigate(path, symType)) {
             navigator.getCurrentNode().set("", value);
         }
-    }
-
-    public void setString(String path, String value) {
-        set(path, value);
-    }
-
-    public void setDouble(String path, double value) {
-        set(path, value);
-    }
-
-    public void setBoolean(String path, boolean value) {
-        set(path, value);
-    }
-
-    public void setByte(String path, byte value) {
-        set(path, value);
-    }
-
-    public void setFloat(String path, float value) {
-        set(path, value);
-    }
-
-    public void setInteger(String path, int value) {
-        set(path, value);
-    }
-
-    public void setLong(String path, long value) {
-        set(path, value);
-    }
-
-    public void setByteList(String path, List<Byte> value) {
-        set(path, value);
-    }
-
-    public void setIntegerList(String path, List<Integer> value) {
-        set(path, value);
     }
 
     public void setSubSection(String path, IConfiguration value) {

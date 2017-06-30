@@ -3,6 +3,8 @@ package me.unei.configuration.api.fs;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+
 public final class PathComponent {
 
     private final PathComponentType type;
@@ -51,13 +53,37 @@ public final class PathComponent {
     public static class PathComponentsList extends ArrayList<PathComponent> {
 
         private static final long serialVersionUID = 7055238860386957873L;
+        
+        private PathSymbolsType symType;
 
-        public PathComponentsList() {
+        public PathComponentsList(PathSymbolsType type) {
             super();
+            this.symType = type;
+        }
+
+        public PathComponentsList(PathComponentsList orig) {
+            super(orig);
+            this.symType = orig.symType;
+        }
+        
+        public PathSymbolsType getSymbolsType() {
+        	return this.symType;
         }
 
         public boolean appendComponent(PathComponentType type, String value) {
             return this.add(new PathComponent(type, value));
+        }
+        
+        public boolean appendChild(String name) {
+        	return this.appendComponent(PathComponentType.CHILD, name);
+        }
+        
+        public boolean appendRoot() {
+        	return this.appendComponent(PathComponentType.ROOT, String.valueOf(symType.root));
+        }
+        
+        public boolean appendParent() {
+        	return this.appendComponent(PathComponentType.PARENT, symType.parent);
         }
         
         public PathComponent last()
@@ -67,6 +93,16 @@ public final class PathComponent {
         		return null;
         	}
         	return this.get(this.size() - 1);
+        }
+        
+        public String lastChild()
+        {
+        	PathComponent last = this.last();
+        	if (last != null)
+        	{
+        		return last.getValue();
+        	}
+        	return null;
         }
         
         public PathComponent removeLast()
@@ -119,6 +155,13 @@ public final class PathComponent {
                 pathBuilder.append(PathComponent.escapeComponent(component.getValue()));
             }
             return pathBuilder.toString();
+        }
+        
+        @Override
+		public PathComponentsList clone() {
+        	PathComponentsList copy = (PathComponentsList) super.clone();
+        	copy.symType = this.symType;
+        	return copy;
         }
     }
 

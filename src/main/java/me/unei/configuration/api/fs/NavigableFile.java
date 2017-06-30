@@ -8,6 +8,14 @@ public interface NavigableFile {
      *
      * @return the current path of this navigable file
      */
+    public PathComponent.PathComponentsList getRealListPath();
+    
+    /**
+     * Returns the path to get from this navigable file's
+     * root to the current node.
+     *
+     * @return the current path of this navigable file
+     */
     public String getCurrentPath();
 
     /**
