@@ -281,6 +281,10 @@ public final class NBTConfig implements INBTConfiguration {
     }
 
     public void setString(String key, String value) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         NBTProxyCompound tag = this.getTagCp();
         tag.setString(key, value);
         this.setTagCp(tag);
@@ -356,6 +360,7 @@ public final class NBTConfig implements INBTConfiguration {
 
     public void set(String key, Object value) {
         if (value == null) {
+            remove(key);
             return;
         }
         String serialized = null;
@@ -414,6 +419,10 @@ public final class NBTConfig implements INBTConfiguration {
     }
 
     public void setByteList(String key, List<Byte> value) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         NBTProxyCompound tag = this.getTagCp();
         tag.setByteArray(key, ArrayUtils.toPrimitive(value.toArray(new Byte[value.size()]), (byte) 0));
         this.setTagCp(tag);
@@ -421,6 +430,10 @@ public final class NBTConfig implements INBTConfiguration {
     }
 
     public void setIntegerList(String key, List<Integer> value) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         NBTProxyCompound tag = this.getTagCp();
         tag.setIntArray(key, ArrayUtils.toPrimitive(value.toArray(new Integer[value.size()]), 0));
         this.setTagCp(tag);
