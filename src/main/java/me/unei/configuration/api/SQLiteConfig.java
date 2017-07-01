@@ -27,7 +27,7 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements ISQLiteConfiguration {
+public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLiteConfiguration {
 
     public static final String SQLITE_FILE_EXT = ".db";
     public static final String SQLITE_DRIVER = "org.sqlite.JDBC";

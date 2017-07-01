@@ -6,12 +6,12 @@ import java.util.List;
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 
-public abstract class GettersInOneConfig<T extends GettersInOneConfig<T>> extends Configuration<T> {
-	protected GettersInOneConfig(SavedFile file, PathSymbolsType symType) {
+public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Configuration<T> {
+	protected UntypedStorage(SavedFile file, PathSymbolsType symType) {
 		super(file, symType);
 	}
 
-	protected GettersInOneConfig(T parent, String childName) {
+	protected UntypedStorage(T parent, String childName) {
 		super(parent, childName);
 	}
 

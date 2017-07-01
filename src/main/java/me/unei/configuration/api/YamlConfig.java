@@ -25,7 +25,7 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlConfiguration {
+public class YamlConfig extends UntypedStorage<YamlConfig> implements IYamlConfiguration {
 
     public static final String YAML_FILE_EXT = ".yml";
     public static final String YAML_TMP_EXT = ".tmp";
