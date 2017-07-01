@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
         this.tableName = this.parent.tableName;
         // this.connection = this.parent.connection;
 
-        this.subinit();
+        this.synchronize();
     }
 
 	private void subinit() {
@@ -112,6 +113,51 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
             return this;
         }
         return new SQLiteConfig(this, name);
+    }
+    
+    private Map<String, Object> getMapParentAt(PathComponent.PathComponentsList path)
+    {
+    	SQLiteConfig dir;
+    	PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
+    	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+    	pathList.removeLast();
+    	if (!pn.followPath(pathList))
+    	{
+    		return SQLiteConfig.clone(this.data);
+    	}
+    	dir = pn.getCurrentNode();
+    	return SQLiteConfig.clone(dir.data);
+    }
+    
+    private void setMapParentAt(PathComponent.PathComponentsList path, Map<String, Object> map)
+    {
+    	SQLiteConfig dir;
+    	PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
+    	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+    	pathList.removeLast();
+    	if (!pn.followPath(pathList))
+    	{
+    		this.data = map;
+    		this.propagate();
+    	}
+    	dir = pn.getCurrentNode();
+    	if (dir != null)
+    	{
+    		dir.data = map;
+    		dir.propagate();
+    	}
+    }
+    
+    private static <K, V> Map<K, V> clone(Map<K, V> orig)
+    {
+    	Map<K, V> copy = new HashMap<K, V>(orig.size());
+    	Iterator<Entry<K, V>> it = orig.entrySet().iterator();
+    	while (it.hasNext())
+    	{
+    		Entry<K, V> entry = it.next();
+    		copy.put(entry.getKey(), entry.getValue());
+    	}
+    	return copy;
     }
 
     public boolean execute(String query, Map<Integer, Object> parameters) throws SQLException {
@@ -395,6 +441,9 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     }
 
     public boolean contains(String path) {
+    	/*PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getMapParentAt(list);
+    	return node.containsKey(list.lastChild());*/
         if (path == null || path.isEmpty()) {
             if (this.parent != null) {
                 return this.parent.data.containsKey(this.nodeName);
@@ -410,6 +459,9 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     }
 
     public Object get(String path) {
+    	/*PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getMapParentAt(list);
+    	return node.get(list.lastChild());*/
         if (path == null || path.isEmpty()) {
             if (this.parent != null) {
                 return this.parent.data.get(this.nodeName);
@@ -437,6 +489,14 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     }
 
     public void set(String path, Object value) {
+    	/*PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getMapParentAt(list);
+    	if (value == null) {
+    		node.remove(list.lastChild());
+    	} else {
+    		node.put(list.lastChild(), value);
+    	}
+    	this.setMapParentAt(list, node);*/
         if (path == null || path.isEmpty()) {
             if (this.parent != null) {
                 if (value == null) {

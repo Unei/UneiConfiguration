@@ -3,6 +3,8 @@ package me.unei.configuration.api.fs;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import org.apache.commons.lang.NullArgumentException;
+
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 
 public final class PathComponent {
@@ -64,6 +66,14 @@ public final class PathComponent {
         public PathComponentsList(PathComponentsList orig) {
             super(orig);
             this.symType = orig.symType;
+        }
+        
+        @Override
+		public boolean add(PathComponent element) {
+        	if (element == null) {
+        		throw new NullArgumentException("element");
+        	}
+        	return super.add(element);
         }
         
         public PathSymbolsType getSymbolsType() {

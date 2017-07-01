@@ -1,5 +1,6 @@
 package me.unei.configuration.api;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -118,8 +119,13 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
         this.data.clear();
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
-            InputStream in = new FileInputStream(this.file.getFile());
-            Map<?, ?> tmpData = YamlConfig.YAML.loadAs(in, Map.class);
+            StringBuilder sb = new StringBuilder();
+            InputStream in = new BufferedInputStream(new FileInputStream(this.file.getFile()));
+            int tmp = -1;
+            while ((tmp = in.read()) > 0) {
+            	sb.append((char)tmp);
+            }
+            Map<?, ?> tmpData = YamlConfig.YAML.loadAs(sb.toString(), Map.class);
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;
@@ -135,7 +141,8 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     protected void synchronize() {
         YamlConfig currentNode = this.getRoot();
         Map<String, Object> currentData = currentNode.data;
