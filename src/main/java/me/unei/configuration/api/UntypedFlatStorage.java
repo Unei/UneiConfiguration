@@ -1,19 +1,14 @@
 package me.unei.configuration.api;
 
 import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Configuration<T> {
+public abstract class UntypedFlatStorage<T extends UntypedFlatStorage<T>> extends FlatConfiguration<T> {
 
-    protected UntypedStorage(SavedFile file, PathSymbolsType symType) {
-        super(file, symType);
-    }
-
-    protected UntypedStorage(T parent, String childName) {
-        super(parent, childName);
+    protected UntypedFlatStorage(SavedFile file) {
+        super(file);
     }
 
     public String getString(String path) {

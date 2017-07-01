@@ -1,59 +1,44 @@
 package me.unei.configuration.api;
 
-import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.NavigableFile;
 
 import java.util.List;
-import java.util.Set;
 
-public interface IConfiguration extends NavigableFile {
-
-    public SavedFile getFile();
-    public String getFileName();
-    public String getName();
-    public String getCurrentPath();
-
-    public boolean canAccess();
-    public void lock();
+public interface IConfiguration extends IFlatConfiguration, NavigableFile {
 
     public IConfiguration getRoot();
     public IConfiguration getParent();
     public IConfiguration getChild(String name);
 
-    public void save();
-    public void reload();
+    public boolean contains(String path);
 
-    public Set<String> getKeys();
+    public Object get(String path);
 
-    public boolean contains(String key);
-
-    public Object get(String key);
-
-    public String getString(String key);
-    public double getDouble(String key);
-    public boolean getBoolean(String key);
-    public byte getByte(String key);
-    public float getFloat(String key);
-    public int getInteger(String key);
-    public long getLong(String key);
-    public List<Byte> getByteList(String key);
-    public List<Integer> getIntegerList(String key);
+    public String getString(String path);
+    public double getDouble(String path);
+    public boolean getBoolean(String path);
+    public byte getByte(String path);
+    public float getFloat(String path);
+    public int getInteger(String path);
+    public long getLong(String path);
+    public List<Byte> getByteList(String path);
+    public List<Integer> getIntegerList(String path);
 
     public IConfiguration getSubSection(String path);
 
-    public void set(String key, Object value);
+    public void set(String path, Object value);
 
-    public void setString(String key, String value);
-    public void setDouble(String key, double value);
-    public void setBoolean(String key, boolean value);
-    public void setByte(String key, byte value);
-    public void setFloat(String key, float value);
-    public void setInteger(String key, int value);
-    public void setLong(String key, long value);
-    public void setByteList(String key, List<Byte> value);
-    public void setIntegerList(String key, List<Integer> value);
+    public void setString(String path, String value);
+    public void setDouble(String path, double value);
+    public void setBoolean(String path, boolean value);
+    public void setByte(String path, byte value);
+    public void setFloat(String path, float value);
+    public void setInteger(String path, int value);
+    public void setLong(String path, long value);
+    public void setByteList(String path, List<Byte> value);
+    public void setIntegerList(String path, List<Integer> value);
 
     public void setSubSection(String path, IConfiguration value);
 
-    public void remove(String key);
+    public void remove(String path);
 }

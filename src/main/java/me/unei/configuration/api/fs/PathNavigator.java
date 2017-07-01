@@ -13,20 +13,20 @@ public final class PathNavigator<T extends NavigableFile> {
         this.currentPath = rootFile.getRealListPath();
         //this.currentPath = PathNavigator.parsePath(rootFile.getCurrentPath(), PathSymbolsType.BUKKIT);
     }
-    
+
     @Deprecated
     public PathNavigator(T rootFile, PathSymbolsType type) {
         this.currentNode = rootFile;
         this.currentPath = PathNavigator.parsePath(rootFile.getCurrentPath(), type);
     }
-    
-    @SuppressWarnings({"unchecked"})
+
+    @SuppressWarnings("unchecked")
     private T getChecked(NavigableFile file) {
-    	try {
-    		return (T) file;
-    	} catch (ClassCastException e) {
-    		return null;
-    	}
+        try {
+            return (T) file;
+        } catch (ClassCastException e) {
+            return null;
+        }
     }
 
     public void goToRoot() {
@@ -193,41 +193,33 @@ public final class PathNavigator<T extends NavigableFile> {
         }
         return path.charAt(index) == type.separator;
     }
-    
-    public static enum PathSymbolsType
-    {
-    	BUKKIT('\\', '.', '.', ".."),
-    	UNIX('\\', '/', '/', "..");
-    	
-    	public final char	escape;
-    	public final char	separator;
-    	public final char	root;
-    	public final String	parent;
-    	
-    	private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent)
-    	{
-    		this.escape = p_escape;
-    		this.separator = p_separator;
-    		this.root = p_root;
-    		this.parent = p_parent;
-    	}
-    	
-    	@Deprecated
-    	public static PathSymbolsType tryDetectType(String apath)
-    	{
-    		int li = apath.lastIndexOf(UNIX.parent);
-    		if (li >= 0)
-    		{
-    			if (li > 0 && apath.charAt(li - 1) == UNIX.separator)
-    			{
-    				return PathSymbolsType.UNIX;
-    			}
-    			else if ((li + 2) < apath.length() && apath.charAt(li + 2) == UNIX.separator)
-    			{
-    				return PathSymbolsType.UNIX;
-    			}
-    		}
-    		return PathSymbolsType.BUKKIT;
-    	}
+
+    public static enum PathSymbolsType {
+        BUKKIT('\\', '.', '.', ".."), UNIX('\\', '/', '/', "..");
+
+        public final char escape;
+        public final char separator;
+        public final char root;
+        public final String parent;
+
+        private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent) {
+            this.escape = p_escape;
+            this.separator = p_separator;
+            this.root = p_root;
+            this.parent = p_parent;
+        }
+
+        @Deprecated
+        public static PathSymbolsType tryDetectType(String apath) {
+            int li = apath.lastIndexOf(UNIX.parent);
+            if (li >= 0) {
+                if (li > 0 && apath.charAt(li - 1) == UNIX.separator) {
+                    return PathSymbolsType.UNIX;
+                } else if ((li + 2) < apath.length() && apath.charAt(li + 2) == UNIX.separator) {
+                    return PathSymbolsType.UNIX;
+                }
+            }
+            return PathSymbolsType.BUKKIT;
+        }
     }
 }
