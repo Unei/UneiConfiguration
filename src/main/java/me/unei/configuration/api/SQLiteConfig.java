@@ -252,6 +252,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
         }
         PreparedStatement statement = null;
         try {
+        	UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "...");
             String table = "\"" + this.tableName.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (`id`, `key`, `value`) VALUES (?, ?, ?)");
 
@@ -272,6 +273,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
 
             statement.executeBatch();
             statement.close();
+            UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
         } catch (SQLException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + ":");
             e.printStackTrace();
@@ -308,6 +310,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
             this.reconnect();
             this.data.clear();
 
+            UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "...");
             String table = "\"" + this.tableName.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             ResultSet result = this.query("SELECT * FROM " + table + "", null);
             while (result.next()) {
@@ -332,6 +335,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
             }
             result.close();
             result.getStatement().close();
+            UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
         } catch (SQLException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
             e.printStackTrace();
@@ -346,6 +350,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
             this.parent.reconnect();
             return;
         }
+        UneiConfiguration.getInstance().getLogger().fine("Trying to reconnect to SQLite file " + getFileName() + ".");
         try {
             if (this.connection != null) {
                 this.connection.close();
@@ -360,6 +365,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
             statement = this.connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + table + " (`id` VARCHAR(32) UNIQUE PRIMARY KEY, `key` LONGTEXT, `value` LONGBLOB)");
             statement.execute();
             statement.close();
+            UneiConfiguration.getInstance().getLogger().fine("Successfully reconnected.");
         } catch (SQLException e) {
             if (statement != null) {
                 statement.close();

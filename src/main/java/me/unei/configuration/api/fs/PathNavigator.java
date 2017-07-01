@@ -1,23 +1,9 @@
 package me.unei.configuration.api.fs;
 
-import java.util.regex.Pattern;
-
 import me.unei.configuration.api.fs.PathComponent.PathComponentType;
 import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 
 public final class PathNavigator<T extends NavigableFile> {
-
-	@Deprecated
-    public static final char	ESCAPE_CHAR		= '\\';
-	@Deprecated
-    public static final char	PATH_SEPARATOR	= '.';
-	@Deprecated
-    public static final char	ROOT_CHAR		= '.';
-	@Deprecated
-    public static final String	PARENT_CHAR		= "..";
-
-	@Deprecated
-    public static final Pattern	PATH_SEPARATOR_REGEXP = Pattern.compile(Pattern.quote(String.valueOf(PathNavigator.PATH_SEPARATOR)));
 
     private PathComponentsList currentPath;
     private T currentNode;
@@ -35,14 +21,10 @@ public final class PathNavigator<T extends NavigableFile> {
     }
     
     @SuppressWarnings({"unchecked"})
-    private T getChecked(NavigableFile file)
-    {
-    	try
-    	{
-    		return (T)file;
-    	}
-    	catch (ClassCastException e)
-    	{
+    private T getChecked(NavigableFile file) {
+    	try {
+    		return (T) file;
+    	} catch (ClassCastException e) {
     		return null;
     	}
     }

@@ -34,17 +34,13 @@ public final class PathComponent {
     }
     
     @Override
-	public boolean equals(Object other)
-    {
-    	if (!(other instanceof PathComponent))
-    	{
+	public boolean equals(Object other) {
+    	if (!(other instanceof PathComponent)) {
     		return false;
     	}
     	PathComponent pc = (PathComponent)other;
-    	if (pc.getType().equals(this.getType()))
-    	{
-    		if (this.getType().equals(PathComponentType.CHILD))
-    		{
+    	if (pc.getType().equals(this.getType())) {
+    		if (this.getType().equals(PathComponentType.CHILD)) {
     			return this.getValue().contentEquals(pc.getValue());
     		}
     		return true;
@@ -96,29 +92,23 @@ public final class PathComponent {
         	return this.appendComponent(PathComponentType.PARENT, symType.parent);
         }
         
-        public PathComponent last()
-        {
-        	if (this.isEmpty())
-        	{
+        public PathComponent last() {
+        	if (this.isEmpty()) {
         		return null;
         	}
         	return this.get(this.size() - 1);
         }
         
-        public String lastChild()
-        {
+        public String lastChild() {
         	PathComponent last = this.last();
-        	if (last != null)
-        	{
+        	if (last != null) {
         		return last.getValue();
         	}
         	return null;
         }
         
-        public PathComponent removeLast()
-        {
-        	if (this.isEmpty())
-        	{
+        public PathComponent removeLast() {
+        	if (this.isEmpty()) {
         		return null;
         	}
         	return this.remove(this.size() - 1);

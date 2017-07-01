@@ -125,6 +125,7 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
             return;
         }
         File tmp = new File(this.file.getFolder(), this.file.getFileName() + YamlConfig.YAML_TMP_EXT);
+        UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
         String tmpData = this.saveToString();
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
@@ -132,11 +133,14 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
             w.flush();
             w.close();
             if (this.file.getFile().exists()) {
+                UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
                 this.file.getFile().delete();
             }
             tmp.renameTo(this.file.getFile());
             tmp.delete();
+            UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
         } catch (IOException e) {
+            UneiConfiguration.getInstance().getLogger().warning("An error occured while saving YAML file " + getFileName() + ":");
             e.printStackTrace();
         }
     }
@@ -167,8 +171,8 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
             }
             r.close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
-            UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
         } catch (IOException e) {
+            UneiConfiguration.getInstance().getLogger().warning("An error occured while loading YAML file " + getFileName() + ":");
             e.printStackTrace();
             return;
         }
