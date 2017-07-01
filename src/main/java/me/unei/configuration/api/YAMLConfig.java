@@ -1,26 +1,57 @@
 package me.unei.configuration.api;
 
-import com.google.common.base.Charsets;
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.fs.PathComponent;
-import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
-import me.unei.configuration.api.fs.PathNavigator;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
-import me.unei.configuration.plugin.UneiConfiguration;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Charsets;
+
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.DumperOptions.LineBreak;
+import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
+import org.yaml.snakeyaml.Yaml;
+
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.plugin.UneiConfiguration;
+
 public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfiguration {
 
     public static final String YAML_FILE_EXT = ".yml";
     public static final String YAML_TMP_EXT = ".tmp";
-    private static final Yaml YAML = new Yaml();
+    private static final Yaml BEAUTIFIED_YAML;
+    private static final Yaml MINIFIED_YAML;
+    
+    static
+    {
+    	DumperOptions dumperOpts = new DumperOptions();
+    	dumperOpts.setDefaultFlowStyle(FlowStyle.BLOCK);
+    	dumperOpts.setDefaultScalarStyle(ScalarStyle.DOUBLE_QUOTED);
+    	dumperOpts.setLineBreak(LineBreak.UNIX);
+    	dumperOpts.setPrettyFlow(true);
+    	dumperOpts.setIndent(2);
+    	BEAUTIFIED_YAML = new Yaml(dumperOpts);
+    	
+    	DumperOptions miniDumperOpts = new DumperOptions();
+    	miniDumperOpts.setDefaultFlowStyle(FlowStyle.FLOW);
+    	miniDumperOpts.setDefaultScalarStyle(ScalarStyle.PLAIN);
+    	miniDumperOpts.setLineBreak(LineBreak.UNIX);
+    	miniDumperOpts.setPrettyFlow(false);
+    	miniDumperOpts.setIndent(1);
+    	MINIFIED_YAML = new Yaml(dumperOpts);
+    }
 
     private Map<String, Object> data = new HashMap<String, Object>();
 
@@ -44,7 +75,8 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
     private YAMLConfig(YAMLConfig p_parent, String p_nodeName) {
         super(p_parent, p_nodeName);
 
-        this.synchronize();
+        this.updateFromParent();
+        this.propagate();
     }
 
     public static YAMLConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
@@ -77,33 +109,18 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
         return new YAMLConfig(this, name);
     }
 
-    private Map<String, Object> getParentMap(PathComponent.PathComponentsList path) {
-        YAMLConfig dir;
-        PathNavigator<YAMLConfig> pn = new PathNavigator<YAMLConfig>(this);
-        PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
-        pathList.removeLast();
-        if (!pn.followPath(pathList)) {
-            return new HashMap<String, Object>(data);
-        }
-        dir = pn.getCurrentNode();
-        return new HashMap<String, Object>(dir.data);
-    }
-
-    private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map) {
-        YAMLConfig dir;
-        PathNavigator<YAMLConfig> pn = new PathNavigator<YAMLConfig>(this);
-        PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
-        pathList.removeLast();
-        if (!pn.followPath(pathList)) {
-            this.data = map;
-            this.propagate();
-            return;
-        }
-        dir = pn.getCurrentNode();
-        if (dir != null) {
-            dir.data = map;
-            dir.propagate();
-        }
+    private Map<String, Object> getParentMap(PathComponent.PathComponentsList path)
+    {
+    	YAMLConfig dir;
+    	PathNavigator<YAMLConfig> pn = new PathNavigator<YAMLConfig>(this);
+    	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+    	pathList.removeLast();
+    	if (!pn.followPath(pathList))
+    	{
+    		return data;
+    	}
+    	dir = pn.getCurrentNode();
+		return dir.data;
     }
 
     public void save() {
@@ -119,11 +136,9 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
         }
         File tmp = new File(this.file.getFolder(), this.file.getFileName() + YAMLConfig.YAML_TMP_EXT);
         UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
-        String tmpData = this.saveToString();
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
-            w.write(tmpData);
-            w.flush();
+            YAMLConfig.BEAUTIFIED_YAML.dump(data, w);
             w.close();
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
@@ -144,7 +159,7 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
         }
         if (this.parent != null) {
             this.parent.reload();
-            this.synchronize();
+            //this.synchronize();
             return;
         }
         if (!this.file.getFile().exists()) {
@@ -155,7 +170,7 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
-            Map<?, ?> tmpData = YAMLConfig.YAML.loadAs(r, Map.class);
+            Map<?, ?> tmpData = YAMLConfig.BEAUTIFIED_YAML.loadAs(r, Map.class);
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;
@@ -170,40 +185,16 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
             return;
         }
     }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void synchronize() {
-        YAMLConfig currentNode = this.getRoot();
-        Map<String, Object> currentData = currentNode.data;
-
-        PathComponentsList path = this.fullPath.clone();
-        path = PathNavigator.cleanPath(path);
-        for (PathComponent component : path) {
-            switch(component.getType()) {
-                case ROOT:
-                    currentNode = currentNode.getRoot();
-                    currentData = currentNode.data;
-                    break;
-
-                case PARENT:
-                    currentNode = currentNode.getParent();
-                    currentData = currentNode.data;
-                    break;
-
-                case CHILD:
-                    currentNode = null;
-                    Object childData = currentData.get(component.getValue());
-                    if (childData != null && childData instanceof Map) {
-                        currentData = (Map<String, Object>) childData;
-                    } else {
-                        return;
-                    }
-                    break;
-            }
-        }
-        this.data = currentData;
-    }
+    
+	@SuppressWarnings("unchecked")
+	private void updateFromParent() {
+		if (this.parent != null && this.parent.data != null) {
+			Object me = this.parent.data.get(nodeName);
+			if (me != null && (me instanceof Map)) {
+				this.data = (Map<String, Object>) me;
+			}
+		}
+	}
 
     @Override
     protected void propagate() {
@@ -245,14 +236,13 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
     }
 
     public void set(String path, Object value) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        if (value == null) {
-            node.remove(list.lastChild());
-        } else {
-            node.put(list.lastChild(), value);
-        }
-        this.setParentMap(list, node);
+    	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getParentMap(list);
+    	if (value == null) {
+    		node.remove(list.lastChild());
+    	} else {
+    		node.put(list.lastChild(), value);
+    	}
     }
 
     public void setSubSection(String path, IConfiguration value) {
@@ -266,14 +256,22 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
     public void remove(String path) {
         set(path, null);
     }
+    
+    public String toFormattedString() {
+    	return YAMLConfig.BEAUTIFIED_YAML.dumpAsMap(data);
+    }
+    
+    public String toMinimizedString() {
+    	return YAMLConfig.MINIFIED_YAML.dumpAsMap(data);
+    }
 
     public String saveToString() {
-        return YAMLConfig.YAML.dumpAs(this.data, null, FlowStyle.BLOCK);
+        return this.toFormattedString();
     }
 
     public void loadFromString(String p_data) {
         this.data.clear();
-        Map<?, ?> tmpMap = YAMLConfig.YAML.loadAs(p_data, Map.class);
+        Map<?, ?> tmpMap = YAMLConfig.MINIFIED_YAML.loadAs(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {
             if (e.getKey() instanceof String) {
                 this.data.put((String) e.getKey(), e.getValue());

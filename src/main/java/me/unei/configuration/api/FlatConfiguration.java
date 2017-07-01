@@ -1,21 +1,16 @@
 package me.unei.configuration.api;
 
 import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.fs.PathComponent;
-import me.unei.configuration.api.fs.PathNavigator;
 
 public abstract class FlatConfiguration<T extends FlatConfiguration<T>> implements IFlatConfiguration {
 
     protected SavedFile file;
-
-    protected String nodeName;
 
     protected FlatConfiguration(SavedFile p_file) {
         if (p_file == null) {
             throw new IllegalArgumentException("SavedFile should not be null");
         }
         this.file = p_file;
-        this.nodeName = "";
     }
 
     protected final void init() {
@@ -32,7 +27,7 @@ public abstract class FlatConfiguration<T extends FlatConfiguration<T>> implemen
     }
 
     public String getName() {
-        return this.nodeName;
+        return this.getFileName();
     }
 
     public final boolean canAccess() {

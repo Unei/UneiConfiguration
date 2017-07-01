@@ -1,20 +1,29 @@
 package me.unei.configuration.api;
 
-import com.google.common.base.Charsets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.fs.PathComponent;
-import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
-import me.unei.configuration.api.fs.PathNavigator;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
-import me.unei.configuration.plugin.UneiConfiguration;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.google.common.base.Charsets;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonWriter;
+
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.plugin.UneiConfiguration;
 
 public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfiguration {
 
@@ -53,7 +62,8 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
     private JSONConfig(JSONConfig p_parent, String p_nodeName) {
         super(p_parent, p_nodeName);
 
-        this.synchronize();
+        this.updateFromParent();
+        this.propagate();
     }
 
     public static JSONConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
@@ -85,6 +95,16 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         }
         return new JSONConfig(this, name);
     }
+    
+    @SuppressWarnings("unchecked")
+	private void updateFromParent() {
+		if (this.parent != null && this.parent.data != null) {
+			Object me = this.parent.data.get(nodeName);
+			if (me != null && (me instanceof Map)) {
+				this.data = (Map<String, Object>) me;
+			}
+		}
+	}
 
     private Map<String, Object> getParentMap(PathComponent.PathComponentsList path) {
         JSONConfig dir;
@@ -92,27 +112,10 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
         pathList.removeLast();
         if (!pn.followPath(pathList)) {
-            return new HashMap<String, Object>(data);
+            return data;
         }
         dir = pn.getCurrentNode();
-        return new HashMap<String, Object>(dir.data);
-    }
-
-    private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map) {
-        JSONConfig dir;
-        PathNavigator<JSONConfig> pn = new PathNavigator<JSONConfig>(this);
-        PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
-        pathList.removeLast();
-        if (!pn.followPath(pathList)) {
-            this.data = map;
-            this.propagate();
-            return;
-        }
-        dir = pn.getCurrentNode();
-        if (dir != null) {
-            dir.data = map;
-            dir.propagate();
-        }
+        return dir.data;
     }
 
     public void save() {
@@ -128,12 +131,12 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         }
         File tmp = new File(this.file.getFolder(), this.file.getFileName() + JSONConfig.JSON_TMP_EXT);
         UneiConfiguration.getInstance().getLogger().fine("Writing JSON to file " + getFileName() + "...");
-        String tmpData = this.saveToString();
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
-            w.write(tmpData);
-            w.flush();
-            w.close();
+            JsonWriter jw = new JsonWriter(w);
+            jw.setIndent("  ");
+            JSONConfig.GSON.toJson(data, Map.class, jw);
+            jw.close();
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
                 this.file.getFile().delete();
@@ -153,7 +156,7 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         }
         if (this.parent != null) {
             this.parent.reload();
-            this.synchronize();
+            //this.synchronize();
             return;
         }
         if (!this.file.getFile().exists()) {
@@ -178,40 +181,6 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
             e.printStackTrace();
             return;
         }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void synchronize() {
-        JSONConfig currentNode = this.getRoot();
-        Map<String, Object> currentData = currentNode.data;
-
-        PathComponentsList path = this.fullPath.clone();
-        path = PathNavigator.cleanPath(path);
-        for (PathComponent component : path) {
-            switch(component.getType()) {
-                case ROOT:
-                    currentNode = currentNode.getRoot();
-                    currentData = currentNode.data;
-                    break;
-
-                case PARENT:
-                    currentNode = currentNode.getParent();
-                    currentData = currentNode.data;
-                    break;
-
-                case CHILD:
-                    currentNode = null;
-                    Object childData = currentData.get(component.getValue());
-                    if (childData != null && childData instanceof Map) {
-                        currentData = (Map<String, Object>) childData;
-                    } else {
-                        return;
-                    }
-                    break;
-            }
-        }
-        this.data = currentData;
     }
 
     @Override
@@ -254,6 +223,9 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
     }
 
     public void set(String path, Object value) {
+    	if (!this.canAccess()) {
+    		return;
+    	}
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         if (value == null) {
@@ -261,7 +233,6 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         } else {
             node.put(list.lastChild(), value);
         }
-        this.setParentMap(list, node);
     }
 
     public void setSubSection(String path, IConfiguration value) {
@@ -276,11 +247,33 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         set(path, null);
     }
 
+	public String toFormattedString() {
+		StringWriter sw = new StringWriter();
+        JsonWriter jw = new JsonWriter(sw);
+        jw.setIndent("  ");
+        JSONConfig.GSON.toJson(data, Map.class, jw);
+        String res = sw.toString();
+        try {
+        	jw.close();
+        	sw.close();
+        } catch (IOException e) {
+        	//
+        }
+        return res;
+	}
+
+	public String toMinimizedString() {
+		return JSONConfig.GSON.toJson(data, Map.class);
+	}
+
     public String saveToString() {
-        return JSONConfig.GSON.toJson(data, data.getClass());
+        return this.toFormattedString();
     }
 
     public void loadFromString(String p_data) {
+    	if (!this.canAccess()) {
+    		return;
+    	}
         this.data.clear();
         Map<?, ?> tmpMap = JSONConfig.GSON.fromJson(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {

@@ -1,6 +1,6 @@
 package me.unei.configuration.api;
 
-public interface IYAMLConfiguration extends IConfiguration {
+public interface IYAMLConfiguration extends IHRConfiguration {
 
     /**
      * Returns this configuration's YAML representation as text.

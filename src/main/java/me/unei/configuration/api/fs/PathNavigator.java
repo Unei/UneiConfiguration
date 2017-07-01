@@ -1,5 +1,9 @@
 package me.unei.configuration.api.fs;
 
+import java.util.function.Consumer;
+
+import org.apache.commons.lang.NullArgumentException;
+
 import me.unei.configuration.api.fs.PathComponent.PathComponentType;
 import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 
@@ -55,6 +59,34 @@ public final class PathNavigator<T extends NavigableFile> {
 
     public T getCurrentNode() {
         return this.currentNode;
+    }
+    
+    public void followAndApply(PathComponentsList path, Consumer<T> action)
+    {
+    	if (action == null) {
+    		throw new NullArgumentException("action");
+    	}
+    	
+    	action.accept(this.currentNode);
+    	
+    	for (PathComponent component : path)
+    	{
+    		switch (component.getType())
+    		{
+    			case ROOT:
+    				this.goToRoot();
+    				break;
+    				
+    			case PARENT:
+    				this.goToParent();
+    				break;
+    				
+    			case CHILD:
+    				this.goToChild(component.getValue());
+    				break;
+    		}
+			action.accept(this.currentNode);
+    	}
     }
 
     public static PathComponentsList parsePath(String path, PathSymbolsType type) {

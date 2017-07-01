@@ -1,17 +1,28 @@
 package me.unei.configuration.api;
 
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.plugin.UneiConfiguration;
-
-import javax.xml.bind.DatatypeConverter;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
+
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.plugin.UneiConfiguration;
 
 public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> implements IFlatSQLiteConfiguration {
 
@@ -281,6 +292,9 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
     }
 
     public void set(String key, Object value) {
+    	if (!this.canAccess()) {
+    		return;
+    	}
         if (value == null) {
             data.remove(key);
         } else {

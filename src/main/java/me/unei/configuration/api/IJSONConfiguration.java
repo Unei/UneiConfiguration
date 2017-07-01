@@ -1,6 +1,6 @@
 package me.unei.configuration.api;
 
-public interface IJSONConfiguration extends IConfiguration {
+public interface IJSONConfiguration extends IHRConfiguration {
 
     /**
      * Returns this configuration's JSON representation as text.
