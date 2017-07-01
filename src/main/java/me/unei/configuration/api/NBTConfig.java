@@ -32,7 +32,11 @@ public final class NBTConfig extends Configuration<NBTConfig> implements INBTCon
     private NBTProxyCompound rootCompound = null;
 
     public NBTConfig(File folder, String fileName) {
-    	super(new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT), PathSymbolsType.BUKKIT);
+    	this(folder, fileName, PathSymbolsType.BUKKIT);
+    }
+    
+    public NBTConfig(File folder, String fileName, PathSymbolsType symType) {
+    	super(new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT), symType);
 
     	this.rootCompound = new NBTProxyCompound();
 
@@ -48,6 +52,10 @@ public final class NBTConfig extends Configuration<NBTConfig> implements INBTCon
     
     @Override
 	protected void propagate() {}
+
+    public static NBTConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
+        return NBTConfig.getForPath(new NBTConfig(folder, fileName, symType), path);
+    }
 
     public static NBTConfig getForPath(File folder, String fileName, String path) {
         return NBTConfig.getForPath(new NBTConfig(folder, fileName), path);

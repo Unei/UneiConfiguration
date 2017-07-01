@@ -38,7 +38,11 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     private String tableName = "_";
 
     public SQLiteConfig(File folder, String fileName, String tableName) {
-        super(new SavedFile(folder, fileName, SQLiteConfig.SQLITE_FILE_EXT), PathSymbolsType.BUKKIT);
+    	this(folder, fileName, tableName, PathSymbolsType.BUKKIT);
+    }
+    
+    public SQLiteConfig(File folder, String fileName, String tableName, PathSymbolsType symType) {
+        super(new SavedFile(folder, fileName, SQLiteConfig.SQLITE_FILE_EXT), symType);
         this.tableName = tableName;
 
         this.subinit();
@@ -70,6 +74,10 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
         this.reload();
     }
 
+    public static SQLiteConfig getForPath(File folder, String fileName, String tableName, String path, PathSymbolsType symType) {
+        return SQLiteConfig.getForPath(new SQLiteConfig(folder, fileName, tableName, symType), path);
+    }
+    
     public static SQLiteConfig getForPath(File folder, String fileName, String tableName, String path) {
         return SQLiteConfig.getForPath(new SQLiteConfig(folder, fileName, tableName), path);
     }

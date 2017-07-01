@@ -14,9 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.base.Charsets;
-
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.Yaml;
+import com.google.gson.Gson;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.PathComponent;
@@ -25,46 +23,46 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlConfiguration {
+public class JsonConfig extends GettersInOneConfig<JsonConfig> implements IYamlConfiguration {
 
-    public static final String YAML_FILE_EXT = ".yml";
-    public static final String YAML_TMP_EXT = ".tmp";
-    private static final Yaml YAML = new Yaml();
+    public static final String JSON_FILE_EXT = ".json";
+    public static final String JSON_TMP_EXT = ".tmp";
+    private static final Gson GSON = new Gson();
 
     private Map<String, Object> data = new HashMap<String, Object>();
 
-    public YamlConfig(File folder, String fileName) {
+    public JsonConfig(File folder, String fileName) {
     	this(folder, fileName, PathSymbolsType.BUKKIT);
     }
     
-    public YamlConfig(File folder, String fileName, PathSymbolsType symType) {
-        super(new SavedFile(folder, fileName, YamlConfig.YAML_FILE_EXT), symType);
+    public JsonConfig(File folder, String fileName, PathSymbolsType symType) {
+        super(new SavedFile(folder, fileName, JsonConfig.JSON_FILE_EXT), symType);
 
         this.init();
     }
 
-    public YamlConfig(String data) {
+    public JsonConfig(String data) {
     	super(new SavedFile(), PathSymbolsType.BUKKIT);
 
         this.init();
         this.loadFromString(data);
     }
 
-    private YamlConfig(YamlConfig p_parent, String p_nodeName) {
+    private JsonConfig(JsonConfig p_parent, String p_nodeName) {
     	super(p_parent, p_nodeName);
 
         this.synchronize();
     }
 
-    public static YamlConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
-        return YamlConfig.getForPath(new YamlConfig(folder, fileName, symType), path);
+    public static JsonConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
+        return JsonConfig.getForPath(new JsonConfig(folder, fileName, symType), path);
     }
 
-    public static YamlConfig getForPath(File folder, String fileName, String path) {
-        return YamlConfig.getForPath(new YamlConfig(folder, fileName), path);
+    public static JsonConfig getForPath(File folder, String fileName, String path) {
+        return JsonConfig.getForPath(new JsonConfig(folder, fileName), path);
     }
 
-    public static YamlConfig getForPath(YamlConfig root, String path) {
+    public static JsonConfig getForPath(JsonConfig root, String path) {
         if (root == null) {
             return null;
         }
@@ -72,25 +70,25 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     }
 
     @Override
-	public YamlConfig getRoot() {
-        return (YamlConfig) super.getRoot();
+	public JsonConfig getRoot() {
+        return (JsonConfig) super.getRoot();
     }
 
 
-    public YamlConfig getChild(String name) {
+    public JsonConfig getChild(String name) {
         if (!this.canAccess()) {
             return null;
         }
         if (name == null || name.isEmpty()) {
             return this;
         }
-        return new YamlConfig(this, name);
+        return new JsonConfig(this, name);
     }
     
     private Map<String, Object> getParentMap(PathComponent.PathComponentsList path)
     {
-    	YamlConfig dir;
-    	PathNavigator<YamlConfig> pn = new PathNavigator<YamlConfig>(this);
+    	JsonConfig dir;
+    	PathNavigator<JsonConfig> pn = new PathNavigator<JsonConfig>(this);
     	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
     	pathList.removeLast();
     	if (!pn.followPath(pathList))
@@ -103,8 +101,8 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     
     private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map)
     {
-    	YamlConfig dir;
-    	PathNavigator<YamlConfig> pn = new PathNavigator<YamlConfig>(this);
+    	JsonConfig dir;
+    	PathNavigator<JsonConfig> pn = new PathNavigator<JsonConfig>(this);
     	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
     	pathList.removeLast();
     	if (!pn.followPath(pathList))
@@ -132,8 +130,8 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
         if (this.file.getFile() == null) {
             return;
         }
-        File tmp = new File(this.file.getFolder(), this.file.getFileName() + YamlConfig.YAML_TMP_EXT);
-        UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
+        File tmp = new File(this.file.getFolder(), this.file.getFileName() + JsonConfig.JSON_TMP_EXT);
+        UneiConfiguration.getInstance().getLogger().fine("Writing JSON to file " + getFileName() + "...");
         String tmpData = this.saveToString();
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
@@ -148,7 +146,7 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
             tmp.delete();
             UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
         } catch (IOException e) {
-            UneiConfiguration.getInstance().getLogger().warning("An error occured while saving YAML file " + getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("An error occured while saving JSON file " + getFileName() + ":");
             e.printStackTrace();
         }
     }
@@ -168,9 +166,9 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
         }
         this.data.clear();
         try {
-            UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Reading JSON from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
-            Map<?, ?> tmpData = YamlConfig.YAML.loadAs(r, Map.class);
+            Map<?, ?> tmpData = JsonConfig.GSON.fromJson(r, Map.class);
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;
@@ -180,7 +178,7 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
             r.close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
         } catch (IOException e) {
-            UneiConfiguration.getInstance().getLogger().warning("An error occured while loading YAML file " + getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("An error occured while loading JSON file " + getFileName() + ":");
             e.printStackTrace();
             return;
         }
@@ -189,7 +187,7 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     @Override
 	@SuppressWarnings("unchecked")
     protected void synchronize() {
-        YamlConfig currentNode = this.getRoot();
+        JsonConfig currentNode = this.getRoot();
         Map<String, Object> currentData = currentNode.data;
 
         PathComponentsList path = this.fullPath.clone();
@@ -245,14 +243,14 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     }
 
     @Override
-	public YamlConfig getSubSection(PathComponent.PathComponentsList path) {
+	public JsonConfig getSubSection(PathComponent.PathComponentsList path) {
     	if (!this.canAccess()) {
     		return null;
     	}
         if (path == null || path.isEmpty()) {
             return this;
         }
-        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
+        PathNavigator<JsonConfig> navigator = new PathNavigator<JsonConfig>(this);
         if (navigator.followPath(path)) {
             return navigator.getCurrentNode();
         }
@@ -271,11 +269,11 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     }
 
     public void setSubSection(String path, IConfiguration value) {
-        if (!(value instanceof YamlConfig)) {
+        if (!(value instanceof JsonConfig)) {
             //TODO ConfigType conversion
             return;
         }
-        set(path, ((YamlConfig) value).data);
+        set(path, ((JsonConfig) value).data);
     }
 
     public void remove(String path) {
@@ -283,12 +281,12 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     }
 
     public String saveToString() {
-        return YamlConfig.YAML.dumpAs(this.data, null, FlowStyle.BLOCK);
+    	return JsonConfig.GSON.toJson(data, data.getClass());
     }
 
     public void loadFromString(String p_data) {
         this.data.clear();
-        Map<?, ?> tmpMap = YamlConfig.YAML.loadAs(p_data, Map.class);
+        Map<?, ?> tmpMap = JsonConfig.GSON.fromJson(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {
             if (e.getKey() instanceof String) {
                 this.data.put((String) e.getKey(), e.getValue());
