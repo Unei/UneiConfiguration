@@ -3,16 +3,16 @@ package me.unei.configuration.api;
 public interface IJSONConfiguration extends IConfiguration {
 
     /**
-     * Returns this configuration's YAML representation as text.
+     * Returns this configuration's JSON representation as text.
      *
-     * @return this configuration's YAML representation
+     * @return this configuration's JSON representation
      */
     public String saveToString();
 
     /**
-     * Loads the provided YAML data into this YamlConfig.
+     * Loads the provided JSON data into this JSONConfig.
      *
-     * @param data The YAML data as text
+     * @param data The JSON data as text
      */
     public void loadFromString(String data);
 

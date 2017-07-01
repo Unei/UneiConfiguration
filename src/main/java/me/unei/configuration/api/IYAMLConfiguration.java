@@ -1,6 +1,6 @@
 package me.unei.configuration.api;
 
-public interface IYamlConfiguration extends IConfiguration {
+public interface IYAMLConfiguration extends IConfiguration {
 
     /**
      * Returns this configuration's YAML representation as text.
@@ -10,7 +10,7 @@ public interface IYamlConfiguration extends IConfiguration {
     public String saveToString();
 
     /**
-     * Loads the provided YAML data into this YamlConfig.
+     * Loads the provided YAML data into this YAMLConfig.
      *
      * @param data The YAML data as text
      */
