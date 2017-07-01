@@ -23,7 +23,7 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class JSONConfig extends UntypedStorage<JSONConfig> implements IYamlConfiguration {
+public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfiguration {
 
     public static final String JSON_FILE_EXT = ".json";
     public static final String JSON_TMP_EXT = ".tmp";
@@ -296,6 +296,6 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IYamlConfi
 
     @Override
     public String toString() {
-        return "YamlConfig=" + this.data.toString();
+        return "JSONConfig=" + this.data.toString();
     }
 }
