@@ -350,7 +350,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
             this.parent.reconnect();
             return;
         }
-        UneiConfiguration.getInstance().getLogger().fine("Trying to reconnect to SQLite file " + getFileName() + ".");
+        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "...");
         try {
             if (this.connection != null) {
                 this.connection.close();
