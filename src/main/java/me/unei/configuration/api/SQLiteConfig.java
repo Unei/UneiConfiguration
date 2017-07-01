@@ -15,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -115,7 +114,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
         return new SQLiteConfig(this, name);
     }
     
-    private Map<String, Object> getMapParentAt(PathComponent.PathComponentsList path)
+    private Map<String, Object> getParentMap(PathComponent.PathComponentsList path)
     {
     	SQLiteConfig dir;
     	PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
@@ -123,13 +122,13 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     	pathList.removeLast();
     	if (!pn.followPath(pathList))
     	{
-    		return SQLiteConfig.clone(this.data);
+    		return new HashMap<String, Object>(data);
     	}
     	dir = pn.getCurrentNode();
-    	return SQLiteConfig.clone(dir.data);
+		return new HashMap<String, Object>(dir.data);
     }
     
-    private void setMapParentAt(PathComponent.PathComponentsList path, Map<String, Object> map)
+    private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map)
     {
     	SQLiteConfig dir;
     	PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
@@ -139,6 +138,7 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     	{
     		this.data = map;
     		this.propagate();
+    		return;
     	}
     	dir = pn.getCurrentNode();
     	if (dir != null)
@@ -146,18 +146,6 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     		dir.data = map;
     		dir.propagate();
     	}
-    }
-    
-    private static <K, V> Map<K, V> clone(Map<K, V> orig)
-    {
-    	Map<K, V> copy = new HashMap<K, V>(orig.size());
-    	Iterator<Entry<K, V>> it = orig.entrySet().iterator();
-    	while (it.hasNext())
-    	{
-    		Entry<K, V> entry = it.next();
-    		copy.put(entry.getKey(), entry.getValue());
-    	}
-    	return copy;
     }
 
     public boolean execute(String query, Map<Integer, Object> parameters) throws SQLException {
@@ -441,39 +429,15 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     }
 
     public boolean contains(String path) {
-    	/*PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-    	Map<String, Object> node = this.getMapParentAt(list);
-    	return node.containsKey(list.lastChild());*/
-        if (path == null || path.isEmpty()) {
-            if (this.parent != null) {
-                return this.parent.data.containsKey(this.nodeName);
-            } else {
-                return true;
-            }
-        }
-        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
-        if (navigator.navigate(path, symType)) {
-            return navigator.getCurrentNode().contains("");
-        }
-        return false;
+    	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getParentMap(list);
+    	return node.containsKey(list.lastChild());
     }
 
     public Object get(String path) {
-    	/*PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-    	Map<String, Object> node = this.getMapParentAt(list);
-    	return node.get(list.lastChild());*/
-        if (path == null || path.isEmpty()) {
-            if (this.parent != null) {
-                return this.parent.data.get(this.nodeName);
-            } else {
-                return this.data;
-            }
-        }
-        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
-        if (navigator.navigate(path, symType)) {
-            return navigator.getCurrentNode().get("");
-        }
-        return null;
+    	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getParentMap(list);
+    	return node.get(list.lastChild());
     }
 
     @Override
@@ -489,29 +453,14 @@ public class SQLiteConfig extends GettersInOneConfig<SQLiteConfig> implements IS
     }
 
     public void set(String path, Object value) {
-    	/*PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-    	Map<String, Object> node = this.getMapParentAt(list);
+    	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getParentMap(list);
     	if (value == null) {
     		node.remove(list.lastChild());
     	} else {
     		node.put(list.lastChild(), value);
     	}
-    	this.setMapParentAt(list, node);*/
-        if (path == null || path.isEmpty()) {
-            if (this.parent != null) {
-                if (value == null) {
-                    this.parent.data.remove(this.nodeName);
-                } else {
-                    this.parent.data.put(this.nodeName, value);
-                }
-                this.parent.propagate();
-            }
-            return;
-        }
-        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
-        if (navigator.navigate(path, symType)) {
-            navigator.getCurrentNode().set("", value);
-        }
+    	this.setParentMap(list, node);
     }
 
     public void setSubSection(String path, IConfiguration value) {

@@ -1,16 +1,19 @@
 package me.unei.configuration.api;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.google.common.base.Charsets;
 
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
@@ -75,7 +78,41 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
         }
         return new YamlConfig(this, name);
     }
-
+    
+    private Map<String, Object> getParentMap(PathComponent.PathComponentsList path)
+    {
+    	YamlConfig dir;
+    	PathNavigator<YamlConfig> pn = new PathNavigator<YamlConfig>(this);
+    	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+    	pathList.removeLast();
+    	if (!pn.followPath(pathList))
+    	{
+    		return new HashMap<String, Object>(data);
+    	}
+    	dir = pn.getCurrentNode();
+		return new HashMap<String, Object>(dir.data);
+    }
+    
+    private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map)
+    {
+    	YamlConfig dir;
+    	PathNavigator<YamlConfig> pn = new PathNavigator<YamlConfig>(this);
+    	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+    	pathList.removeLast();
+    	if (!pn.followPath(pathList))
+    	{
+    		this.data = map;
+    		this.propagate();
+    		return;
+    	}
+    	dir = pn.getCurrentNode();
+    	if (dir != null)
+    	{
+    		dir.data = map;
+    		dir.propagate();
+    	}
+    }
+    
     public void save() {
         if (!this.canAccess()) {
             return;
@@ -90,9 +127,10 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
         File tmp = new File(this.file.getFolder(), this.file.getFileName() + YamlConfig.YAML_TMP_EXT);
         String tmpData = this.saveToString();
         try {
-            OutputStream out = new FileOutputStream(tmp);
-            out.write(tmpData.getBytes());
-            out.close();
+            Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
+            w.write(tmpData);
+            w.flush();
+            w.close();
             if (this.file.getFile().exists()) {
                 this.file.getFile().delete();
             }
@@ -119,20 +157,15 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
         this.data.clear();
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
-            StringBuilder sb = new StringBuilder();
-            InputStream in = new BufferedInputStream(new FileInputStream(this.file.getFile()));
-            int tmp = -1;
-            while ((tmp = in.read()) > 0) {
-            	sb.append((char)tmp);
-            }
-            Map<?, ?> tmpData = YamlConfig.YAML.loadAs(sb.toString(), Map.class);
+            Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
+            Map<?, ?> tmpData = YamlConfig.YAML.loadAs(r, Map.class);
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;
                     this.data.put(key, entry.getValue());
                 }
             }
-            in.close();
+            r.close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
             UneiConfiguration.getInstance().getLogger().finest(tmpData == null? "(null)" : tmpData.toString());
         } catch (IOException e) {
@@ -188,34 +221,15 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     }
 
     public boolean contains(String path) {
-        if (path == null || path.isEmpty()) {
-            if (this.parent != null) {
-                return this.parent.data.containsKey(this.nodeName);
-            } else {
-                return true;
-            }
-        }
-        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
-        if (navigator.navigate(path, this.symType)) {
-            YamlConfig node = navigator.getCurrentNode();
-            return node.contains("");
-        }
-        return false;
+    	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getParentMap(list);
+    	return node.containsKey(list.lastChild());
     }
 
     public Object get(String path) {
-        if (path == null || path.isEmpty()) {
-            if (this.parent != null) {
-                return this.parent.data.get(this.nodeName);
-            } else {
-                return this.data;
-            }
-        }
-        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
-        if (navigator.navigate(path, this.symType)) {
-            return navigator.getCurrentNode().get("");
-        }
-        return null;
+    	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getParentMap(list);
+    	return node.get(list.lastChild());
     }
 
     @Override
@@ -234,21 +248,14 @@ public class YamlConfig extends GettersInOneConfig<YamlConfig> implements IYamlC
     }
 
     public void set(String path, Object value) {
-        if (path == null || path.isEmpty()) {
-            if (this.parent != null) {
-                if (value == null) {
-                    this.parent.data.remove(this.nodeName);
-                } else {
-                    this.parent.data.put(this.nodeName, value);
-                }
-                this.parent.propagate();
-            }
-            return;
-        }
-        PathNavigator<YamlConfig> navigator = new PathNavigator<YamlConfig>(this);
-        if (navigator.navigate(path, this.symType)) {
-            navigator.getCurrentNode().set("", value);
-        }
+    	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+    	Map<String, Object> node = this.getParentMap(list);
+    	if (value == null) {
+    		node.remove(list.lastChild());
+    	} else {
+    		node.put(list.lastChild(), value);
+    	}
+    	this.setParentMap(list, node);
     }
 
     public void setSubSection(String path, IConfiguration value) {
