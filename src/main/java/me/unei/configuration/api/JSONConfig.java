@@ -23,7 +23,7 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfiguration {
+public class JSONConfig extends UntypedStorage<JSONConfig> implements IYamlConfiguration {
 
     public static final String JSON_FILE_EXT = ".json";
     public static final String JSON_TMP_EXT = ".tmp";
@@ -31,38 +31,38 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
 
     private Map<String, Object> data = new HashMap<String, Object>();
 
-    public JsonConfig(File folder, String fileName) {
+    public JSONConfig(File folder, String fileName) {
     	this(folder, fileName, PathSymbolsType.BUKKIT);
     }
     
-    public JsonConfig(File folder, String fileName, PathSymbolsType symType) {
-        super(new SavedFile(folder, fileName, JsonConfig.JSON_FILE_EXT), symType);
+    public JSONConfig(File folder, String fileName, PathSymbolsType symType) {
+        super(new SavedFile(folder, fileName, JSONConfig.JSON_FILE_EXT), symType);
 
         this.init();
     }
 
-    public JsonConfig(String data) {
+    public JSONConfig(String data) {
     	super(new SavedFile(), PathSymbolsType.BUKKIT);
 
         this.init();
         this.loadFromString(data);
     }
 
-    private JsonConfig(JsonConfig p_parent, String p_nodeName) {
+    private JSONConfig(JSONConfig p_parent, String p_nodeName) {
     	super(p_parent, p_nodeName);
 
         this.synchronize();
     }
 
-    public static JsonConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
-        return JsonConfig.getForPath(new JsonConfig(folder, fileName, symType), path);
+    public static JSONConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
+        return JSONConfig.getForPath(new JSONConfig(folder, fileName, symType), path);
     }
 
-    public static JsonConfig getForPath(File folder, String fileName, String path) {
-        return JsonConfig.getForPath(new JsonConfig(folder, fileName), path);
+    public static JSONConfig getForPath(File folder, String fileName, String path) {
+        return JSONConfig.getForPath(new JSONConfig(folder, fileName), path);
     }
 
-    public static JsonConfig getForPath(JsonConfig root, String path) {
+    public static JSONConfig getForPath(JSONConfig root, String path) {
         if (root == null) {
             return null;
         }
@@ -70,25 +70,25 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
     }
 
     @Override
-	public JsonConfig getRoot() {
-        return (JsonConfig) super.getRoot();
+	public JSONConfig getRoot() {
+        return (JSONConfig) super.getRoot();
     }
 
 
-    public JsonConfig getChild(String name) {
+    public JSONConfig getChild(String name) {
         if (!this.canAccess()) {
             return null;
         }
         if (name == null || name.isEmpty()) {
             return this;
         }
-        return new JsonConfig(this, name);
+        return new JSONConfig(this, name);
     }
     
     private Map<String, Object> getParentMap(PathComponent.PathComponentsList path)
     {
-    	JsonConfig dir;
-    	PathNavigator<JsonConfig> pn = new PathNavigator<JsonConfig>(this);
+    	JSONConfig dir;
+    	PathNavigator<JSONConfig> pn = new PathNavigator<JSONConfig>(this);
     	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
     	pathList.removeLast();
     	if (!pn.followPath(pathList))
@@ -101,8 +101,8 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
     
     private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map)
     {
-    	JsonConfig dir;
-    	PathNavigator<JsonConfig> pn = new PathNavigator<JsonConfig>(this);
+    	JSONConfig dir;
+    	PathNavigator<JSONConfig> pn = new PathNavigator<JSONConfig>(this);
     	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
     	pathList.removeLast();
     	if (!pn.followPath(pathList))
@@ -130,7 +130,7 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
         if (this.file.getFile() == null) {
             return;
         }
-        File tmp = new File(this.file.getFolder(), this.file.getFileName() + JsonConfig.JSON_TMP_EXT);
+        File tmp = new File(this.file.getFolder(), this.file.getFileName() + JSONConfig.JSON_TMP_EXT);
         UneiConfiguration.getInstance().getLogger().fine("Writing JSON to file " + getFileName() + "...");
         String tmpData = this.saveToString();
         try {
@@ -168,7 +168,7 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading JSON from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
-            Map<?, ?> tmpData = JsonConfig.GSON.fromJson(r, Map.class);
+            Map<?, ?> tmpData = JSONConfig.GSON.fromJson(r, Map.class);
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;
@@ -187,7 +187,7 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
     @Override
 	@SuppressWarnings("unchecked")
     protected void synchronize() {
-        JsonConfig currentNode = this.getRoot();
+        JSONConfig currentNode = this.getRoot();
         Map<String, Object> currentData = currentNode.data;
 
         PathComponentsList path = this.fullPath.clone();
@@ -243,14 +243,14 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
     }
 
     @Override
-	public JsonConfig getSubSection(PathComponent.PathComponentsList path) {
+	public JSONConfig getSubSection(PathComponent.PathComponentsList path) {
     	if (!this.canAccess()) {
     		return null;
     	}
         if (path == null || path.isEmpty()) {
             return this;
         }
-        PathNavigator<JsonConfig> navigator = new PathNavigator<JsonConfig>(this);
+        PathNavigator<JSONConfig> navigator = new PathNavigator<JSONConfig>(this);
         if (navigator.followPath(path)) {
             return navigator.getCurrentNode();
         }
@@ -269,11 +269,11 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
     }
 
     public void setSubSection(String path, IConfiguration value) {
-        if (!(value instanceof JsonConfig)) {
+        if (!(value instanceof JSONConfig)) {
             //TODO ConfigType conversion
             return;
         }
-        set(path, ((JsonConfig) value).data);
+        set(path, ((JSONConfig) value).data);
     }
 
     public void remove(String path) {
@@ -281,12 +281,12 @@ public class JsonConfig extends UntypedStorage<JsonConfig> implements IYamlConfi
     }
 
     public String saveToString() {
-    	return JsonConfig.GSON.toJson(data, data.getClass());
+    	return JSONConfig.GSON.toJson(data, data.getClass());
     }
 
     public void loadFromString(String p_data) {
         this.data.clear();
-        Map<?, ?> tmpMap = JsonConfig.GSON.fromJson(p_data, Map.class);
+        Map<?, ?> tmpMap = JSONConfig.GSON.fromJson(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {
             if (e.getKey() instanceof String) {
                 this.data.put((String) e.getKey(), e.getValue());
