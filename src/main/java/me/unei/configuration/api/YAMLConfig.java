@@ -38,7 +38,7 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
     {
     	DumperOptions dumperOpts = new DumperOptions();
     	dumperOpts.setDefaultFlowStyle(FlowStyle.BLOCK);
-    	dumperOpts.setDefaultScalarStyle(ScalarStyle.DOUBLE_QUOTED);
+    	dumperOpts.setDefaultScalarStyle(ScalarStyle.PLAIN);
     	dumperOpts.setLineBreak(LineBreak.UNIX);
     	dumperOpts.setPrettyFlow(true);
     	dumperOpts.setIndent(2);
