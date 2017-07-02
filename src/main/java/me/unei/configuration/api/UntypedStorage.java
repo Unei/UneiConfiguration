@@ -1,10 +1,10 @@
 package me.unei.configuration.api;
 
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 
 public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Configuration<T> {
 
@@ -28,7 +28,11 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         try {
             return ((Number) get(path)).doubleValue();
         } catch (Exception e) {
-            return 0.0D;
+            try {
+            	return (Double.valueOf(getString(path)).doubleValue());
+            } catch (NumberFormatException nfe) {
+            	return 0.0D;
+            }
         }
     }
 
@@ -52,7 +56,11 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         try {
             return ((Number) get(path)).floatValue();
         } catch (Exception e) {
-            return 0.0F;
+            try {
+            	return (Float.valueOf(getString(path)).floatValue());
+            } catch (NumberFormatException nfe) {
+            	return 0.0F;
+            }
         }
     }
 

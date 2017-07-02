@@ -19,8 +19,8 @@ public final class SerializerHelper
 		if (SerializerHelper.GSON == null)
 		{
 			GsonBuilder gb = new GsonBuilder();
-			gb.serializeNulls().serializeSpecialFloatingPointValues().disableHtmlEscaping();
-			gb.setLenient();
+			gb.serializeNulls().disableHtmlEscaping();
+			//gb.setLenient();
 			SerializerHelper.GSON = gb.create();
 		}
 	}

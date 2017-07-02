@@ -1,9 +1,9 @@
 package me.unei.configuration.api;
 
-import me.unei.configuration.SavedFile;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import me.unei.configuration.SavedFile;
 
 public abstract class UntypedFlatStorage<T extends UntypedFlatStorage<T>> extends FlatConfiguration<T> {
 
@@ -23,7 +23,11 @@ public abstract class UntypedFlatStorage<T extends UntypedFlatStorage<T>> extend
         try {
             return ((Number) get(path)).doubleValue();
         } catch (Exception e) {
-            return 0.0D;
+            try {
+            	return (Double.valueOf(getString(path)).doubleValue());
+            } catch (NumberFormatException nfe) {
+            	return 0.0D;
+            }
         }
     }
 
@@ -47,7 +51,11 @@ public abstract class UntypedFlatStorage<T extends UntypedFlatStorage<T>> extend
         try {
             return ((Number) get(path)).floatValue();
         } catch (Exception e) {
-            return 0.0F;
+            try {
+            	return (Float.valueOf(getString(path)).floatValue());
+            } catch (NumberFormatException nfe) {
+            	return 0.0F;
+            }
         }
     }
 

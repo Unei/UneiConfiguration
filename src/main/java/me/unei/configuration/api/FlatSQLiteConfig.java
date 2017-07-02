@@ -277,7 +277,21 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
         if (value == null) {
             data.remove(key);
         } else {
-            data.put(key, value);
+        	if (value instanceof Double) {
+        		if (((Double)value).isInfinite() || ((Double)value).isNaN()) {
+        			data.put(key, value.toString());
+        		} else {
+        			data.put(key, value);
+        		}
+        	} else if (value instanceof Float) {
+        		if (((Float)value).isInfinite() || ((Float)value).isNaN()) {
+        			data.put(key, value.toString());
+        		} else {
+        			data.put(key, value);
+        		}
+        	} else {
+        		data.put(key, value);
+        	}
         }
     }
 

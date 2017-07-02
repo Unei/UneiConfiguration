@@ -231,7 +231,21 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         if (value == null) {
             node.remove(list.lastChild());
         } else {
-            node.put(list.lastChild(), value);
+        	if (value instanceof Double) {
+        		if (((Double)value).isInfinite() || ((Double)value).isNaN()) {
+        			node.put(list.lastChild(), value.toString());
+        		} else {
+        			node.put(list.lastChild(), value);
+        		}
+        	} else if (value instanceof Float) {
+        		if (((Float)value).isInfinite() || ((Float)value).isNaN()) {
+        			node.put(list.lastChild(), value.toString());
+        		} else {
+        			node.put(list.lastChild(), value);
+        		}
+        	} else {
+        		node.put(list.lastChild(), value);
+        	}
         }
     }
 
