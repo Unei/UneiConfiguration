@@ -1,12 +1,7 @@
 package me.unei.configuration.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -22,6 +17,7 @@ import java.util.Set;
 import javax.xml.bind.DatatypeConverter;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> implements IFlatSQLiteConfiguration {
@@ -160,17 +156,9 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
             statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (`id`, `key`, `value`) VALUES (?, ?, ?)");
 
             for (Entry<String, Object> entry : this.data.entrySet()) {
-                ByteArrayOutputStream bitout = new ByteArrayOutputStream();
-                ObjectOutputStream objout = new ObjectOutputStream(bitout);
-                objout.writeObject(entry.getValue());
-                objout.flush();
-                byte[] bytes = bitout.toByteArray();
-                objout.close();
-                bitout.close();
-
                 statement.setString(1, FlatSQLiteConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
-                statement.setBytes(3, bytes);
+                statement.setString(3, SerializerHelper.toJSONString(entry.getValue()));
                 statement.addBatch();
             }
 
@@ -214,19 +202,10 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
             while (result.next()) {
                 try {
                     String key = result.getString("key");
-                    byte[] bytes = result.getBytes("value");
-
-                    InputStream bitin = new ByteArrayInputStream(bytes);
-                    ObjectInputStream objin = new ObjectInputStream(bitin);
-                    Object value = objin.readObject();
-                    objin.close();
-                    bitin.close();
+                    Object value = SerializerHelper.parseJSON(result.getString("value"));
 
                     this.data.put(key, value);
                 } catch (IOException e) {
-                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
                     UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
                     e.printStackTrace();
                 }
