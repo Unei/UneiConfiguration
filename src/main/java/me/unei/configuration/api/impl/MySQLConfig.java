@@ -1,12 +1,16 @@
 package me.unei.configuration.api.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.IMySQLConfiguration;
+import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.plugin.UneiConfiguration;
+
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
@@ -15,39 +19,37 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.xml.bind.DatatypeConverter;
+public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IMySQLConfiguration {
 
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.IConfiguration;
-import me.unei.configuration.api.ISQLiteConfiguration;
-import me.unei.configuration.api.UntypedStorage;
-import me.unei.configuration.api.fs.PathComponent;
-import me.unei.configuration.api.fs.PathNavigator;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
-import me.unei.configuration.plugin.UneiConfiguration;
-
-public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLiteConfiguration {
-
-    public static final String SQLITE_FILE_EXT = ".db";
-    public static final String SQLITE_DRIVER = "org.sqlite.JDBC";
+    public static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
 
     private Map<String, Object> data = new HashMap<String, Object>();
 
+    private String host;
+    private int port;
+    private String base;
+    private String user;
+    private String pass;
     private Connection connection = null;
     private String tableName = "_";
 
-    public SQLiteConfig(File folder, String fileName, String tableName) {
-        this(folder, fileName, tableName, PathSymbolsType.BUKKIT);
+    public MySQLConfig(String host, int port, String base, String user, String pass, String tableName) {
+        this(host, port, base, user, pass, tableName, PathSymbolsType.BUKKIT);
     }
 
-    public SQLiteConfig(File folder, String fileName, String tableName, PathSymbolsType symType) {
-        super(new SavedFile(folder, fileName, SQLiteConfig.SQLITE_FILE_EXT), symType);
+    public MySQLConfig(String host, int port, String base, String user, String pass, String tableName, PathSymbolsType symType) {
+        super(new SavedFile(), symType);
+        this.host = host;
+        this.port = port;
+        this.base = base;
+        this.user = user;
+        this.pass = pass;
         this.tableName = tableName;
 
         this.subinit();
     }
 
-    private SQLiteConfig(SQLiteConfig p_parent, String p_nodeName) {
+    private MySQLConfig(MySQLConfig p_parent, String p_nodeName) {
         super(p_parent, p_nodeName);
 
         this.tableName = this.parent.tableName;
@@ -63,9 +65,9 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
             return;
         }
         try {
-            Class.forName(SQLiteConfig.SQLITE_DRIVER);
+            Class.forName(MySQLConfig.MYSQL_DRIVER);
         } catch (ClassNotFoundException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not load SQLite driver " + SQLiteConfig.SQLITE_DRIVER + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not load MySQL driver " + MySQLConfig.MYSQL_DRIVER + ":");
             e.printStackTrace();
             return;
         }
@@ -73,15 +75,15 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
         this.reload();
     }
 
-    public static SQLiteConfig getForPath(File folder, String fileName, String tableName, String path, PathSymbolsType symType) {
-        return SQLiteConfig.getForPath(new SQLiteConfig(folder, fileName, tableName, symType), path);
+    public static MySQLConfig getForPath(String host, int port, String base, String user, String pass, String tableName, String path, PathSymbolsType symType) {
+        return MySQLConfig.getForPath(new MySQLConfig(host, port, base, user, pass, tableName, symType), path);
     }
 
-    public static SQLiteConfig getForPath(File folder, String fileName, String tableName, String path) {
-        return SQLiteConfig.getForPath(new SQLiteConfig(folder, fileName, tableName), path);
+    public static MySQLConfig getForPath(String host, int port, String base, String user, String pass, String tableName, String path) {
+        return MySQLConfig.getForPath(new MySQLConfig(host, port, base, user, pass, tableName), path);
     }
 
-    public static SQLiteConfig getForPath(SQLiteConfig root, String path) {
+    public static MySQLConfig getForPath(MySQLConfig root, String path) {
         if (root == null) {
             return null;
         }
@@ -107,23 +109,23 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     }
 
     @Override
-	public SQLiteConfig getRoot() {
-        return (SQLiteConfig) super.getRoot();
+	public MySQLConfig getRoot() {
+        return (MySQLConfig) super.getRoot();
     }
 
-    public SQLiteConfig getChild(String name) {
+    public MySQLConfig getChild(String name) {
         if (!this.canAccess()) {
             return null;
         }
         if (name == null || name.isEmpty()) {
             return this;
         }
-        return new SQLiteConfig(this, name);
+        return new MySQLConfig(this, name);
     }
 
     private Map<String, Object> getParentMap(PathComponent.PathComponentsList path) {
-        SQLiteConfig dir;
-        PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
+        MySQLConfig dir;
+        PathNavigator<MySQLConfig> pn = new PathNavigator<MySQLConfig>(this);
         PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
         pathList.removeLast();
         if (!pn.followPath(pathList)) {
@@ -134,8 +136,8 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     }
 
     private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map) {
-        SQLiteConfig dir;
-        PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
+        MySQLConfig dir;
+        PathNavigator<MySQLConfig> pn = new PathNavigator<MySQLConfig>(this);
         PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
         pathList.removeLast();
         if (!pn.followPath(pathList)) {
@@ -254,9 +256,9 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
         }
         PreparedStatement statement = null;
         try {
-            UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "->" + tableName + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Sending SQL data to MySQL database " + this.host + ":" + this.port + "->" + tableName + "...");
             String table = this.tableName; // TODO: Escape table name
-            statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, k, v) VALUES (?, ?, ?)");
+            statement = this.connection.prepareStatement("INSERT INTO " + table + " (id, k, v) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE v = ?");
 
             for (Entry<String, Object> entry : this.data.entrySet()) {
                 if (entry.getValue() == null) {
@@ -271,9 +273,10 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
                 objout.close();
                 bitout.close();
 
-                statement.setString(1, SQLiteConfig.getHash(entry.getKey()));
+                statement.setString(1, MySQLConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
                 statement.setBytes(3, bytes);
+                statement.setBytes(4, bytes);
                 statement.addBatch();
             }
 
@@ -283,7 +286,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 
             for (Entry<String, Object> entry : this.data.entrySet()) {
                 if (entry.getValue() == null) {
-                    statement.setString(1, SQLiteConfig.getHash(entry.getKey()));
+                    statement.setString(1, MySQLConfig.getHash(entry.getKey()));
                     statement.addBatch();
                     this.data.remove(entry.getKey());
                 }
@@ -291,9 +294,9 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 
             statement.executeBatch();
             statement.close();
-            UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
+            UneiConfiguration.getInstance().getLogger().fine("Successfully sent.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -303,7 +306,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
                 }
             }
         } catch (IOException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -328,7 +331,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
             this.reconnect();
             this.data.clear();
 
-            UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "->" + tableName + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Retreiving SQL data from MySQL database " + this.host + ":" + this.port + "->" + tableName + "...");
             String table = this.tableName; // TODO: Escape table name
             ResultSet result = this.query("SELECT * FROM " + table + "", null);
             while (result.next()) {
@@ -344,19 +347,19 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 
                     this.data.put(key, value);
                 } catch (IOException e) {
-                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+                    UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
-                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+                    UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
                     e.printStackTrace();
                 }
             }
             Statement statement = result.getStatement();
             result.close();
             statement.close();
-            UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+            UneiConfiguration.getInstance().getLogger().fine("Successfully retreived.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
         }
     }
@@ -369,7 +372,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
             this.parent.reconnect();
             return;
         }
-        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
+        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to MySQL file " + this.host + ":" + this.port + "->" + tableName + "...");
         try {
             if (this.connection != null) {
                 this.connection.close();
@@ -377,7 +380,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
         } catch (SQLException e) {
         }
 
-        this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.file.getFile().getPath());
+        this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.base, this.user, this.pass);
 
         PreparedStatement statement = null;
         try {
@@ -402,7 +405,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
         try {
             this.connection.close();
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not close SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not close MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
         }
         this.connection = null;
@@ -411,7 +414,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     //@Override
 	@SuppressWarnings("unchecked")
     protected void synchronize() {
-        SQLiteConfig currentNode = this.getRoot();
+        MySQLConfig currentNode = this.getRoot();
         Map<String, Object> currentData = currentNode.data;
 
         PathComponent.PathComponentsList path = fullPath.clone();
@@ -476,11 +479,11 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     }
 
     @Override
-	public SQLiteConfig getSubSection(PathComponent.PathComponentsList path) {
+	public MySQLConfig getSubSection(PathComponent.PathComponentsList path) {
         if (path == null || path.isEmpty()) {
             return this;
         }
-        PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
+        PathNavigator<MySQLConfig> navigator = new PathNavigator<MySQLConfig>(this);
         if (navigator.followPath(path)) {
             return navigator.getCurrentNode();
         }
@@ -500,11 +503,11 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     }
 
     public void setSubSection(String path, IConfiguration value) {
-        if (!(value instanceof SQLiteConfig)) {
+        if (!(value instanceof MySQLConfig)) {
             //TODO ConfigType conversion
             return;
         }
-        set(path, ((SQLiteConfig) value).data);
+        set(path, ((MySQLConfig) value).data);
     }
 
     public void remove(String path) {
@@ -513,6 +516,6 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 
     @Override
     public String toString() {
-        return "SQLiteConfig=" + this.data.toString();
+        return "MySQLConfig=" + this.data.toString();
     }
 }

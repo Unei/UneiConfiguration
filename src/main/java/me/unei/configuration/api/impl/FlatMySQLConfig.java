@@ -1,6 +1,12 @@
 package me.unei.configuration.api.impl;
 
-import java.io.File;
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.SerializerHelper;
+import me.unei.configuration.api.IFlatMySQLConfiguration;
+import me.unei.configuration.api.UntypedFlatStorage;
+import me.unei.configuration.plugin.UneiConfiguration;
+
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,26 +16,27 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.xml.bind.DatatypeConverter;
+public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> implements IFlatMySQLConfiguration {
 
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.SerializerHelper;
-import me.unei.configuration.api.IFlatSQLiteConfiguration;
-import me.unei.configuration.api.UntypedFlatStorage;
-import me.unei.configuration.plugin.UneiConfiguration;
-
-public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> implements IFlatSQLiteConfiguration {
-
-    public static final String SQLITE_FILE_EXT = ".db";
-    public static final String SQLITE_DRIVER = "org.sqlite.JDBC";
+    public static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
 
     private Map<String, Object> data = new HashMap<String, Object>();
 
+    private String host;
+    private int port;
+    private String base;
+    private String user;
+    private String pass;
     private Connection connection = null;
     private String tableName = "_";
 
-    public FlatSQLiteConfig(File folder, String fileName, String tableName) {
-        super(new SavedFile(folder, fileName, FlatSQLiteConfig.SQLITE_FILE_EXT));
+    public FlatMySQLConfig(String host, int port, String base, String user, String pass, String tableName) {
+        super(new SavedFile());
+        this.host = host;
+        this.port = port;
+        this.base = base;
+        this.user = user;
+        this.pass = pass;
         this.tableName = tableName;
 
         this.subinit();
@@ -37,9 +44,9 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
 
     private void subinit() {
         try {
-            Class.forName(FlatSQLiteConfig.SQLITE_DRIVER);
+            Class.forName(FlatMySQLConfig.MYSQL_DRIVER);
         } catch (ClassNotFoundException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not load SQLite driver " + FlatSQLiteConfig.SQLITE_DRIVER + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not load MySQL driver " + FlatMySQLConfig.MYSQL_DRIVER + ":");
             e.printStackTrace();
             return;
         }
@@ -149,22 +156,23 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         }
         PreparedStatement statement = null;
         try {
-            UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "->" + tableName + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Sending SQL data to MySQL file " + this.host + ":" + this.port + "->" + tableName + "...");
             String table = this.tableName; // TODO: Escape table name
-            statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, k, v) VALUES (?, ?, ?)");
+            statement = this.connection.prepareStatement("INSERT INTO " + table + " (id, k, v) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE v = ?");
 
             for (Entry<String, Object> entry : this.data.entrySet()) {
-                statement.setString(1, FlatSQLiteConfig.getHash(entry.getKey()));
+                statement.setString(1, FlatMySQLConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
                 statement.setString(3, SerializerHelper.toJSONString(entry.getValue()));
+                statement.setString(4, SerializerHelper.toJSONString(entry.getValue()));
                 statement.addBatch();
             }
 
             statement.executeBatch();
             statement.close();
-            UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
+            UneiConfiguration.getInstance().getLogger().fine("Successfully sent.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -174,7 +182,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
                 }
             }
         } catch (IOException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -194,7 +202,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
             this.reconnect();
             this.data.clear();
 
-            UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "->" + tableName + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Retreiving SQL data from MySQL file " + this.host + ":" + this.port + "->" + tableName + "...");
             String table = this.tableName; // TODO: Escape table name
             ResultSet result = this.query("SELECT * FROM " + table + "", null);
             while (result.next()) {
@@ -204,16 +212,16 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
 
                     this.data.put(key, value);
                 } catch (IOException e) {
-                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+                    UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
                     e.printStackTrace();
                 }
             }
             Statement statement = result.getStatement();
             result.close();
             statement.close();
-            UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+            UneiConfiguration.getInstance().getLogger().fine("Successfully retreived.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
         }
     }
@@ -222,7 +230,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         if (!this.canAccess()) {
             return;
         }
-        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
+        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to MySQL file " + this.host + ":" + this.port + "->" + tableName + "...");
         try {
             if (this.connection != null) {
                 this.connection.close();
@@ -230,7 +238,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         } catch (SQLException e) {
         }
 
-        this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.file.getFile().getPath());
+        this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.base, this.user, this.pass);
 
         PreparedStatement statement = null;
         try {
@@ -251,7 +259,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         try {
             this.connection.close();
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not close SQLite configuration " + this.getFileName() + "->" + tableName + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not close MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
         }
         this.connection = null;
@@ -300,6 +308,6 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
 
     @Override
     public String toString() {
-        return "FlatSQLiteConfig=" + this.data.toString();
+        return "FlatMySQLConfig=" + this.data.toString();
     }
 }
