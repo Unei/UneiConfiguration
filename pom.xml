@@ -58,6 +58,7 @@
           </execution>
         </executions>
         <configuration>
+          <outputDirectory>.</outputDirectory>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
