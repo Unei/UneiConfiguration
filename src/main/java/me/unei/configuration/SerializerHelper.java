@@ -1,9 +1,17 @@
 package me.unei.configuration;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,6 +33,175 @@ public final class SerializerHelper
 		}
 	}
 	
+	public static void writeCSV(Writer w, List<String> keyNames, Map<String, Object> map) throws IOException {
+		List<List<String>> lines = new ArrayList<List<String>>(map.size());
+		for (Entry<String, Object> entry : map.entrySet()) {
+			List<String> line = new ArrayList<String>();
+			line.add(entry.getKey());
+			if (entry.getValue() instanceof Iterable) {
+				Iterable<?> itable = (Iterable<?>) entry.getValue();
+				Iterator<?> it = itable.iterator();
+				while (it.hasNext())
+				{
+					Object elem = it.next();
+					line.add(SerializerHelper.toJSONString(elem));
+				}
+			} else {
+				line.add(SerializerHelper.toJSONString(entry.getValue()));
+			}
+			lines.add(line);
+		}
+		String s = SerializerHelper.toCSVString(keyNames, lines);
+		StringReader sr = new StringReader(s);
+		int cur = 0;
+		while ((cur = sr.read()) > 0) {
+			w.write(cur);
+		}
+	}
+	
+	public static Map<String, Object> readCSV(Reader r, List<String> keyNames) throws IOException {
+		keyNames.clear();
+		StringWriter sw = new StringWriter();
+		int cur = 0;
+		while ((cur = r.read()) > 0) {
+			sw.write(cur);
+		}
+		List<List<String>> result = SerializerHelper.parseCSV(sw.toString());
+		if (result == null || result.isEmpty()) {
+			return new HashMap<String, Object>();
+		}
+		List<String> keys = result.get(0);
+		keyNames.addAll(keys);
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		for (int i = 1; i < result.size(); i++) {
+			List<String> line = result.get(i);
+			if (line == null || line.isEmpty()) {
+				continue;
+			}
+			MyEntry<String, Object> entry = new MyEntry<String, Object>(line.get(0), null);
+			if (line.size() == 2) {
+				entry.setValue(SerializerHelper.parseJSON(line.get(1)));
+			} else {
+				ArrayList<Object> list = new ArrayList<Object>(line.size() - 1);
+				for (int j = 1; j < line.size(); j++) {
+					list.add(SerializerHelper.parseJSON(line.get(j)));
+				}
+				entry.setValue(list);
+			}
+			map.put(entry.getKey(), entry.getValue());
+		}
+		return map;
+	}
+	
+	public static String toCSVString(List<String> keyNames, List<List<String>> lines)
+	{
+		StringBuilder sb = new StringBuilder();
+		String str = null;
+		if (keyNames != null) {
+			for (Iterator<String> it = keyNames.iterator(); it.hasNext(); )
+			{
+				str = it.next();
+				sb.append(/*'"').append(SerializerHelper.escapeQuote(*/str/*)).append('"'*/);
+				if (it.hasNext())
+				{
+					sb.append(';').append(' ');
+				}
+			}
+			if (!keyNames.isEmpty()) {
+				sb.append('\n');
+			}
+		}
+		if (lines != null) {
+			for (List<String> elems : lines) {
+				if (elems == null) {
+					continue;
+				}
+				if (!elems.isEmpty()) {
+					for (Iterator<String> it = elems.iterator(); it.hasNext(); ) {
+						str = it.next();
+						sb.append(/*'"').append(SerializerHelper.escapeQuote(*/str/*)).append('"'*/);
+						if (it.hasNext()) {
+							sb.append(';').append(' ');
+						}
+					}
+				}
+				sb.append('\n');
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static List<List<String>> parseCSV(String csv) {
+		if (csv == null) {
+			return null;
+		}
+		List<List<String>> lines = new ArrayList<List<String>>();
+		boolean quoted = false;
+		boolean escaped = false;
+		StringBuilder sb = new StringBuilder();
+		List<String> currentLine = new ArrayList<String>();
+		for (int i = 0; i < csv.length(); i++) {
+			char c = csv.charAt(i);
+			
+			if (escaped)
+			{
+				sb.append(c);
+				escaped = false;
+				continue;
+			}
+			
+			switch (c)
+			{
+				case '\\':
+					escaped = true;
+					break;
+					
+				case '"':
+					quoted = !quoted;
+					break;
+					
+				case ';':
+					if (!quoted) {
+						currentLine.add(sb.toString());
+						sb.setLength(0);
+					} else {
+						sb.append(c);
+					}
+					break;
+					
+				case ' ': //TODO allow spaces between words even if not quoted
+					if (quoted) {
+						sb.append(c);
+					}
+					break;
+					
+				case '\n':
+					if (!quoted) {
+						if (sb.length() > 0) {
+							currentLine.add(sb.toString());
+						}
+						sb.setLength(0);
+						lines.add(currentLine);
+						currentLine = new ArrayList<String>();
+					} else {
+						sb.append(c);
+					}
+					break;
+					
+				default:
+					sb.append(c);
+			}
+		}
+		return lines;
+	}
+	/*
+	private static String escapeQuote(String input) {
+		if (input == null) {
+			return null;
+		}
+		return input.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"");
+	}
+*/
 	public static String toJSONString(Object objects) throws IOException
 	{
 		if (objects == null/* || objects.length < 1 || objects[0] == null*/)
@@ -82,5 +259,42 @@ public final class SerializerHelper
 				super.write(' ');
 			}
 		}
+	}
+	
+	private static class MyEntry<K, V> implements Map.Entry<K, V>
+	{
+		private final K key;
+		private V value;
+		
+		MyEntry(K key, V value)
+		{
+			this.key = key;
+			this.value = value;
+		}
+		
+		public final K getKey()
+		{
+			return this.key;
+		}
+		
+		public final V getValue()
+		{
+			return this.value;
+		}
+		
+		public final V setValue(V newValue)
+		{
+			V old = this.getValue();
+			this.value = newValue;
+			return old;
+		}
+
+		@Override
+		public int hashCode() {
+			K k = getKey();
+		    V v = getValue();
+		    return ((k == null) ? 0 : k.hashCode()) ^ ((v == null) ? 0 : v.hashCode());
+		}
+
 	}
 }
