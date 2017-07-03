@@ -42,16 +42,23 @@ public final class NMSReflection {
 
     public static boolean canUseNMS() {
         try {
-            Class.forName("org.bukkit.Bukkit");
+            Bukkit.getVersion();
             return true;
-        } catch (ClassNotFoundException e) {
+        } catch (Throwable t) {
             return false;
         }
     }
 
     public static Class<?> getNMSClass(String name) {
-        if (name == null || name.isEmpty() || NMSReflection.getVersion().isEmpty()) {
-            return null;
+        if (name == null || name.isEmpty()) {
+        	return null;
+        }
+        if (NMSReflection.getVersion().isEmpty()) {
+            try {
+                return Class.forName("net.minecraft.server." + name);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         try {
             return Class.forName("net.minecraft.server." + NMSReflection.getVersion() + "." + name);
@@ -62,8 +69,15 @@ public final class NMSReflection {
     }
 
     public static Class<?> getOBCClass(String name) {
-        if (name == null || name.isEmpty() || NMSReflection.getVersion().isEmpty()) {
+        if (name == null || name.isEmpty()) {
             return null;
+        }
+        if (NMSReflection.getVersion().isEmpty()) {
+            try {
+                return Class.forName("org.bukkit.craftbukkit." + name);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         try {
             return Class.forName("org.bukkit.craftbukkit." + NMSReflection.getVersion() + "." + name);

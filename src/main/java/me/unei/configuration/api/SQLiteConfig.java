@@ -1,20 +1,31 @@
 package me.unei.configuration.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
+
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
-
-import javax.xml.bind.DatatypeConverter;
-import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLiteConfiguration {
 
@@ -96,7 +107,8 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
         return hex;
     }
 
-    public SQLiteConfig getRoot() {
+    @Override
+	public SQLiteConfig getRoot() {
         return (SQLiteConfig) super.getRoot();
     }
 
@@ -243,7 +255,7 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
         }
         PreparedStatement statement = null;
         try {
-            UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "->" + tableName + "...");
             String table = "\"" + this.tableName.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (`id`, `key`, `value`) VALUES (?, ?, ?)");
 
@@ -282,7 +294,7 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
             statement.close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -292,7 +304,7 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
                 }
             }
         } catch (IOException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -317,7 +329,7 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
             this.reconnect();
             this.data.clear();
 
-            UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "->" + tableName + "...");
             String table = "\"" + this.tableName.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             ResultSet result = this.query("SELECT * FROM " + table + "", null);
             while (result.next()) {
@@ -333,10 +345,10 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
 
                     this.data.put(key, value);
                 } catch (IOException e) {
-                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
+                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
-                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
+                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
                     e.printStackTrace();
                 }
             }
@@ -344,7 +356,7 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
             result.getStatement().close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
         }
     }
@@ -357,7 +369,7 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
             this.parent.reconnect();
             return;
         }
-        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "...");
+        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
         try {
             if (this.connection != null) {
                 this.connection.close();
@@ -390,13 +402,14 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
         try {
             this.connection.close();
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not close SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not close SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
         }
         this.connection = null;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     protected void synchronize() {
         SQLiteConfig currentNode = this.getRoot();
         Map<String, Object> currentData = currentNode.data;
@@ -429,7 +442,8 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
         this.data = currentData;
     }
 
-    protected void propagate() {
+    @Override
+	protected void propagate() {
         if (this.parent != null) {
             this.parent.data.put(this.nodeName, this.data);
             this.parent.propagate();
@@ -461,7 +475,8 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
         return node.get(list.lastChild());
     }
 
-    public SQLiteConfig getSubSection(PathComponent.PathComponentsList path) {
+    @Override
+	public SQLiteConfig getSubSection(PathComponent.PathComponentsList path) {
         if (path == null || path.isEmpty()) {
             return this;
         }

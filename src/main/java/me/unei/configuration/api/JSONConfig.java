@@ -266,8 +266,9 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         JsonWriter jw = new JsonWriter(sw);
         jw.setIndent("  ");
         JSONConfig.GSON.toJson(data, Map.class, jw);
-        String res = sw.toString();
+        String res = null;
         try {
+            res = sw.toString();
         	jw.close();
         	sw.close();
         } catch (IOException e) {

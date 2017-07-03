@@ -645,11 +645,19 @@ public class NBTCompoundReflection {
 
     public static void remove(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
+        	Method rm;
+        	try {
+        		rm = NBTCompoundReflection.nbtTagCompound.getMethod("remove", String.class);
+        	} catch (NoSuchMethodException e) {
+        		try {
+        			rm = NBTCompoundReflection.nbtTagCompound.getMethod("o", String.class);
+        		} catch (NoSuchMethodException e2) {
+        			e2.printStackTrace();
+        			return;
+        		}
+        	}
             try {
-                Method set = NBTCompoundReflection.nbtTagCompound.getMethod("remove", String.class);
-                set.invoke(obj, key);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+                rm.invoke(obj, key);
             } catch (InvocationTargetException e) {
                 if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
                     throw (RuntimeException) e.getCause();

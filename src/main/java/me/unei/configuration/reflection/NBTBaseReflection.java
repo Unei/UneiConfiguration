@@ -22,7 +22,8 @@ public final class NBTBaseReflection {
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (NoSuchFieldException e) {
-                e.printStackTrace();
+            	/* Minecraft version is probably under 1.7.X */
+                /* e.printStackTrace(); */
             } catch (SecurityException e) {
                 e.printStackTrace();
             }
@@ -97,6 +98,7 @@ public final class NBTBaseReflection {
         return NBTBaseReflection.nbtTagBase;
     }
 
+    @Deprecated
     public static String[] getTypeList() {
         if (NBTBaseReflection.tagList == null) {
             return null;

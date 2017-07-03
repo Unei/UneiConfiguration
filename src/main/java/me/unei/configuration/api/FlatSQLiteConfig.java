@@ -151,7 +151,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
         }
         PreparedStatement statement = null;
         try {
-            UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "->" + tableName + "...");
             String table = "\"" + this.tableName.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (`id`, `key`, `value`) VALUES (?, ?, ?)");
 
@@ -166,7 +166,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
             statement.close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -176,7 +176,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
                 }
             }
         } catch (IOException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
                 try {
@@ -196,7 +196,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
             this.reconnect();
             this.data.clear();
 
-            UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "...");
+            UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "->" + tableName + "...");
             String table = "\"" + this.tableName.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             ResultSet result = this.query("SELECT * FROM " + table + "", null);
             while (result.next()) {
@@ -206,7 +206,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
 
                     this.data.put(key, value);
                 } catch (IOException e) {
-                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
+                    UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
                     e.printStackTrace();
                 }
             }
@@ -214,7 +214,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
             result.getStatement().close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
         }
     }
@@ -223,7 +223,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
         if (!this.canAccess()) {
             return;
         }
-        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "...");
+        UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
         try {
             if (this.connection != null) {
                 this.connection.close();
@@ -252,7 +252,7 @@ public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> imple
         try {
             this.connection.close();
         } catch (SQLException e) {
-            UneiConfiguration.getInstance().getLogger().warning("Could not close SQLite configuration " + this.getFileName() + ":");
+            UneiConfiguration.getInstance().getLogger().warning("Could not close SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
         }
         this.connection = null;

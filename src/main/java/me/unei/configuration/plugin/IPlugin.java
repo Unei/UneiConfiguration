@@ -21,6 +21,6 @@ public interface IPlugin {
     public IPlugin.Type getType();
 
     public static enum Type {
-        BUKKIT, BUNGEECORD, SPONGE, FORGE;
+        BUKKIT, BUNGEECORD, SPONGE, FORGE, STANDALONE;
     }
 }

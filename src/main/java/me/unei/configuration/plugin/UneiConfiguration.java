@@ -1,10 +1,10 @@
 package me.unei.configuration.plugin;
 
-import me.unei.configuration.reflection.NMSReflection;
-
 import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
+
+import me.unei.configuration.reflection.NMSReflection;
 
 public final class UneiConfiguration implements IPlugin {
 
@@ -26,6 +26,7 @@ public final class UneiConfiguration implements IPlugin {
 
         if (NMSReflection.canUseNMS()) {
             this.getLogger().fine("NMS detected for NBT");
+            this.getLogger().fine("NMS Version = " + NMSReflection.getVersion());
         } else {
             this.getLogger().fine("Using Unei's NBTLib");
         }
@@ -44,7 +45,14 @@ public final class UneiConfiguration implements IPlugin {
     }
 
     public Logger getLogger() {
-        return source.getLogger();
+    	try
+    	{
+    		return source.getLogger();
+    	}
+    	catch (AbstractMethodError t)
+    	{
+    		return Logger.getLogger("UneiConfiguration");
+    	}
     }
 
     public InputStream getResource(String path) {
@@ -56,6 +64,9 @@ public final class UneiConfiguration implements IPlugin {
     }
 
     public static UneiConfiguration getInstance() {
+    	if (UneiConfiguration.Instance == null) {
+    		new Standalone();
+    	}
         return UneiConfiguration.Instance;
     }
 }
