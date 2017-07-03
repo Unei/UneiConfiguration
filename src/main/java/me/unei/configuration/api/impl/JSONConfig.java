@@ -1,4 +1,4 @@
-package me.unei.configuration.api;
+package me.unei.configuration.api.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,15 +17,20 @@ import java.util.Set;
 import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.IJSONConfiguration;
+import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfiguration {
+public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfiguration {
 
     public static final String JSON_FILE_EXT = ".json";
     public static final String JSON_TMP_EXT = ".tmp";
@@ -150,7 +155,7 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         }
     }
 
-    public void reload() {
+    public void reload() throws FileFormatException {
         if (!this.canAccess()) {
             return;
         }
@@ -167,7 +172,12 @@ public class JSONConfig extends UntypedStorage<JSONConfig> implements IJSONConfi
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading JSON from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
-            Map<?, ?> tmpData = JSONConfig.GSON.fromJson(r, Map.class);
+            Map<?, ?> tmpData;
+            try {
+            	tmpData = JSONConfig.GSON.fromJson(r, Map.class);
+            } catch (JsonSyntaxException jse) {
+            	throw new FileFormatException("JSON", file.getFile(), "", jse);
+            }
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;

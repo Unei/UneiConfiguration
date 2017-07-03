@@ -1,9 +1,10 @@
 package me.unei.configuration.api;
 
-import me.unei.configuration.SavedFile;
-
 import java.util.List;
 import java.util.Set;
+
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.exceptions.FileFormatException;
 
 public interface IFlatConfiguration {
 
@@ -15,7 +16,7 @@ public interface IFlatConfiguration {
     public void lock();
 
     public void save();
-    public void reload();
+    public void reload() throws FileFormatException;
 
     public Set<String> getKeys();
 

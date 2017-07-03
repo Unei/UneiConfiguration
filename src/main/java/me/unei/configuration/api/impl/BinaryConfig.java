@@ -1,4 +1,4 @@
-package me.unei.configuration.api;
+package me.unei.configuration.api.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,17 +10,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Consumer;
-
-import com.sun.media.sound.InvalidFormatException;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfiguration {
+public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfiguration {
 	
 	public static final String BINARY_FILE_EXT = ".bin";
 	public static final String BINARY_TMP_EXT = ".tmp";
@@ -67,19 +67,6 @@ public class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfi
 				this.data = (Map<String, Object>) me;
 			}
 		}
-	}
-	
-	@Override
-	@Deprecated
-	protected void synchronize()
-	{
-		PathNavigator<BinaryConfig> pn = new PathNavigator<BinaryConfig>(this);
-		pn.goToRoot();
-		pn.followAndApply(PathNavigator.cleanPath(this.fullPath), new Consumer<BinaryConfig>() {
-			public void accept(BinaryConfig t) {
-				t.updateFromParent();
-			}
-		});
 	}
 	
 	@Override
@@ -146,7 +133,7 @@ public class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfi
 		}
 	}
 	
-	public void reload()
+	public void reload() throws FileFormatException
 	{
 		if (!this.canAccess()) {
 			return;
@@ -172,7 +159,7 @@ public class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfi
 			ois = new ObjectInputStream(new FileInputStream(this.file.getFile()));
 			if (ois.readInt() != 0xdeadbeef) {
 				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
-				throw new InvalidFormatException("The file " + this.file.getFile().getAbsolutePath() + " is not in the good format !");
+				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
 			}
 			Object result = ois.readObject();
 			if (result != null && (result instanceof Map)) {
@@ -186,7 +173,7 @@ public class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfi
 			}
 			if (ois.readInt() != 0xfeebdaed) {
 				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
-				throw new InvalidFormatException("The file " + this.file.getFile().getAbsolutePath() + " is not in the good format !");
+				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
 			}
 			UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
 		} catch (ClassNotFoundException e) {

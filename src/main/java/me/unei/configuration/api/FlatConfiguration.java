@@ -1,6 +1,7 @@
 package me.unei.configuration.api;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.exceptions.FileFormatException;
 
 public abstract class FlatConfiguration<T extends FlatConfiguration<T>> implements IFlatConfiguration {
 
@@ -15,7 +16,14 @@ public abstract class FlatConfiguration<T extends FlatConfiguration<T>> implemen
 
     protected final void init() {
         this.file.init();
-        this.reload();
+        try
+        {
+        	this.reload();
+        }
+        catch (FileFormatException e)
+        {
+        	e.printStackTrace();
+        }
     }
 
     public final SavedFile getFile() {

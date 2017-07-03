@@ -1,4 +1,4 @@
-package me.unei.configuration.api;
+package me.unei.configuration.api.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,12 +22,15 @@ import java.util.Set;
 import javax.xml.bind.DatatypeConverter;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.ISQLiteConfiguration;
+import me.unei.configuration.api.UntypedStorage;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLiteConfiguration {
+public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLiteConfiguration {
 
     public static final String SQLITE_FILE_EXT = ".db";
     public static final String SQLITE_DRIVER = "org.sqlite.JDBC";
@@ -408,7 +411,7 @@ public class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLit
         this.connection = null;
     }
 
-    @Override
+    //@Override
 	@SuppressWarnings("unchecked")
     protected void synchronize() {
         SQLiteConfig currentNode = this.getRoot();

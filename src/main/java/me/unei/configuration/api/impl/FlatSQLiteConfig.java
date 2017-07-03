@@ -1,4 +1,4 @@
-package me.unei.configuration.api;
+package me.unei.configuration.api.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +18,11 @@ import javax.xml.bind.DatatypeConverter;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.SerializerHelper;
+import me.unei.configuration.api.IFlatSQLiteConfiguration;
+import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> implements IFlatSQLiteConfiguration {
+public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> implements IFlatSQLiteConfiguration {
 
     public static final String SQLITE_FILE_EXT = ".db";
     public static final String SQLITE_DRIVER = "org.sqlite.JDBC";

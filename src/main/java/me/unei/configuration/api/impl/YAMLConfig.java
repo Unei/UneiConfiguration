@@ -1,4 +1,4 @@
-package me.unei.configuration.api;
+package me.unei.configuration.api.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,14 +20,19 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.DumperOptions.LineBreak;
 import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.IYAMLConfiguration;
+import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfiguration {
+public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfiguration {
 
     public static final String YAML_FILE_EXT = ".yml";
     public static final String YAML_TMP_EXT = ".tmp";
@@ -153,7 +158,7 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
         }
     }
 
-    public void reload() {
+    public void reload() throws FileFormatException {
         if (!this.canAccess()) {
             return;
         }
@@ -170,7 +175,13 @@ public class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfi
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
-            Map<?, ?> tmpData = YAMLConfig.BEAUTIFIED_YAML.loadAs(r, Map.class);
+            Map<?, ?> tmpData;
+            try {
+            	tmpData = YAMLConfig.BEAUTIFIED_YAML.loadAs(r, Map.class);
+            } catch (YAMLException ye) {
+            	throw new FileFormatException("YAML", this.file.getFile(), "", ye);
+            }
+            
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;

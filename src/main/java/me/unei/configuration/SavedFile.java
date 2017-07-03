@@ -1,8 +1,8 @@
 package me.unei.configuration;
 
-import me.unei.configuration.plugin.UneiConfiguration;
-
 import java.io.File;
+
+import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class SavedFile {
 
@@ -23,7 +23,7 @@ public final class SavedFile {
     }
 
     public SavedFile(File folder, String fileName, String extension) {
-        this.folder = (folder == null? new File(".") : folder);
+        this.folder = (folder == null ? new File(".") : folder);
         if (fileName != null) {
             this.fileName = fileName;
         }
@@ -42,6 +42,7 @@ public final class SavedFile {
         if (this.dummyFile) {
             this.canAccess = true;
             this.initialized = true;
+            return true;
         }
         if (!this.folder.exists()) {
             UneiConfiguration.getInstance().getLogger().finest("Creating Configuration tree... (" + this.folder.getPath() + ")");

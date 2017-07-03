@@ -1,6 +1,7 @@
 package me.unei.configuration.api;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
@@ -46,11 +47,16 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	protected final void init()
 	{
 		this.file.init();
-		this.reload();
+		try
+		{
+			this.reload();
+		}
+		catch (FileFormatException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
-	@Deprecated
-	protected void synchronize() {};
 	protected abstract void propagate();
 	
 	public final SavedFile getFile()
