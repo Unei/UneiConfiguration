@@ -159,7 +159,7 @@ public final class SerializerHelper
 					if (!quoted) {
 						currentLine.add(sb.toString());
 						sb.setLength(0);
-						if (i < csv.length() && csv.charAt(i) == ' ') {
+						if (i < csv.length() && csv.charAt(i + 1) == ' ') {
 							i++;
 						}
 					} else {
