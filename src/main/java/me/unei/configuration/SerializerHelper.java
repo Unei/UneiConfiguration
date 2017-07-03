@@ -41,8 +41,7 @@ public final class SerializerHelper
 			if (entry.getValue() instanceof Iterable) {
 				Iterable<?> itable = (Iterable<?>) entry.getValue();
 				Iterator<?> it = itable.iterator();
-				while (it.hasNext())
-				{
+				while (it.hasNext()) {
 					Object elem = it.next();
 					line.add(SerializerHelper.toJSONString(elem));
 				}
@@ -78,32 +77,30 @@ public final class SerializerHelper
 			if (line == null || line.isEmpty()) {
 				continue;
 			}
-			MyEntry<String, Object> entry = new MyEntry<String, Object>(line.get(0), null);
+			String key = line.get(0);
+			Object value = null;
 			if (line.size() == 2) {
-				entry.setValue(SerializerHelper.parseJSON(line.get(1)));
+				value = SerializerHelper.parseJSON(line.get(1));
 			} else {
 				ArrayList<Object> list = new ArrayList<Object>(line.size() - 1);
 				for (int j = 1; j < line.size(); j++) {
 					list.add(SerializerHelper.parseJSON(line.get(j)));
 				}
-				entry.setValue(list);
+				value = list;
 			}
-			map.put(entry.getKey(), entry.getValue());
+			map.put(key, value);
 		}
 		return map;
 	}
 	
-	public static String toCSVString(List<String> keyNames, List<List<String>> lines)
-	{
+	public static String toCSVString(List<String> keyNames, List<List<String>> lines) {
 		StringBuilder sb = new StringBuilder();
 		String str = null;
 		if (keyNames != null) {
-			for (Iterator<String> it = keyNames.iterator(); it.hasNext(); )
-			{
+			for (Iterator<String> it = keyNames.iterator(); it.hasNext(); ) {
 				str = it.next();
-				sb.append(/*'"').append(SerializerHelper.escapeQuote(*/str/*)).append('"'*/);
-				if (it.hasNext())
-				{
+				sb.append(str);
+				if (it.hasNext()) {
 					sb.append(';').append(' ');
 				}
 			}
@@ -119,7 +116,7 @@ public final class SerializerHelper
 				if (!elems.isEmpty()) {
 					for (Iterator<String> it = elems.iterator(); it.hasNext(); ) {
 						str = it.next();
-						sb.append(/*'"').append(SerializerHelper.escapeQuote(*/str/*)).append('"'*/);
+						sb.append(str);
 						if (it.hasNext()) {
 							sb.append(';').append(' ');
 						}
@@ -143,15 +140,13 @@ public final class SerializerHelper
 		for (int i = 0; i < csv.length(); i++) {
 			char c = csv.charAt(i);
 			
-			if (escaped)
-			{
+			if (escaped) {
 				sb.append(c);
 				escaped = false;
 				continue;
 			}
 			
-			switch (c)
-			{
+			switch (c) {
 				case '\\':
 					escaped = true;
 					break;
@@ -164,13 +159,10 @@ public final class SerializerHelper
 					if (!quoted) {
 						currentLine.add(sb.toString());
 						sb.setLength(0);
+						if (i < csv.length() && csv.charAt(i) == ' ') {
+							i++;
+						}
 					} else {
-						sb.append(c);
-					}
-					break;
-					
-				case ' ': //TODO allow spaces between words even if not quoted
-					if (quoted) {
 						sb.append(c);
 					}
 					break;
@@ -194,30 +186,18 @@ public final class SerializerHelper
 		}
 		return lines;
 	}
-	/*
-	private static String escapeQuote(String input) {
-		if (input == null) {
-			return null;
-		}
-		return input.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"");
-	}
-*/
-	public static String toJSONString(Object objects) throws IOException
-	{
-		if (objects == null/* || objects.length < 1 || objects[0] == null*/)
-		{
+
+	public static String toJSONString(Object objects) throws IOException {
+		if (objects == null/* || objects.length < 1 || objects[0] == null*/) {
 			return "";
 		}
 		SerializerHelper.initGSON();
 		MyStringWriter sw = new MyStringWriter();
 		JsonWriter jw = new JsonWriter(sw);
-		try
-		{
+		try {
 			SerializerHelper.setSpace(jw);
-		}
-		catch (Exception e)
-		{
-			//
+		} catch (Exception e) {
+			// Nothing here ...
 		}
 		SerializerHelper.GSON.toJson(objects, objects.getClass(), jw);
 		String res = sw.toString();
@@ -259,42 +239,5 @@ public final class SerializerHelper
 				super.write(' ');
 			}
 		}
-	}
-	
-	private static class MyEntry<K, V> implements Map.Entry<K, V>
-	{
-		private final K key;
-		private V value;
-		
-		MyEntry(K key, V value)
-		{
-			this.key = key;
-			this.value = value;
-		}
-		
-		public final K getKey()
-		{
-			return this.key;
-		}
-		
-		public final V getValue()
-		{
-			return this.value;
-		}
-		
-		public final V setValue(V newValue)
-		{
-			V old = this.getValue();
-			this.value = newValue;
-			return old;
-		}
-
-		@Override
-		public int hashCode() {
-			K k = getKey();
-		    V v = getValue();
-		    return ((k == null) ? 0 : k.hashCode()) ^ ((v == null) ? 0 : v.hashCode());
-		}
-
 	}
 }

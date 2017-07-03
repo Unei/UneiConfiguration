@@ -9,7 +9,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,10 +30,14 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCon
 	public static final String CSV_TMP_EXT = ".tmp";
 	
 	private Map<String, Object> data = new HashMap<String, Object>();
+	private List<String> keyLine;
 	
 	public CSVConfig(File folder, String fileName)
 	{
 		super(new SavedFile(folder, fileName, CSVConfig.CSV_FILE_EXT));
+		
+		this.keyLine = new ArrayList<String>();
+		this.resetHeaderLine();
 		
 		this.init();
 	}
@@ -50,7 +53,7 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCon
 		UneiConfiguration.getInstance().getLogger().fine("Writing CSV data to file " + getFileName() + "...");
 		try {
 			Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
-			SerializerHelper.writeCSV(w, Arrays.asList("Key", "Value"), data);
+			SerializerHelper.writeCSV(w, keyLine, data);
 			w.flush();
 			w.close();
 			if (file.getFile().exists()) {
@@ -77,8 +80,7 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCon
 		try {
 			UneiConfiguration.getInstance().getLogger().fine("Reading CSV from file " + getFileName() + "...");
 			Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
-			List<String> names = new ArrayList<String>();
-			Map<String, Object> tmpData = SerializerHelper.readCSV(r, names);
+			Map<String, Object> tmpData = SerializerHelper.readCSV(r, keyLine);
 			r.close();
 			if (tmpData != null && !tmpData.isEmpty()) {
 				data.clear();
@@ -91,6 +93,16 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCon
 			UneiConfiguration.getInstance().getLogger().warning("An error occured while loading CSV file " + getFileName() + ":");
 			e.printStackTrace();
 		}
+	}
+	
+	public List<String> getHeaderLine() {
+		return this.keyLine;
+	}
+	
+	public void resetHeaderLine() {
+		this.keyLine.clear();
+		this.keyLine.add("Key");
+		this.keyLine.add("Value");
 	}
 	
 	public Set<String> getKeys() {
