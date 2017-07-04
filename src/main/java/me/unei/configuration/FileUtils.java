@@ -22,6 +22,20 @@ public final class FileUtils {
         UneiConfiguration.getInstance().getLogger().log(Level.FINE, "Successfully copied " + Integer.toString(totalCopyedBytes) + " bytes.");
         return totalCopyedBytes;
     }
+    
+    public static int copy(Reader in, Writer out) throws IOException {
+        UneiConfiguration.getInstance().getLogger().log(Level.FINEST, "Copying a set of characters into another");
+        int totalCopyedBytes = 0;
+        char buffer[] = new char[FileUtils.BUFFER_SIZE];
+        int read;
+        while ((read = in.read(buffer, 0, FileUtils.BUFFER_SIZE)) > 0) {
+            out.write(buffer, 0, read);
+            totalCopyedBytes += read;
+        }
+        out.flush();
+        UneiConfiguration.getInstance().getLogger().log(Level.FINE, "Successfully copied " + Integer.toString(totalCopyedBytes) + " characters.");
+        return totalCopyedBytes;
+    }
 
     public static int copy(InputStream is, File out) throws IOException, NullPointerException, FileNotFoundException, SecurityException {
         int tmp;

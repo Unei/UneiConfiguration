@@ -52,19 +52,13 @@ public final class SerializerHelper
 		}
 		String s = SerializerHelper.toCSVString(keyNames, lines);
 		StringReader sr = new StringReader(s);
-		int cur = 0;
-		while ((cur = sr.read()) > 0) {
-			w.write(cur);
-		}
+		FileUtils.copy(sr, w);
 	}
 	
 	public static Map<String, Object> readCSV(Reader r, List<String> keyNames) throws IOException {
 		keyNames.clear();
 		StringWriter sw = new StringWriter();
-		int cur = 0;
-		while ((cur = r.read()) > 0) {
-			sw.write(cur);
-		}
+		FileUtils.copy(r, sw);
 		List<List<String>> result = SerializerHelper.parseCSV(sw.toString());
 		if (result == null || result.isEmpty()) {
 			return new HashMap<String, Object>();
