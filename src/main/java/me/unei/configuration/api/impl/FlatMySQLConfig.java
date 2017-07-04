@@ -1,20 +1,28 @@
 package me.unei.configuration.api.impl;
 
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.SerializerHelper;
-import me.unei.configuration.api.IFlatMySQLConfiguration;
-import me.unei.configuration.api.UntypedFlatStorage;
-import me.unei.configuration.plugin.UneiConfiguration;
-
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
+
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.SerializerHelper;
+import me.unei.configuration.api.IFlatMySQLConfiguration;
+import me.unei.configuration.api.UntypedFlatStorage;
+import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.MySQLConnectionException;
+import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> implements IFlatMySQLConfiguration {
 
@@ -51,7 +59,11 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
             return;
         }
         this.file.init();
-        this.reload();
+        try {
+        	this.reload();
+        } catch (FileFormatException e) {
+        	e.printStackTrace();
+        }
     }
 
     private static String getHash(String text) {
@@ -73,6 +85,10 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
     }
 
     public boolean execute(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return false;
+        }
+
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -93,6 +109,10 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
     }
 
     public ResultSet query(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return null;
+        }
+
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -111,6 +131,10 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
     }
 
     public int update(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return -1;
+        }
+
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -131,6 +155,10 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
     }
 
     public long largeUpdate(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return -1;
+        }
+        
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -153,6 +181,14 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
     public void save() {
         if (!this.canAccess()) {
             return;
+        }
+        if (this.connection == null) {
+        	try {
+        		this.reconnect();
+        	} catch (SQLException e) {
+        		UneiConfiguration.getInstance().getLogger().warning("Could not save MySQL configuration (no connection) " + this.host + ":" + this.port + "->" + tableName);
+        		return;
+        	}
         }
         PreparedStatement statement = null;
         try {
@@ -194,7 +230,7 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
         }
     }
 
-    public void reload() {
+    public void reload() throws FileFormatException {
         if (!this.canAccess()) {
             return;
         }
@@ -222,7 +258,7 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
             UneiConfiguration.getInstance().getLogger().fine("Successfully retreived.");
         } catch (SQLException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
-            e.printStackTrace();
+            throw new MySQLConnectionException(host, port, tableName, null, e);
         }
     }
 
@@ -256,6 +292,9 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
     }
 
     public void close() {
+    	if (this.connection == null) {
+    		return;
+    	}
         try {
             this.connection.close();
         } catch (SQLException e) {

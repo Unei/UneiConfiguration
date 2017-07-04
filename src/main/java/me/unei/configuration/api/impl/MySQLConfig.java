@@ -1,23 +1,36 @@
 package me.unei.configuration.api.impl;
 
-import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.IConfiguration;
-import me.unei.configuration.api.IMySQLConfiguration;
-import me.unei.configuration.api.UntypedStorage;
-import me.unei.configuration.api.fs.PathComponent;
-import me.unei.configuration.api.fs.PathNavigator;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
-import me.unei.configuration.plugin.UneiConfiguration;
-
-import javax.xml.bind.DatatypeConverter;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
+
+import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.IMySQLConfiguration;
+import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.MySQLConnectionException;
+import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IMySQLConfiguration {
 
@@ -72,7 +85,11 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
             return;
         }
         this.file.init();
-        this.reload();
+        try {
+        	this.reload();
+        } catch (FileFormatException e) {
+        	e.printStackTrace();
+        }
     }
 
     public static MySQLConfig getForPath(String host, int port, String base, String user, String pass, String tableName, String path, PathSymbolsType symType) {
@@ -156,6 +173,10 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         if (this.parent != null) {
             return this.parent.execute(query, parameters);
         }
+        
+        if (this.connection == null) {
+        	return false;
+        }
 
         PreparedStatement statement = null;
         try {
@@ -180,6 +201,10 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         if (this.parent != null) {
             return this.parent.query(query, parameters);
         }
+        
+        if (this.connection == null) {
+        	return null;
+        }
 
         PreparedStatement statement = null;
         try {
@@ -201,6 +226,10 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
     public int update(String query, Map<Integer, Object> parameters) throws SQLException {
         if (this.parent != null) {
             return this.parent.update(query, parameters);
+        }
+        
+        if (this.connection == null) {
+        	return -1;
         }
 
         PreparedStatement statement = null;
@@ -225,6 +254,10 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
     public long largeUpdate(String query, Map<Integer, Object> parameters) throws SQLException {
         if (this.parent != null) {
             return this.parent.largeUpdate(query, parameters);
+        }
+        
+        if (this.connection == null) {
+        	return -1;
         }
 
         PreparedStatement statement = null;
@@ -253,6 +286,14 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         if (this.parent != null) {
             this.parent.save();
             return;
+        }
+        if (this.connection == null) {
+        	try {
+        		this.reconnect();
+        	} catch (SQLException e) {
+        		UneiConfiguration.getInstance().getLogger().warning("Could not save MySQL configuration (no connection) " + this.host + ":" + this.port + "->" + tableName);
+        		return;
+        	}
         }
         PreparedStatement statement = null;
         try {
@@ -318,7 +359,7 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         }
     }
 
-    public void reload() {
+    public void reload() throws FileFormatException {
         if (!this.canAccess()) {
             return;
         }
@@ -360,7 +401,7 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
             UneiConfiguration.getInstance().getLogger().fine("Successfully retreived.");
         } catch (SQLException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
-            e.printStackTrace();
+            throw new MySQLConnectionException(host, port, tableName, null, e);
         }
     }
 
@@ -401,6 +442,9 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         if (this.parent != null) {
             this.parent.close();
             return;
+        }
+        if (this.connection == null) {
+        	return;
         }
         try {
             this.connection.close();

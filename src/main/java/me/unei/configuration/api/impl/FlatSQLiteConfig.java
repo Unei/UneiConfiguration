@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -147,6 +152,15 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         if (!this.canAccess()) {
             return;
         }
+        if (this.connection == null) {
+        	try {
+        		this.reconnect();
+        	} catch (SQLException e) {
+        		UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + getFileName() + "->" + tableName + ":");
+        		e.printStackTrace();
+        		return;
+        	}
+        }
         PreparedStatement statement = null;
         try {
             UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "->" + tableName + "...");
@@ -248,6 +262,9 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     }
 
     public void close() {
+    	if (this.connection == null) {
+    		return;
+    	}
         try {
             this.connection.close();
         } catch (SQLException e) {
