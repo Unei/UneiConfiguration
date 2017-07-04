@@ -71,6 +71,10 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     }
 
     public boolean execute(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return false;
+        }
+
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -91,6 +95,10 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     }
 
     public ResultSet query(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return null;
+        }
+
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -109,6 +117,10 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     }
 
     public int update(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return -1;
+        }
+
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -129,6 +141,10 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     }
 
     public long largeUpdate(String query, Map<Integer, Object> parameters) throws SQLException {
+        if (this.connection == null) {
+        	return -1;
+        }
+        
         PreparedStatement statement = null;
         try {
             statement = this.connection.prepareStatement(query);
@@ -157,7 +173,6 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         		this.reconnect();
         	} catch (SQLException e) {
         		UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + getFileName() + "->" + tableName + ":");
-        		e.printStackTrace();
         		return;
         	}
         }

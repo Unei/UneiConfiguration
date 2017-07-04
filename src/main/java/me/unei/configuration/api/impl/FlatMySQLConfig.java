@@ -194,13 +194,13 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
         try {
             UneiConfiguration.getInstance().getLogger().fine("Sending SQL data to MySQL file " + this.host + ":" + this.port + "->" + tableName + "...");
             String table = this.tableName; // TODO: Escape table name
-            statement = this.connection.prepareStatement("INSERT INTO " + table + " (id, k, v) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE v = ?");
+            statement = this.connection.prepareStatement("REPLACE INTO " + table + " (id, k, v) VALUES (?, ?, ?)");
 
             for (Entry<String, Object> entry : this.data.entrySet()) {
+            	
                 statement.setString(1, FlatMySQLConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
                 statement.setString(3, SerializerHelper.toJSONString(entry.getValue()));
-                statement.setString(4, SerializerHelper.toJSONString(entry.getValue()));
                 statement.addBatch();
             }
 
@@ -279,7 +279,7 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
         PreparedStatement statement = null;
         try {
             String table = this.tableName; // TODO: Escape table name
-            statement = this.connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + table + " (id VARCHAR(32) UNIQUE PRIMARY KEY, k LONGTEXT, v LONGTEXT)");
+            statement = this.connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + table + " (id VARCHAR(32) UNIQUE, k LONGTEXT, v LONGTEXT, PRIMARY KEY (id))");
             statement.execute();
             statement.close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully reconnected.");

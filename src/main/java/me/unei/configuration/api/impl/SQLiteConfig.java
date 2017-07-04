@@ -159,6 +159,10 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
         if (this.parent != null) {
             return this.parent.execute(query, parameters);
         }
+        
+        if (this.connection == null) {
+        	return false;
+        }
 
         PreparedStatement statement = null;
         try {
@@ -183,6 +187,10 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
         if (this.parent != null) {
             return this.parent.query(query, parameters);
         }
+        
+        if (this.connection == null) {
+        	return null;
+        }
 
         PreparedStatement statement = null;
         try {
@@ -204,6 +212,10 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     public int update(String query, Map<Integer, Object> parameters) throws SQLException {
         if (this.parent != null) {
             return this.parent.update(query, parameters);
+        }
+        
+        if (this.connection == null) {
+        	return -1;
         }
 
         PreparedStatement statement = null;
@@ -228,6 +240,10 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     public long largeUpdate(String query, Map<Integer, Object> parameters) throws SQLException {
         if (this.parent != null) {
             return this.parent.largeUpdate(query, parameters);
+        }
+        
+        if (this.connection == null) {
+        	return -1;
         }
 
         PreparedStatement statement = null;
@@ -262,7 +278,6 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
         		this.reconnect();
         	} catch (SQLException e) {
         		UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + getFileName() + "->" + tableName + ":");
-        		e.printStackTrace();
         		return;
         	}
         }
