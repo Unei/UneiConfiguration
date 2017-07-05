@@ -219,8 +219,13 @@ public final class NBTConfig extends Configuration<NBTConfig> implements INBTCon
     }
 
     public Object get(String key) {
-        String serialized = this.getString(key);
-        InputStream is = new ByteArrayInputStream(serialized.getBytes());
+        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
+        NBTProxyCompound tag = this.getTagParentAt(list);
+        byte[] dats = tag.getByteArray(list.lastChild());
+        if (dats == null || dats.length < 1) {
+        	return null;
+        }
+        InputStream is = new ByteArrayInputStream(dats);
         ObjectInputStream ois = null;
         Object result = null;
         try {
@@ -360,7 +365,7 @@ public final class NBTConfig extends Configuration<NBTConfig> implements INBTCon
             remove(key);
             return;
         }
-        String serialized = null;
+        byte[] dats = null;
         ByteArrayOutputStream baos;
         ObjectOutputStream oos;
         try {
@@ -368,14 +373,17 @@ public final class NBTConfig extends Configuration<NBTConfig> implements INBTCon
             oos = new ObjectOutputStream(baos);
             oos.writeObject(value);
             oos.flush();
-            serialized = new String(baos.toByteArray());
+            dats = baos.toByteArray();
             oos.close();
             baos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (serialized != null) {
-            this.setString(key, serialized);
+        if (dats != null) {
+            PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
+            NBTProxyCompound tag = this.getTagParentAt(list);
+            tag.setByteArray(list.lastChild(), dats);
+            this.setTagParentAt(list, tag);
         }
     }
 
