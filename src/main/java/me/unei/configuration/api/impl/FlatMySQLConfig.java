@@ -194,13 +194,14 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
         try {
             UneiConfiguration.getInstance().getLogger().fine("Sending SQL data to MySQL file " + this.host + ":" + this.port + "->" + tableName + "...");
             String table = this.tableName; // TODO: Escape table name
-            statement = this.connection.prepareStatement("REPLACE INTO " + table + " (id, k, v) VALUES (?, ?, ?)");
+            statement = this.connection.prepareStatement("INSERT INTO " + table + " (id, k, v) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE v = ?");
 
             for (Entry<String, Object> entry : this.data.entrySet()) {
             	
                 statement.setString(1, FlatMySQLConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
                 statement.setString(3, SerializerHelper.toJSONString(entry.getValue()));
+                statement.setString(4, SerializerHelper.toJSONString(entry.getValue()));
                 statement.addBatch();
             }
 
