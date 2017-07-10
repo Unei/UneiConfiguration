@@ -4,7 +4,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-class TagFloat extends Tag {
+import me.unei.configuration.reflection.NBTNumberReflection;
+
+public final class TagFloat extends Tag {
 
     private float data;
 
@@ -24,6 +26,16 @@ class TagFloat extends Tag {
     void read(DataInput output) throws IOException {
         this.data = output.readFloat();
     }
+    
+    Object getAsNMS() {
+    	return NBTNumberReflection.newFloat(this.getValue());
+    }
+    
+    void getFromNMS(Object nmsFloat) {
+    	if (NBTNumberReflection.isNBTFloat(nmsFloat)) {
+    		this.data = NBTNumberReflection.getFloat(nmsFloat);
+    	}
+    }
 
     @Override
     public byte getTypeId() {
@@ -42,6 +54,11 @@ class TagFloat extends Tag {
 
     public float getValue() {
         return this.data;
+    }
+    
+    @Override
+    public Float getAsObject() {
+    	return Float.valueOf(this.getValue());
     }
 
     @Override

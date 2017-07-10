@@ -26,6 +26,9 @@ public class NBTCompoundReflection {
     }
 
     public static Object newInstance() {
+    	if (NBTCompoundReflection.nbtTagCompound == null) {
+    		return null;
+    	}
         try {
             return NBTCompoundReflection.nbtTagCompound.getConstructor().newInstance();
         } catch (InvocationTargetException e) {
@@ -62,6 +65,7 @@ public class NBTCompoundReflection {
         return null;
     }
 
+    @Deprecated
     public static int size(Object obj) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -97,6 +101,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setByte(Object obj, String key, byte b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -114,6 +119,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setShort(Object obj, String key, short short0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -131,6 +137,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setInt(Object obj, String key, int b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -148,6 +155,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setLong(Object obj, String key, long b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -165,6 +173,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setUUID(Object obj, String key, UUID uuid) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -182,6 +191,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static UUID getUUID(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -200,6 +210,7 @@ public class NBTCompoundReflection {
         return null;
     }
 
+    @Deprecated
     public static boolean isUUID(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -218,6 +229,7 @@ public class NBTCompoundReflection {
         return false;
     }
 
+    @Deprecated
     public static void setFloat(Object obj, String key, float b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -235,6 +247,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setDouble(Object obj, String key, double b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -252,6 +265,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setString(Object obj, String key, String b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -269,6 +283,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setByteArray(Object obj, String key, byte[] b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -286,6 +301,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setIntArray(Object obj, String key, int[] b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -303,6 +319,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setLongArray(Object obj, String key, long[] b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -320,6 +337,7 @@ public class NBTCompoundReflection {
         }
     }
 
+    @Deprecated
     public static void setBoolean(Object obj, String key, boolean b0) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -373,6 +391,7 @@ public class NBTCompoundReflection {
         return -1;
     }
 
+    @Deprecated
     public static boolean hasKey(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -391,6 +410,7 @@ public class NBTCompoundReflection {
         return false;
     }
 
+    @Deprecated
     public static boolean hasKeyOfType(Object obj, String key, int type) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -409,6 +429,7 @@ public class NBTCompoundReflection {
         return false;
     }
 
+    @Deprecated
     public static byte getByte(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -427,6 +448,7 @@ public class NBTCompoundReflection {
         return (byte) 0;
     }
 
+    @Deprecated
     public static short getShort(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -445,6 +467,7 @@ public class NBTCompoundReflection {
         return (short) 0;
     }
 
+    @Deprecated
     public static int getInt(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -463,6 +486,7 @@ public class NBTCompoundReflection {
         return 0;
     }
 
+    @Deprecated
     public static long getLong(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -481,6 +505,7 @@ public class NBTCompoundReflection {
         return 0L;
     }
 
+    @Deprecated
     public static float getFloat(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -499,6 +524,7 @@ public class NBTCompoundReflection {
         return 0.0F;
     }
 
+    @Deprecated
     public static double getDouble(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -517,6 +543,7 @@ public class NBTCompoundReflection {
         return 0.0D;
     }
 
+    @Deprecated
     public static String getString(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -535,6 +562,7 @@ public class NBTCompoundReflection {
         return "";
     }
 
+    @Deprecated
     public static byte[] getByteArray(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -553,6 +581,7 @@ public class NBTCompoundReflection {
         return new byte[0];
     }
 
+    @Deprecated
     public static int[] getIntArray(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -571,6 +600,7 @@ public class NBTCompoundReflection {
         return new int[0];
     }
 
+    @Deprecated
     public static long[] getLongArray(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -589,6 +619,7 @@ public class NBTCompoundReflection {
         return new long[0];
     }
 
+    @Deprecated
     public static Object getCompound(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -607,6 +638,7 @@ public class NBTCompoundReflection {
         return NBTCompoundReflection.newInstance();
     }
 
+    @Deprecated
     public static Object getList(Object obj, String key, int type) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -625,6 +657,7 @@ public class NBTCompoundReflection {
         return NBTListReflection.newInstance();
     }
 
+    @Deprecated
     public static boolean getBoolean(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
             try {
@@ -643,6 +676,7 @@ public class NBTCompoundReflection {
         return false;
     }
 
+    @Deprecated
     public static void remove(Object obj, String key) {
         if (NBTCompoundReflection.isNBTCompound(obj)) {
         	Method rm;

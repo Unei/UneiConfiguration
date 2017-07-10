@@ -8,6 +8,7 @@ import me.unei.configuration.formats.nbtlib.TagString;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NMSReflection;
 
+@Deprecated
 abstract class NBTProxyTag implements INBTTag {
 
     public static final LibType Unei_Type_NMS = LibType.NMS;

@@ -4,7 +4,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public abstract class Tag implements Cloneable {
+import me.unei.configuration.api.format.INBTTag;
+
+public abstract class Tag implements INBTTag, Cloneable {
 
     public static final byte TAG_End = 0;
     public static final byte TAG_Byte = 1;
@@ -32,6 +34,12 @@ public abstract class Tag implements Cloneable {
 
     protected Tag() {
     }
+    
+    abstract Object getAsObject();
+    
+    abstract Object getAsNMS();
+    
+    abstract void getFromNMS(Object nmsObject);
 
     public static Tag newTag(byte type) {
         switch(type) {

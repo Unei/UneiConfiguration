@@ -43,7 +43,7 @@ public class NBTListReflection {
         return null;
     }
 
-    public static void add(Object list, Object nbtBase)//TODO some methods to add directly strings/numbers...
+    public static void add(Object list, Object nbtBase)
     {
         if (NBTBaseReflection.isNBTTag(nbtBase) && NBTListReflection.isNBTList(list)) {
             try {
@@ -61,6 +61,7 @@ public class NBTListReflection {
         }
     }
 
+    @Deprecated
     public static void set(Object list, int idx, Object nbtBase) {
         if (NBTBaseReflection.isNBTTag(nbtBase) && NBTListReflection.isNBTList(list)) {
             try {
@@ -78,6 +79,7 @@ public class NBTListReflection {
         }
     }
 
+    @Deprecated
     public static Object remove(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
@@ -96,10 +98,12 @@ public class NBTListReflection {
         return null;
     }
 
+    @Deprecated
     public static boolean isEmpty(Object list) {
         return NBTBaseReflection.isEmpty(list);
     }
 
+    @Deprecated
     public static Object getAsCompound(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
@@ -118,6 +122,7 @@ public class NBTListReflection {
         return null;
     }
 
+    @Deprecated
     public static int getAsInt(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
@@ -136,6 +141,7 @@ public class NBTListReflection {
         return 0;
     }
 
+    @Deprecated
     public static int[] getAsIntArray(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
@@ -154,6 +160,7 @@ public class NBTListReflection {
         return new int[0];
     }
 
+    @Deprecated
     public static double getAsDouble(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
@@ -172,6 +179,7 @@ public class NBTListReflection {
         return 0.0D;
     }
 
+    @Deprecated
     public static float getAsFloat(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
@@ -190,6 +198,7 @@ public class NBTListReflection {
         return 0.0F;
     }
 
+    @Deprecated
     public static String getAsString(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {

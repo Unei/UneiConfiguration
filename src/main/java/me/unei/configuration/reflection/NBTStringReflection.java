@@ -24,6 +24,9 @@ public class NBTStringReflection {
     }
 
     public static Object newInstance() {
+    	if (NBTStringReflection.nbtTagString == null) {
+    		return null;
+    	}
         try {
             return NBTStringReflection.nbtTagString.getConstructor().newInstance();
         } catch (InvocationTargetException e) {
@@ -41,6 +44,9 @@ public class NBTStringReflection {
     }
 
     public static Object newInstance(String orig) {
+    	if (NBTStringReflection.nbtTagString == null) {
+    		return null;
+    	}
         try {
             return NBTStringReflection.nbtTagString.getConstructor(String.class).newInstance(orig);
         } catch (InvocationTargetException e) {

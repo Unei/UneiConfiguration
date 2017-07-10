@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-class TagEnd extends Tag {
+final class TagEnd extends Tag {
 
     public TagEnd() {
         super();
@@ -26,6 +26,19 @@ class TagEnd extends Tag {
     @Override
     public String toString() {
         return "END";
+    }
+    
+    Object getAsNMS() {
+    	return null;
+    }
+    
+    void getFromNMS(Object nmsObject) {
+    	// Nothing here
+    }
+    
+    @Override
+    public Void getAsObject() {
+    	return null;
     }
 
     @Override

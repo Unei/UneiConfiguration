@@ -10,7 +10,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class TagCompound extends Tag {
+import org.apache.commons.lang.ArrayUtils;
+
+import me.unei.configuration.api.format.INBTCompound;
+import me.unei.configuration.api.format.INBTTag;
+import me.unei.configuration.reflection.NBTCompoundReflection;
+
+public final class TagCompound extends Tag implements INBTCompound {
 
     private Map<String, Tag> tags = new HashMap<String, Tag>();
     private static final Pattern name_conventions = Pattern.compile("[A-Za-z0-9._+-]+");
@@ -46,6 +52,100 @@ public class TagCompound extends Tag {
             this.tags.put(key, tag);
         }
     }
+    
+    public void loadMap(Map<?, ?> datas)
+    {
+    	this.tags.clear();
+    	for (Entry<?, ?> entry : datas.entrySet())
+    	{
+    		String key = entry.getKey().toString();
+    		Object value = entry.getValue();
+    		if (value == null) {
+    			continue;
+    		}
+    		if (value instanceof CharSequence) {
+    			this.setString(key, value.toString());
+    		} else if (value instanceof Tag) {
+    			this.set(key, (Tag)value);
+    		} else if (value instanceof Map) {
+    			TagCompound subTag = new TagCompound();
+    			subTag.loadMap((Map<?, ?>)value);
+    			this.set(key, subTag);
+    		} else if (value instanceof Iterable) {
+    			TagList subTag = new TagList();
+    			subTag.loadList((Iterable<?>)value);
+    			this.set(key, subTag);
+    		} else if (value instanceof Integer) {
+    			this.setInt(key, (Integer)value);
+    		} else if (value instanceof Byte) {
+    			this.setByte(key, (Byte)value);
+    		} else if (value instanceof Double) {
+    			this.setDouble(key, (Double)value);
+    		} else if (value instanceof Short) {
+    			this.setShort(key, (Short)value);
+    		} else if (value instanceof Long) {
+    			this.setLong(key, (Long)value);
+    		} else if (value instanceof Float) {
+    			this.setFloat(key, (Float)value);
+    		} else if (value instanceof Boolean) {
+    			this.setBoolean(key, (Boolean)value);
+    		}/* else if (value instanceof UUID) {
+    			this.setUUID(key, (UUID)value);
+    		}*/ else if (value instanceof int[]) {
+    			this.setIntArray(key, (int[])value);
+    		} else if (value instanceof Integer[]) {
+    			this.setIntArray(key, ArrayUtils.toPrimitive((Integer[])value));
+    		} else if (value instanceof byte[]) {
+    			this.setByteArray(key, (byte[])value);
+    		} else if (value instanceof Byte[]) {
+    			this.setByteArray(key, ArrayUtils.toPrimitive((Byte[])value));
+    		} else if (value instanceof long[]) {
+    			this.setLongArray(key, (long[])value);
+    		} else if (value instanceof Long[]) {
+    			this.setLongArray(key, ArrayUtils.toPrimitive((Long[])value));
+    		}
+    	}
+    }
+    
+    public Map<String, Object> getAsObject()
+    {
+    	Map<String, Object> result = new HashMap<String, Object>();
+    	for (Entry<String, Tag> entry : this.tags.entrySet())
+    	{
+    		result.put(entry.getKey(), entry.getValue().getAsObject());
+    	}
+    	return result;
+    }
+    
+    public Object getAsNMS()
+    {
+    	Object NMSCompound = NBTCompoundReflection.newInstance();
+    	if (NMSCompound == null) {
+    		return null;
+    	}
+    	for (Entry<String, Tag> entry : this.tags.entrySet())
+    	{
+    		NBTCompoundReflection.set(NMSCompound, entry.getKey(), entry.getValue().getAsNMS());
+    	}
+    	return NMSCompound;
+    }
+    
+    public void getFromNMS(Object nmsCompound)
+    {
+    	if (!NBTCompoundReflection.isNBTCompound(nmsCompound)) {
+    		return;
+    	}
+    	
+    	this.tags.clear();
+    	Set<String> keys = NBTCompoundReflection.keySet(nmsCompound);
+    	for (String key : keys)
+    	{
+    		byte typeID = NBTCompoundReflection.getTypeOf(nmsCompound, key);
+    		Tag current = Tag.newTag(typeID);
+    		current.getFromNMS(NBTCompoundReflection.get(nmsCompound, key));
+    		this.set(key, current);
+    	}
+    }
 
     public Set<String> keySet() {
         return this.tags.keySet();
@@ -60,6 +160,10 @@ public class TagCompound extends Tag {
         return Tag.TAG_Compound;
     }
 
+    public void set(String key, INBTTag tag) {
+        this.set(key, (Tag)tag);
+    }
+    
     public void set(String key, Tag tag) {
         this.tags.put(key, tag);
     }
@@ -222,7 +326,7 @@ public class TagCompound extends Tag {
         }
     }
 
-    public TagList getList(String key, int type) {
+    public TagList getList(String key, byte type) {
         try {
             if (!this.hasKeyOfType(key, Tag.TAG_List)) {
                 return new TagList();

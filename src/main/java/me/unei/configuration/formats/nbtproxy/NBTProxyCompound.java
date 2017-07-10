@@ -10,6 +10,7 @@ import me.unei.configuration.reflection.NBTCompoundReflection;
 import java.util.Collections;
 import java.util.Set;
 
+@Deprecated
 public class NBTProxyCompound extends NBTProxyTag implements INBTCompound {
 
     private Object nms_representation;

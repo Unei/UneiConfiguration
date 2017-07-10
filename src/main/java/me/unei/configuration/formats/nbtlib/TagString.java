@@ -4,7 +4,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TagString extends Tag {
+import me.unei.configuration.api.format.INBTString;
+import me.unei.configuration.reflection.NBTStringReflection;
+
+public final class TagString extends Tag implements INBTString {
 
     private String data;
 
@@ -27,6 +30,16 @@ public class TagString extends Tag {
     @Override
     void read(DataInput input) throws IOException {
         this.data = input.readUTF();
+    }
+    
+    Object getAsNMS() {
+    	return NBTStringReflection.newInstance(this.data);
+    }
+    
+    void getFromNMS(Object strNMS) {
+    	if (NBTStringReflection.isNBTString(strNMS)) {
+    		this.data = NBTStringReflection.getString(strNMS);
+    	}
     }
 
     @Override
@@ -76,5 +89,10 @@ public class TagString extends Tag {
     @Override
     public String getString() {
         return this.data;
+    }
+    
+    @Override
+    public String getAsObject() {
+    	return this.getString();
     }
 }

@@ -5,7 +5,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
-class TagIntArray extends Tag {
+import me.unei.configuration.reflection.NBTArrayReflection;
+
+public final class TagIntArray extends Tag {
 
     private int[] data;
 
@@ -31,6 +33,16 @@ class TagIntArray extends Tag {
         for (int i = 0; i < this.data.length; i++) {
             this.data[i] = input.readInt();
         }
+    }
+    
+    Object getAsNMS() {
+    	return NBTArrayReflection.newIntArray(this.getIntArray());
+    }
+    
+    void getFromNMS(Object nmsIntArray) {
+    	if (NBTArrayReflection.isNBTIntArray(nmsIntArray)) {
+    		this.data = NBTArrayReflection.getIntArray(nmsIntArray);
+    	}
     }
 
     @Override
@@ -64,6 +76,10 @@ class TagIntArray extends Tag {
 
     public int[] getIntArray() {
         return this.data;
+    }
+    
+    public int[] getAsObject() {
+    	return this.getIntArray();
     }
 
     @Override

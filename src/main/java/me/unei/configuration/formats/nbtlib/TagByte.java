@@ -4,7 +4,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-class TagByte extends Tag {
+import me.unei.configuration.reflection.NBTNumberReflection;
+
+public final class TagByte extends Tag {
 
     private byte data;
 
@@ -42,6 +44,21 @@ class TagByte extends Tag {
 
     public byte getValue() {
         return this.data;
+    }
+    
+    @Override
+    public Byte getAsObject() {
+    	return Byte.valueOf(this.getValue());
+    }
+    
+    Object getAsNMS() {
+    	return NBTNumberReflection.newByte(this.getValue());
+    }
+    
+    void getFromNMS(Object nmsByte) {
+    	if (NBTNumberReflection.isNBTByte(nmsByte)) {
+    		this.data = NBTNumberReflection.getByte(nmsByte);
+    	}
     }
 
     @Override

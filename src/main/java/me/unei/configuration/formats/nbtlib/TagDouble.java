@@ -4,7 +4,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-class TagDouble extends Tag {
+import me.unei.configuration.reflection.NBTNumberReflection;
+
+public final class TagDouble extends Tag {
 
     private double data;
 
@@ -23,6 +25,16 @@ class TagDouble extends Tag {
     @Override
     void read(DataInput output) throws IOException {
         this.data = output.readDouble();
+    }
+    
+    Object getAsNMS() {
+    	return NBTNumberReflection.newDouble(this.getValue());
+    }
+    
+    void getFromNMS(Object nmsDouble) {
+    	if (NBTNumberReflection.isNBTDouble(nmsDouble)) {
+    		this.data = NBTNumberReflection.getDouble(nmsDouble);
+    	}
     }
 
     @Override
@@ -43,6 +55,11 @@ class TagDouble extends Tag {
 
     public double getValue() {
         return this.data;
+    }
+    
+    @Override
+    public Double getAsObject() {
+    	return Double.valueOf(this.getValue());
     }
 
     @Override

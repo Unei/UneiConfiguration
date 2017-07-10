@@ -5,6 +5,7 @@ import me.unei.configuration.formats.nbtlib.TagString;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NBTStringReflection;
 
+@Deprecated
 class NBTProxyString extends NBTProxyTag implements INBTString {
 
     private Object nms_representation;

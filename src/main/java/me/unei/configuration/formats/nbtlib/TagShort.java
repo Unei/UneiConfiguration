@@ -4,7 +4,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-class TagShort extends Tag {
+import me.unei.configuration.reflection.NBTNumberReflection;
+
+public final class TagShort extends Tag {
 
     private short data;
 
@@ -24,6 +26,16 @@ class TagShort extends Tag {
     void read(DataInput output) throws IOException {
         this.data = output.readShort();
     }
+    
+    Object getAsNMS() {
+    	return NBTNumberReflection.newShort(this.getValue());
+    }
+    
+    void getFromNMS(Object nmsShort) {
+    	if (NBTNumberReflection.isNBTShort(nmsShort)) {
+    		this.data = NBTNumberReflection.getShort(nmsShort);
+    	}
+    }
 
     @Override
     public byte getTypeId() {
@@ -42,6 +54,11 @@ class TagShort extends Tag {
 
     public short getValue() {
         return this.data;
+    }
+    
+    @Override
+    public Short getAsObject() {
+    	return Short.valueOf(this.getValue());
     }
 
     @Override

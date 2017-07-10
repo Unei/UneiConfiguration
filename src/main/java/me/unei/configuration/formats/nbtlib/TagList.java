@@ -6,8 +6,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-public class TagList extends Tag {
+import org.apache.commons.lang.ArrayUtils;
+
+import me.unei.configuration.api.format.INBTList;
+import me.unei.configuration.api.format.INBTTag;
+import me.unei.configuration.reflection.NBTListReflection;
+
+public final class TagList extends Tag implements INBTList{
 
     private List<Tag> list = new ArrayList<Tag>();
     private byte type = 0;
@@ -45,6 +52,92 @@ public class TagList extends Tag {
             this.list.add(tag);
         }
     }
+    
+    public void loadList(Iterable<?> datas)
+    {
+    	Iterator<?> it = datas.iterator();
+    	while (it.hasNext())
+    	{
+    		Object value = it.next();
+    		if (value == null) {
+    			continue;
+    		}
+    		if (value instanceof CharSequence) {
+    			this.add(new TagString(value.toString()));
+    		} else if (value instanceof Tag) {
+    			this.add((Tag)value);
+    		} else if (value instanceof Iterable) {
+    			TagList subTag = new TagList();
+    			subTag.loadList((Iterable<?>)value);
+    			this.add(subTag);
+    		} else if (value instanceof Map) {
+    			TagCompound subTag = new TagCompound();
+    			subTag.loadMap((Map<?, ?>)value);
+    			this.add(subTag);
+    		} else if (value instanceof Void) {
+    			this.add(new TagEnd());
+    		} else if (value instanceof Integer) {
+    			this.add(new TagInt((Integer)value));
+    		} else if (value instanceof Byte) {
+    			this.add(new TagByte((Byte)value));
+    		} else if (value instanceof Double) {
+    			this.add(new TagDouble((Double)value));
+    		} else if (value instanceof Long) {
+    			this.add(new TagLong((Long)value));
+    		} else if (value instanceof Float) {
+    			this.add(new TagFloat((Float)value));
+    		} else if (value instanceof Short) {
+    			this.add(new TagShort((Short)value));
+    		} else if (value instanceof int[]) {
+    			this.add(new TagIntArray((int[])value));
+    		} else if (value instanceof Integer[]) {
+    			this.add(new TagIntArray(ArrayUtils.toPrimitive((Integer[])value)));
+    		} else if (value instanceof byte[]) {
+    			this.add(new TagByteArray((byte[])value));
+    		} else if (value instanceof Byte[]) {
+    			this.add(new TagByteArray(ArrayUtils.toPrimitive((Byte[])value)));
+    		} else if (value instanceof long[]) {
+    			this.add(new TagLongArray((long[])value));
+    		} else if (value instanceof Long[]) {
+    			this.add(new TagLongArray(ArrayUtils.toPrimitive((Long[])value)));
+    		}
+    	}
+    }
+    
+    public List<Object> getAsObject()
+    {
+    	List<Object> result = new ArrayList<Object>();
+    	Iterator<Tag> it = this.list.iterator();
+    	
+    	while (it.hasNext())
+    	{
+    		Tag t = it.next();
+    		result.add(t.getAsObject());
+    	}
+    	return result;
+    }
+    
+    public Object getAsNMS() {
+    	Object nmsList = NBTListReflection.newInstance();
+    	if (nmsList != null) {
+    		for (Tag tag : this.list) {
+    			NBTListReflection.add(nmsList, tag.getAsNMS());
+    		}
+    	}
+    	return nmsList;
+    }
+    
+    public void getFromNMS(Object nmsList) {
+    	if (NBTListReflection.isNBTList(nmsList)) {
+    		this.list.clear();
+    		int typeID = NBTListReflection.getTypeInList(nmsList);
+    		for (int i = 0; i < NBTListReflection.size(nmsList); i++) {
+    			Tag current = Tag.newTag((byte)typeID);
+    			current.getFromNMS(NBTListReflection.getAsNBTBase(nmsList, i));
+    			this.list.add(current);
+    		}
+    	}
+    }
 
     @Override
     public byte getTypeId() {
@@ -65,6 +158,10 @@ public class TagList extends Tag {
 
         return builder.append("]").toString();
     }
+    
+    public void add(INBTTag elem) {
+    	this.add((Tag)elem);
+    }
 
     public void add(Tag elem) {
         if (elem.getTypeId() != Tag.TAG_End) {
@@ -76,6 +173,10 @@ public class TagList extends Tag {
 
             this.list.add(elem);
         }
+    }
+    
+    public void set(int idx, INBTTag elem) {
+    	this.set(idx, (Tag)elem);
     }
 
     public void set(int idx, Tag elem) {
@@ -141,7 +242,7 @@ public class TagList extends Tag {
         return super.hashCode() ^ this.list.hashCode();
     }
 
-    public int getTagType() {
+    public byte getTagType() {
         return this.type;
     }
 }

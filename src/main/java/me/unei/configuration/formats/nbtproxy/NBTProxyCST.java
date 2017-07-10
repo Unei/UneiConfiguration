@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+@Deprecated
 public class NBTProxyCST {
 
     public static void writeCompressed(NBTProxyCompound compound, OutputStream stream) throws IOException {

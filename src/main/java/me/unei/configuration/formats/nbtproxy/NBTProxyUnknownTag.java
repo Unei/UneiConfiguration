@@ -3,6 +3,7 @@ package me.unei.configuration.formats.nbtproxy;
 import me.unei.configuration.formats.nbtlib.Tag;
 import me.unei.configuration.reflection.NBTBaseReflection;
 
+@Deprecated
 class NBTProxyUnknownTag extends NBTProxyTag {
 
     private Object nms_representation;

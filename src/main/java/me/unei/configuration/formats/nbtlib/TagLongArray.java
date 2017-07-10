@@ -5,7 +5,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
-class TagLongArray extends Tag {
+import me.unei.configuration.reflection.NBTArrayReflection;
+
+public final class TagLongArray extends Tag {
 
     private long[] data;
 
@@ -31,6 +33,16 @@ class TagLongArray extends Tag {
         for (int i = 0; i < this.data.length; i++) {
             this.data[i] = input.readLong();
         }
+    }
+    
+    Object getAsNMS() {
+    	return NBTArrayReflection.newLongArray(this.getLongArray());
+    }
+    
+    void getFromNMS(Object nmsLongArray) {
+    	if (NBTArrayReflection.isNBTLongArray(nmsLongArray)) {
+    		this.data = NBTArrayReflection.getLongArray(nmsLongArray);
+    	}
     }
 
     @Override
@@ -64,6 +76,10 @@ class TagLongArray extends Tag {
 
     public long[] getLongArray() {
         return this.data;
+    }
+    
+    public long[] getAsObject() {
+    	return this.getLongArray();
     }
 
     @Override

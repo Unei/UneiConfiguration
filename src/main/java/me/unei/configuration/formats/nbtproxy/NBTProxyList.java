@@ -6,6 +6,7 @@ import me.unei.configuration.formats.nbtlib.TagList;
 import me.unei.configuration.reflection.NBTBaseReflection;
 import me.unei.configuration.reflection.NBTListReflection;
 
+@Deprecated
 class NBTProxyList extends NBTProxyTag implements INBTList {
 
     private Object nms_representation;
@@ -65,7 +66,7 @@ class NBTProxyList extends NBTProxyTag implements INBTList {
         }
     }
 
-    public byte getTypeInList() {
+    public byte getTagType() {
         switch(this.unei_type) {
             case NMS:
                 return ((byte) (NBTListReflection.getTypeInList(nms_representation) & 0xff));
@@ -76,7 +77,7 @@ class NBTProxyList extends NBTProxyTag implements INBTList {
     }
 
     public NBTProxyTag remove(int idx) {
-        byte type = this.getTypeInList();
+        byte type = this.getTagType();
         Object res = null;
         switch(this.unei_type) {
             case NMS:
@@ -90,7 +91,7 @@ class NBTProxyList extends NBTProxyTag implements INBTList {
     }
 
     public NBTProxyTag get(int idx) {
-        byte type = this.getTypeInList();
+        byte type = this.getTagType();
         Object res = null;
         switch(this.unei_type) {
             case NMS:
