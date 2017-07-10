@@ -11,19 +11,19 @@ public final class NBTArrayReflection {
     private static Class<?> nbtTagByteArray = null;
     private static Class<?> nbtTagLongArray = null;
 
-    public static void setIntArrayClass(Class<?> type) {
+    static void setIntArrayClass(Class<?> type) {
         if (type != null && NBTArrayReflection.nbtTagIntArray == null) {
         	NBTArrayReflection.nbtTagIntArray = type;
         }
     }
     
-    public static void setByteArrayClass(Class<?> type) {
+    static void setByteArrayClass(Class<?> type) {
         if (type != null && NBTArrayReflection.nbtTagByteArray == null) {
         	NBTArrayReflection.nbtTagByteArray = type;
         }
     }
     
-    public static void setLongArrayClass(Class<?> type) {
+    static void setLongArrayClass(Class<?> type) {
         if (type != null && NBTArrayReflection.nbtTagLongArray == null) {
         	NBTArrayReflection.nbtTagLongArray = type;
         }

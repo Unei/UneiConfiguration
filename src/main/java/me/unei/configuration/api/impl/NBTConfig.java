@@ -18,33 +18,35 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.nbtlib.NBTIO;
 import me.unei.configuration.formats.nbtlib.TagCompound;
-import me.unei.configuration.formats.nbtproxy.NBTProxyCompound;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 /**
- * @version 2.0.0
+ * @version 2.5.0
  * @since 0.0.1
  */
-@SuppressWarnings("deprecation")
 public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTConfiguration {
 
     public static final String NBT_FILE_EXT = ".dat";
     public static final String NBT_TMP_EXT = ".tmp";
 
-    @Deprecated
-    private NBTProxyCompound rootCompound = null;
     private Map<String, Object> data = new HashMap<String, Object>();
-
-    public NBTConfig(File folder, String fileName) {
-        this(folder, fileName, PathSymbolsType.BUKKIT);
+    
+    public NBTConfig(SavedFile file, PathSymbolsType symType) {
+    	super(file, symType);
+    	
+    	this.init();
+    }
+    
+    public NBTConfig(SavedFile file) {
+    	this(file, PathSymbolsType.BUKKIT);
     }
 
 	public NBTConfig(File folder, String fileName, PathSymbolsType symType) {
-        super(new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT), symType);
+        this(new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT), symType);
+    }
 
-        this.rootCompound = new NBTProxyCompound();
-
-        this.init();
+    public NBTConfig(File folder, String fileName) {
+        this(folder, fileName, PathSymbolsType.BUKKIT);
     }
 
     private NBTConfig(NBTConfig p_parent, String p_tagName) {
@@ -104,32 +106,10 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		}
 	}
 
-    @Deprecated
-    private NBTProxyCompound getTagCp() {
-        NBTProxyCompound papa;
-        if (this.parent != null) {
-            papa = this.parent.getTagCp();
-        } else {
-            return rootCompound;
-        }
-        if (papa == null) {
-            return null;
-        }
-        return papa.getCompound(this.nodeName).clone();
-    }
-
-    @SuppressWarnings("unused")
-	@Deprecated
-    private NBTProxyCompound getTagParentAt(PathComponent.PathComponentsList path) {
-        NBTConfig dir;
-        PathNavigator<NBTConfig> pn = new PathNavigator<NBTConfig>(this);
-        PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
-        pathList.removeLast();
-        if (!pn.followPath(pathList)) {
-            return this.getTagCp();
-        }
-        dir = pn.getCurrentNode();
-        return dir.getTagCp();
+    private TagCompound getTagCp() {
+    	TagCompound result = new TagCompound();
+    	result.loadMap(data);
+    	return result;
     }
 
     private Map<String, Object> getParentMap(PathComponent.PathComponentsList path) {
@@ -144,49 +124,20 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         return dir.data;
     }
 
-    @Deprecated
     public INBTCompound getTagCopy() {
         return this.getTagCp();
     }
-
-    @Deprecated
-    private void setTagCp(NBTProxyCompound compound) {
-        if (!this.canAccess()) {
-            return;
-        }
-        NBTProxyCompound papa;
-        if (this.parent != null) {
-            papa = this.parent.getTagCp();
-        } else {
-            this.rootCompound = compound;
-            return;
-        }
-        if (papa != null) {
-            papa.set(this.nodeName, compound);
-            this.parent.setTagCp(papa);
-        }
-
+    
+    private void setTagCp(TagCompound compound) {
+    	if (!this.canAccess() || compound == null) {
+    		return;
+    	}
+    	this.data = compound.getAsObject();
+    	this.propagate();
     }
 
-    @SuppressWarnings("unused")
-	@Deprecated
-    private void setTagParentAt(PathComponent.PathComponentsList path, NBTProxyCompound compound) {
-        NBTConfig dir;
-        PathNavigator<NBTConfig> pn = new PathNavigator<NBTConfig>(this);
-        PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
-        pathList.removeLast();
-        if (!pn.followPath(pathList)) {
-            this.setTagCp(compound);
-        }
-        dir = pn.getCurrentNode();
-        if (dir != null) {
-            dir.setTagCp(compound);
-        }
-    }
-
-    @Deprecated
     public void setTagCopy(INBTCompound compound) {
-        this.setTagCp((NBTProxyCompound) compound);
+        this.setTagCp((TagCompound) compound);
     }
 
 	public void reload() {
@@ -200,15 +151,11 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
                 this.save();
                 return;
             }
-			//NBTProxyCompound tmpCompound = null;
             TagCompound compound = null;
             try {
                 UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + getFileName() + "...");
-                //tmpCompound = NBTProxyCST.readCompressed(new FileInputStream(this.file.getFile()));
                 compound = NBTIO.readCompressed(new FileInputStream(file.getFile()));
                 UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
-                /*if (tmpCompound != null)
-                    UneiConfiguration.getInstance().getLogger().fine("Type is " + tmpCompound.getUneiType());*/
             } catch (IOException e) {
                 UneiConfiguration.getInstance().getLogger().warning("An error occured while loading NBT file " + getFileName() + ":");
                 e.printStackTrace();
@@ -219,11 +166,6 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
             } else {
             	this.data = new HashMap<String, Object>();
             }
-            /*if (tmpCompound != null) {
-                this.rootCompound = tmpCompound.clone();
-            } else {
-                this.rootCompound = new NBTProxyCompound();
-            }*/
         }
     }
 
@@ -241,7 +183,6 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         try {
             UneiConfiguration.getInstance().getLogger().fine("Writing NBT Compound to file " + getFileName() + "...");
             NBTIO.writeCompressed(compound, new FileOutputStream(tmp));
-            //NBTProxyCST.writeCompressed(rootCompound.clone(), new FileOutputStream(tmp));
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
                 this.file.getFile().delete();
@@ -257,67 +198,19 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 
     public Set<String> getKeys() {
     	return this.data.keySet();
-        /*NBTProxyCompound tag = this.getTagCp();
-        return tag.keySet();*/
     }
 
     public boolean contains(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         return node.containsKey(list.lastChild());
-        /*NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.hasKey(list.lastChild());*/
     }
 
     public Object get(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         return node.get(list.lastChild());
-        /*PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        byte[] dats = tag.getByteArray(list.lastChild());
-        if (dats == null || dats.length < 1) {
-        	return null;
-        }
-        InputStream is = new ByteArrayInputStream(dats);
-        ObjectInputStream ois = null;
-        Object result = null;
-        try {
-            ois = new ObjectInputStream(is);
-            result = ois.readObject();
-            ois.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-        if (result != null) {
-            return result;
-        }
-        return null;*/
     }
-
-    /*public String getString(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.getString(list.lastChild());
-    }
-
-    public void setString(String key, String value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        if (value == null) {
-            remove(key);
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setString(list.lastChild(), value);
-        this.setTagParentAt(list, tag);
-    }*/
 
     public void setSubSection(String path, IConfiguration value) {
         if (!this.canAccess()) {
@@ -332,10 +225,6 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
             return;
         }
         set(path, ((NBTConfig) value).data);
-        /*NBTConfig cfg = (NBTConfig) value;
-        NBTProxyCompound nbt = this.getTagCp();
-        nbt.set(path, cfg.getTagCp());
-        this.setTagCp(nbt);*/
     }
 
 	public void remove(String key) {
@@ -344,10 +233,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         }
         PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
         Map<String, Object> node = this.getParentMap(list);
-        node.remove(key);
-        /*NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.remove(list.lastChild());
-        this.setTagParentAt(list, tag);*/
+        node.remove(list.lastChild());
     }
 
     @Override
@@ -360,59 +246,16 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         return navi.getCurrentNode();
     }
 
-    /*public double getDouble(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.getDouble(list.lastChild());
+    @Override
+	public boolean getBoolean(String key) {
+    	Object o = this.get(key);
+    	if (o instanceof Boolean) {
+    		return ((Boolean)o).booleanValue();
+    	} else if (o instanceof Number) {
+    		return (((Number)o).byteValue() == 0 ? false : true);
+    	}
+    	return false;
     }
-
-    public boolean getBoolean(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.getBoolean(list.lastChild());
-    }
-
-    public byte getByte(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.getByte(list.lastChild());
-    }
-
-    public float getFloat(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.getFloat(list.lastChild());
-    }
-
-    public int getInteger(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.getInt(list.lastChild());
-    }
-
-    public long getLong(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return tag.getLong(list.lastChild());
-    }
-
-    public List<Byte> getByteList(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return Arrays.asList(ArrayUtils.toObject(tag.getByteArray(list.lastChild())));
-    }
-
-    public List<Integer> getIntegerList(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return Arrays.asList(ArrayUtils.toObject(tag.getIntArray(list.lastChild())));
-    }
-
-    public List<Long> getLongList(String key) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        return Arrays.asList(ArrayUtils.toObject(tag.getLongArray(list.lastChild())));
-    }*/
 
 	public void set(String path, Object value) {
     	if (!this.canAccess()) {
@@ -425,129 +268,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         node.put(list.lastChild(), value);
-        /*byte[] dats = null;
-        ByteArrayOutputStream baos;
-        ObjectOutputStream oos;
-        try {
-            baos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(baos);
-            oos.writeObject(value);
-            oos.flush();
-            dats = baos.toByteArray();
-            oos.close();
-            baos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (dats != null) {
-            PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-            NBTProxyCompound tag = this.getTagParentAt(list);
-            tag.setByteArray(list.lastChild(), dats);
-            this.setTagParentAt(list, tag);
-        }*/
     }
-
-    /*public void setDouble(String key, double value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setDouble(list.lastChild(), value);
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setBoolean(String key, boolean value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setBoolean(list.lastChild(), value);
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setByte(String key, byte value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setByte(list.lastChild(), value);
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setFloat(String key, float value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setFloat(list.lastChild(), value);
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setInteger(String key, int value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setInt(list.lastChild(), value);
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setLong(String key, long value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setLong(list.lastChild(), value);
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setByteList(String key, List<Byte> value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        if (value == null) {
-            remove(key);
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setByteArray(list.lastChild(), ArrayUtils.toPrimitive(value.toArray(new Byte[value.size()]), (byte) 0));
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setIntegerList(String key, List<Integer> value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        if (value == null) {
-            remove(key);
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setIntArray(list.lastChild(), ArrayUtils.toPrimitive(value.toArray(new Integer[value.size()]), 0));
-        this.setTagParentAt(list, tag);
-    }
-
-    public void setLongList(String key, List<Long> value) {
-        if (!this.canAccess()) {
-            return;
-        }
-        if (value == null) {
-            remove(key);
-            return;
-        }
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        NBTProxyCompound tag = this.getTagParentAt(list);
-        tag.setLongArray(list.lastChild(), ArrayUtils.toPrimitive(value.toArray(new Long[value.size()]), 0));
-        this.setTagParentAt(list, tag);
-    }*/
 
     @Override
     public String toString() {

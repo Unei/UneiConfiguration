@@ -34,8 +34,29 @@ public final class SavedFile {
             this.extension = extension;
         }
     }
+    
+    public SavedFile(File file) {
+    	if (file == null) {
+    		throw new NullPointerException("file cannot be null");
+    	}
+    	this.folder = file.getParentFile();
+    	this.canAccess = false;
+    	this.initialized = false;
+    	this.datFile = file;
+    	String name = file.getName();
+    	if (!name.contains(".")) {
+    		this.fileName = name;
+    		this.extension = "";
+    	} else {
+    		this.fileName = name.substring(0, name.lastIndexOf('.'));
+    		this.extension = name.substring(name.lastIndexOf('.'));
+    	}
+    }
 
     public boolean init() {
+    	if (this.isInitialized()) {
+    		return true;
+    	}
         if (this.folder == null || this.fileName == null || this.fileName.isEmpty()) {
             return false;
         }
@@ -53,7 +74,9 @@ public final class SavedFile {
                 return false;
             }
         }
-        this.datFile = new File(this.folder, this.fileName + this.extension);
+        if (this.datFile == null) {
+        	this.datFile = new File(this.folder, this.fileName + this.extension);
+        }
         this.canAccess = true;
         this.initialized = true;
         return true;

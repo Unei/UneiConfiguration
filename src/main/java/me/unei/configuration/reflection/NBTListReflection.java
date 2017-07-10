@@ -7,7 +7,7 @@ public class NBTListReflection {
 
     private static Class<?> nbtTagList = null;
 
-    public static void setListClass(Class<?> type) {
+    static void setListClass(Class<?> type) {
         if (type != null && NBTListReflection.nbtTagList == null) {
             NBTListReflection.nbtTagList = type;
         }

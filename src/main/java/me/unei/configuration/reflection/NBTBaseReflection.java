@@ -12,7 +12,7 @@ public final class NBTBaseReflection {
 
     private static Class<?> nbtTagBase = null;
 
-    public static void setBaseClass(Class<?> type) {
+    static void setBaseClass(Class<?> type) {
         if (type != null && NBTBaseReflection.nbtTagBase == null) {
             NBTBaseReflection.nbtTagBase = type;
             try {

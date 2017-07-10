@@ -9,7 +9,7 @@ public class NBTCompressedStreamToolsReflection {
 
     private static Class<?> nbtcst = null;
 
-    public static void setCSTClass(Class<?> type) {
+    static void setCSTClass(Class<?> type) {
         if (type != null && NBTCompressedStreamToolsReflection.nbtcst == null) {
             NBTCompressedStreamToolsReflection.nbtcst = type;
         }

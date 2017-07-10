@@ -9,6 +9,8 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,27 +21,34 @@ import com.google.common.base.Charsets;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.SerializerHelper;
-import me.unei.configuration.api.IFlatConfiguration;
+import me.unei.configuration.api.IFlatCSVConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatConfiguration
+public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSVConfiguration
 {
 	public static final String CSV_FILE_EXT = ".csv";
 	public static final String CSV_TMP_EXT = ".tmp";
 	
+	private static final List<String> DEFAULT_HEADER_LINE = Collections.unmodifiableList(Arrays.asList("Key", "Value"));
+	
 	private Map<String, Object> data = new HashMap<String, Object>();
 	private List<String> keyLine;
 	
-	public CSVConfig(File folder, String fileName)
+	public CSVConfig(SavedFile file)
 	{
-		super(new SavedFile(folder, fileName, CSVConfig.CSV_FILE_EXT));
+		super(file);
 		
 		this.keyLine = new ArrayList<String>();
 		this.resetHeaderLine();
 		
 		this.init();
+	}
+	
+	public CSVConfig(File folder, String fileName)
+	{
+		this(new SavedFile(folder, fileName, CSVConfig.CSV_FILE_EXT));
 	}
 	
 	public void save() {
@@ -101,8 +110,9 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCon
 	
 	public void resetHeaderLine() {
 		this.keyLine.clear();
-		this.keyLine.add("Key");
-		this.keyLine.add("Value");
+		for (String elem : CSVConfig.DEFAULT_HEADER_LINE) {
+			this.keyLine.add(elem);
+		}
 	}
 	
 	public Set<String> getKeys() {
@@ -122,7 +132,7 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCon
 			return;
 		}
 		if (value == null) {
-			data.remove(key);
+			this.remove(key);
 		} else {
         	if (value instanceof Double) {
         		if (((Double)value).isInfinite() || ((Double)value).isNaN()) {
@@ -143,7 +153,10 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCon
 	}
 	
 	public void remove(String key) {
-		set(key, null);
+		if (!this.canAccess()) {
+			return;
+		}
+		data.remove(key);
 	}
 	
 	@Override

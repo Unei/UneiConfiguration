@@ -14,37 +14,37 @@ public final class NBTNumberReflection {
     private static Class<?> nbtTagShort = null;
     private static Class<?> nbtTagDouble = null;
 
-    public static void setIntClass(Class<?> type) {
+    static void setIntClass(Class<?> type) {
         if (type != null && NBTNumberReflection.nbtTagInt == null) {
         	NBTNumberReflection.nbtTagInt = type;
         }
     }
     
-    public static void setByteClass(Class<?> type) {
+    static void setByteClass(Class<?> type) {
         if (type != null && NBTNumberReflection.nbtTagByte == null) {
         	NBTNumberReflection.nbtTagByte = type;
         }
     }
     
-    public static void setLongClass(Class<?> type) {
+    static void setLongClass(Class<?> type) {
         if (type != null && NBTNumberReflection.nbtTagLong == null) {
         	NBTNumberReflection.nbtTagLong = type;
         }
     }
     
-    public static void setFloatClass(Class<?> type) {
+    static void setFloatClass(Class<?> type) {
         if (type != null && NBTNumberReflection.nbtTagFloat == null) {
         	NBTNumberReflection.nbtTagFloat = type;
         }
     }
     
-    public static void setShortClass(Class<?> type) {
+    static void setShortClass(Class<?> type) {
         if (type != null && NBTNumberReflection.nbtTagShort == null) {
         	NBTNumberReflection.nbtTagShort = type;
         }
     }
     
-    public static void setDoubleClass(Class<?> type) {
+    static void setDoubleClass(Class<?> type) {
         if (type != null && NBTNumberReflection.nbtTagDouble == null) {
         	NBTNumberReflection.nbtTagDouble = type;
         }

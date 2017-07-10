@@ -27,14 +27,22 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 	
 	private Map<String, Object> data = new HashMap<String, Object>();
 	
+	public BinaryConfig(SavedFile file, PathSymbolsType symType) {
+		super(file, symType);
+		
+		this.init();
+	}
+	
+	public BinaryConfig(SavedFile file) {
+		this(file, PathSymbolsType.BUKKIT);
+	}
+	
 	public BinaryConfig(File folder, String fileName) {
 		this(folder, fileName, PathSymbolsType.BUKKIT);
 	}
 	
 	public BinaryConfig(File folder, String fileName, PathSymbolsType symType) {
-		super(new SavedFile(folder, fileName, BinaryConfig.BINARY_FILE_EXT), symType);
-		
-		this.init();
+		this(new SavedFile(folder, fileName, BinaryConfig.BINARY_FILE_EXT), symType);
 	}
 	
 	public BinaryConfig(BinaryConfig parent, String tagName) {

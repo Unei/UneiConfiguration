@@ -12,9 +12,6 @@ public final class UneiConfiguration implements IPlugin {
 
     private final IPlugin source;
 
-    @SuppressWarnings("unused")
-    private boolean forceNbtUneiLib = false;
-
     public UneiConfiguration(IPlugin plugin) {
         this.source = plugin;
         NMSReflection.doNothing();
@@ -25,10 +22,8 @@ public final class UneiConfiguration implements IPlugin {
         this.getLogger().fine("Loading UNEI Configuration API...");
 
         if (NMSReflection.canUseNMS()) {
-            this.getLogger().fine("NMS detected for NBT");
+            this.getLogger().fine("NMS classes detected !");
             this.getLogger().fine("NMS Version = " + NMSReflection.getVersion());
-        } else {
-            this.getLogger().fine("Using Unei's NBTLib");
         }
     }
 

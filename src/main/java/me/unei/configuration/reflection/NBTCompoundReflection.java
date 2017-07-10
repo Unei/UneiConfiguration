@@ -9,7 +9,7 @@ public class NBTCompoundReflection {
 
     private static Class<?> nbtTagCompound = null;
 
-    public static void setCompoundClass(Class<?> type) {
+    static void setCompoundClass(Class<?> type) {
         if (type != null && NBTCompoundReflection.nbtTagCompound == null) {
             NBTCompoundReflection.nbtTagCompound = type;
         }

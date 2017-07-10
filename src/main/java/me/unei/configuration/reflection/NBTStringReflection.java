@@ -7,7 +7,7 @@ public class NBTStringReflection {
 
     private static Class<?> nbtTagString = null;
 
-    public static void setStringClass(Class<?> type) {
+    static void setStringClass(Class<?> type) {
         if (type != null && NBTStringReflection.nbtTagString == null) {
             NBTStringReflection.nbtTagString = type;
         }
