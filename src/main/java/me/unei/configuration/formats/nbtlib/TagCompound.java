@@ -3,15 +3,18 @@ package me.unei.configuration.formats.nbtlib;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.reflection.NBTCompoundReflection;
@@ -21,8 +24,7 @@ public final class TagCompound extends Tag implements INBTCompound {
     private Map<String, Tag> tags = new HashMap<String, Tag>();
     private static final Pattern name_conventions = Pattern.compile("[A-Za-z0-9._+-]+");
 
-    public TagCompound() {
-    }
+    public TagCompound() {}
 
     @Override
     void write(DataOutput output) throws IOException {
@@ -53,11 +55,9 @@ public final class TagCompound extends Tag implements INBTCompound {
         }
     }
     
-    public void loadMap(Map<?, ?> datas)
-    {
+    public void loadMap(Map<?, ?> datas) {
     	this.tags.clear();
-    	for (Entry<?, ?> entry : datas.entrySet())
-    	{
+    	for (Entry<?, ?> entry : datas.entrySet()) {
     		String key = entry.getKey().toString();
     		Object value = entry.getValue();
     		if (value == null) {
@@ -89,9 +89,9 @@ public final class TagCompound extends Tag implements INBTCompound {
     			this.setFloat(key, (Float)value);
     		} else if (value instanceof Boolean) {
     			this.setBoolean(key, (Boolean)value);
-    		}/* else if (value instanceof UUID) {
+    		} else if (value instanceof UUID) {
     			this.setUUID(key, (UUID)value);
-    		}*/ else if (value instanceof int[]) {
+    		} else if (value instanceof int[]) {
     			this.setIntArray(key, (int[])value);
     		} else if (value instanceof Integer[]) {
     			this.setIntArray(key, ArrayUtils.toPrimitive((Integer[])value));
@@ -103,43 +103,66 @@ public final class TagCompound extends Tag implements INBTCompound {
     			this.setLongArray(key, (long[])value);
     		} else if (value instanceof Long[]) {
     			this.setLongArray(key, ArrayUtils.toPrimitive((Long[])value));
+    		} else if (value instanceof Serializable) {
+    			this.setByteArray(key + "Object", SerializerHelper.serialize(value));
     		}
     	}
     }
     
-    public Map<String, Object> getAsObject()
-    {
+    @Override
+	public Map<String, Object> getAsObject() {
     	Map<String, Object> result = new HashMap<String, Object>();
-    	for (Entry<String, Tag> entry : this.tags.entrySet())
-    	{
-    		result.put(entry.getKey(), entry.getValue().getAsObject());
+    	for (Entry<String, Tag> entry : this.tags.entrySet()) {
+    		String key = entry.getKey();
+    		if (key.endsWith("Most") || key.endsWith("Least")) {
+    			if (key.endsWith("Most")) {
+    				key = key.substring(0, key.length() - "Most".length());
+    			} else if (key.endsWith("Least")) {
+    				key = key.substring(0, key.length() - "Least".length());
+    			}
+    			if (this.isUUID(key)) {
+    				if (!result.containsKey(key)) {
+    					result.put(key, this.getUUID(key));
+    				}
+    			} else {
+    				result.put(entry.getKey(), entry.getValue().getAsObject());
+    			}
+    		} else if (key.endsWith("Object")) {
+    			key = key.substring(0, key.length() - "Object".length());
+    			Object r = SerializerHelper.deserialize(this.getByteArray(entry.getKey()));
+    			if (r != null) {
+    				result.put(key, r);
+    			} else {
+    				result.put(entry.getKey(), entry.getValue());
+    			}
+    		} else {
+    			result.put(entry.getKey(), entry.getValue().getAsObject());
+    		}
     	}
     	return result;
     }
     
-    public Object getAsNMS()
-    {
+    @Override
+	public Object getAsNMS() {
     	Object NMSCompound = NBTCompoundReflection.newInstance();
     	if (NMSCompound == null) {
     		return null;
     	}
-    	for (Entry<String, Tag> entry : this.tags.entrySet())
-    	{
+    	for (Entry<String, Tag> entry : this.tags.entrySet()) {
     		NBTCompoundReflection.set(NMSCompound, entry.getKey(), entry.getValue().getAsNMS());
     	}
     	return NMSCompound;
     }
     
-    public void getFromNMS(Object nmsCompound)
-    {
+    @Override
+	public void getFromNMS(Object nmsCompound) {
     	if (!NBTCompoundReflection.isNBTCompound(nmsCompound)) {
     		return;
     	}
     	
     	this.tags.clear();
     	Set<String> keys = NBTCompoundReflection.keySet(nmsCompound);
-    	for (String key : keys)
-    	{
+    	for (String key : keys) {
     		byte typeID = NBTCompoundReflection.getTypeOf(nmsCompound, key);
     		Tag current = Tag.newTag(typeID);
     		current.getFromNMS(NBTCompoundReflection.get(nmsCompound, key));
@@ -182,6 +205,19 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public void setLong(String key, long value) {
         this.tags.put(key, new TagLong(value));
+    }
+    
+    public void setUUID(String key, UUID uuid) {
+    	this.setLong(key + "Most", uuid.getMostSignificantBits());
+    	this.setLong(key + "Least", uuid.getLeastSignificantBits());
+    }
+    
+    public UUID getUUID(String key) {
+    	return new UUID(this.getLong(key + "Most"), this.getLong(key + "Least"));
+    }
+    
+    public boolean isUUID(String key) {
+    	return (this.hasKeyOfType(key + "Most", Tag.Number_TAG) && this.hasKeyOfType(key + "Least", Tag.Number_TAG));
     }
 
     public void setFloat(String key, float value) {

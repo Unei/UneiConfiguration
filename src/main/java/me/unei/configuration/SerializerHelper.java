@@ -2,6 +2,7 @@ package me.unei.configuration;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -18,6 +19,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import org.apache.commons.lang.SerializationUtils;
+
 public final class SerializerHelper
 {
 	private static Gson GSON = null;
@@ -31,6 +34,34 @@ public final class SerializerHelper
 			//gb.setLenient();
 			SerializerHelper.GSON = gb.create();
 		}
+	}
+	
+	public static byte[] serialize(Object obj) {
+		if (!(obj instanceof Serializable)) {
+			return new byte[0];
+		}
+		try {
+			return SerializationUtils.serialize((Serializable)obj);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			return new byte[0];
+		}
+	}
+	
+	public static Object deserialize(byte[] data) {
+		if (data == null || data.length < 2) {
+			return null;
+		}
+		try {
+			return SerializationUtils.deserialize(data);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static boolean isSerializedObject(byte[] data) {
+		return (SerializerHelper.deserialize(data) != null);
 	}
 	
 	public static void writeCSV(Writer w, List<String> keyNames, Map<String, Object> map) throws IOException {
