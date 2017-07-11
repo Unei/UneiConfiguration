@@ -27,7 +27,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.file = p_file;
 		this.symType = p_symType;
 		this.fullPath = new PathComponent.PathComponentsList(p_symType);
-		this.fullPath.appendRoot(); //TODO : Check good placement ^^
+		this.fullPath.appendRoot();
 		this.nodeName = "";
 	}
 	
@@ -71,6 +71,11 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 			return this.parent.getFileName();
 		}
 		return this.file.getFileName();
+	}
+	
+	PathSymbolsType getPathSymbolsType()
+	{
+		return this.symType;
 	}
 	
 	public String getName()

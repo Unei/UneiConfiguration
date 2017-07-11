@@ -27,6 +27,11 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 	
 	private Map<String, Object> data = new HashMap<String, Object>();
 	
+	@Deprecated
+	final Map<String, Object> getData() {
+		return data;
+	}
+	
 	public BinaryConfig(SavedFile file, PathSymbolsType symType) {
 		super(file, symType);
 		

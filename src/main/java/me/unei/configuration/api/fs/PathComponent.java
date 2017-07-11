@@ -1,10 +1,11 @@
 package me.unei.configuration.api.fs;
 
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
-import org.apache.commons.lang.NullArgumentException;
-
 import java.util.ArrayList;
 import java.util.ListIterator;
+
+import org.apache.commons.lang.NullArgumentException;
+
+import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 
 public final class PathComponent {
 
@@ -24,12 +25,15 @@ public final class PathComponent {
         return this.value;
     }
 
-    public static String escapeComponent(String component) {
+    public static String escapeComponent(String component, PathSymbolsType symType) {
         if (component == null || component.isEmpty()) {
             return component;
         }
-        // TODO: Escape depending on PathNavigator's constants
-        return component.replace("\\", "\\\\").replace(".", "\\.");
+        // TODO: Verify good escaping
+        component = component.replace(String.valueOf(symType.escape), String.valueOf(new char[]{symType.escape, symType.escape}));
+        component = component.replace(String.valueOf(symType.separator), String.valueOf(new char[]{symType.escape, symType.separator}));
+        //component = component.replace(String.valueOf(symType.root), String.valueOf(new char[]{symType.escape, symType.root}));
+        return component;
     }
 
     @Override
@@ -144,7 +148,7 @@ public final class PathComponent {
         public String toString() {
             StringBuilder pathBuilder = new StringBuilder();
             for (PathComponent component : this) {
-                pathBuilder.append(PathComponent.escapeComponent(component.getValue()));
+                pathBuilder.append(PathComponent.escapeComponent(component.getValue(), this.symType));
             }
             return pathBuilder.toString();
         }
