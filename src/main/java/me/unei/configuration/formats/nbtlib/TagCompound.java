@@ -127,7 +127,7 @@ public final class TagCompound extends Tag implements INBTCompound {
     			} else {
     				result.put(entry.getKey(), entry.getValue().getAsObject());
     			}
-    		} else if (key.endsWith("Object")) {
+    		} else if (key.endsWith("Object") && this.hasKeyOfType(key, Tag.TAG_Byte_Array)) {
     			key = key.substring(0, key.length() - "Object".length());
     			Object r = SerializerHelper.deserialize(this.getByteArray(entry.getKey()));
     			if (r != null) {
