@@ -1,7 +1,6 @@
 package me.unei.configuration.api.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -18,7 +17,6 @@ import java.util.Set;
 import javax.xml.bind.DatatypeConverter;
 
 import me.unei.configuration.SavedFile;
-import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.IFlatSQLiteConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.plugin.UneiConfiguration;
@@ -28,7 +26,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     public static final String SQLITE_FILE_EXT = ".db";
     public static final String SQLITE_DRIVER = "org.sqlite.JDBC";
 
-    private Map<String, Object> data = new HashMap<String, Object>();
+    private Map<String, String> data = new HashMap<String, String>();
 
     private Connection connection = null;
     private String tableName = "_";
@@ -182,10 +180,10 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
             String table = this.tableName; // TODO: Escape table name
             statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, k, v) VALUES (?, ?, ?)");
 
-            for (Entry<String, Object> entry : this.data.entrySet()) {
+            for (Entry<String, String> entry : this.data.entrySet()) {
                 statement.setString(1, FlatSQLiteConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
-                statement.setString(3, SerializerHelper.toJSONString(entry.getValue()));
+                statement.setString(3, /*SerializerHelper.toJSONString(*/entry.getValue()/*)*/);
                 statement.addBatch();
             }
 
@@ -202,7 +200,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
                     e.printStackTrace();
                 }
             }
-        } catch (IOException e) {
+        }/* catch (IOException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
@@ -212,7 +210,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
                     e.printStackTrace();
                 }
             }
-        }
+        }*/
     }
 
     public void reload() {
@@ -227,15 +225,15 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
             String table = this.tableName; // TODO: Escape table name
             ResultSet result = this.query("SELECT * FROM " + table + "", null);
             while (result.next()) {
-                try {
+                //try {
                     String key = result.getString("k");
-                    Object value = SerializerHelper.parseJSON(result.getString("v"));
+                    //Object value = SerializerHelper.parseJSON(result.getString("v"));
 
-                    this.data.put(key, value);
-                } catch (IOException e) {
+                    this.data.put(key, result.getString("v"));
+                /*} catch (IOException e) {
                     UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
                     e.printStackTrace();
-                }
+                }*/
             }
             Statement statement = result.getStatement();
             result.close();
@@ -297,42 +295,11 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         return data.containsKey(key);
     }
 
-    @Deprecated
-    public Object get(String key) {
-        return data.get(key);
-    }
-
-    @Deprecated
-    public void set(String key, Object value) {
-    	if (!this.canAccess()) {
-    		return;
-    	}
-        if (value == null) {
-            data.remove(key);
-        } else {
-        	if (value instanceof Double) {
-        		if (((Double)value).isInfinite() || ((Double)value).isNaN()) {
-        			data.put(key, value.toString());
-        		} else {
-        			data.put(key, value);
-        		}
-        	} else if (value instanceof Float) {
-        		if (((Float)value).isInfinite() || ((Float)value).isNaN()) {
-        			data.put(key, value.toString());
-        		} else {
-        			data.put(key, value);
-        		}
-        	} else {
-        		data.put(key, value);
-        	}
-        }
-    }
-    
     public String getString(String key) {
     	if (!data.containsKey(key) || data.get(key) == null) {
     		return "";
     	}
-    	return data.get(key).toString();
+    	return data.get(key);
     }
     
     public void setString(String key, String value) {

@@ -1,6 +1,5 @@
 package me.unei.configuration.api.impl;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -17,7 +16,6 @@ import java.util.Set;
 import javax.xml.bind.DatatypeConverter;
 
 import me.unei.configuration.SavedFile;
-import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.IFlatMySQLConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.api.exceptions.FileFormatException;
@@ -28,7 +26,7 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
 
     public static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
 
-    private Map<String, Object> data = new HashMap<String, Object>();
+    private Map<String, String> data = new HashMap<String, String>();
 
     private String host;
     private int port;
@@ -196,12 +194,12 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
             String table = this.tableName; // TODO: Escape table name
             statement = this.connection.prepareStatement("INSERT INTO " + table + " (id, k, v) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE v = ?");
 
-            for (Entry<String, Object> entry : this.data.entrySet()) {
+            for (Entry<String, String> entry : this.data.entrySet()) {
             	
                 statement.setString(1, FlatMySQLConfig.getHash(entry.getKey()));
                 statement.setString(2, entry.getKey());
-                statement.setString(3, SerializerHelper.toJSONString(entry.getValue()));
-                statement.setString(4, SerializerHelper.toJSONString(entry.getValue()));
+                statement.setString(3, /*SerializerHelper.toJSONString(*/entry.getValue()/*)*/);
+                statement.setString(4, /*SerializerHelper.toJSONString(*/entry.getValue()/*)*/);
                 statement.addBatch();
             }
 
@@ -218,7 +216,7 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
                     e.printStackTrace();
                 }
             }
-        } catch (IOException e) {
+        }/* catch (IOException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not save MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
@@ -228,7 +226,7 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
                     e.printStackTrace();
                 }
             }
-        }
+        }*/
     }
 
     public void reload() throws FileFormatException {
@@ -243,15 +241,15 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
             String table = this.tableName; // TODO: Escape table name
             ResultSet result = this.query("SELECT * FROM " + table + "", null);
             while (result.next()) {
-                try {
+                //try {
                     String key = result.getString("k");
-                    Object value = SerializerHelper.parseJSON(result.getString("v"));
+                    //Object value = SerializerHelper.parseJSON(result.getString("v"));
 
-                    this.data.put(key, value);
-                } catch (IOException e) {
+                    this.data.put(key, /*value*/result.getString("v"));
+                /*} catch (IOException e) {
                     UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
                     e.printStackTrace();
-                }
+                }*/
             }
             Statement statement = result.getStatement();
             result.close();
@@ -313,37 +311,6 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
         return data.containsKey(key);
     }
 
-    @Deprecated
-    public Object get(String key) {
-        return data.get(key);
-    }
-
-    @Deprecated
-    public void set(String key, Object value) {
-    	if (!this.canAccess()) {
-    		return;
-    	}
-        if (value == null) {
-            data.remove(key);
-        } else {
-        	if (value instanceof Double) {
-        		if (((Double)value).isInfinite() || ((Double)value).isNaN()) {
-        			data.put(key, value.toString());
-        		} else {
-        			data.put(key, value);
-        		}
-        	} else if (value instanceof Float) {
-        		if (((Float)value).isInfinite() || ((Float)value).isNaN()) {
-        			data.put(key, value.toString());
-        		} else {
-        			data.put(key, value);
-        		}
-        	} else {
-        		data.put(key, value);
-        	}
-        }
-    }
-    
     public void setString(String key, String value) {
     	if (!this.canAccess()) {
     		return;
@@ -359,7 +326,7 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
     	if (!data.containsKey(key) || data.get(key) == null) {
     		return "";
     	}
-    	return data.get(key).toString();
+    	return data.get(key);
     }
 
     public void remove(String key) {

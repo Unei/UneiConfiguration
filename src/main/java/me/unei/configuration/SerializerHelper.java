@@ -66,9 +66,9 @@ public final class SerializerHelper
 		return (SerializerHelper.deserialize(data) != null);
 	}
 	
-	public static void writeCSV(Writer w, List<String> keyNames, Map<String, Object> map) throws IOException, UnexpectedClassException {
+	public static void writeCSV(Writer w, List<String> keyNames, Map<String, ?> map) throws IOException, UnexpectedClassException {
 		List<List<String>> lines = new ArrayList<List<String>>(map.size());
-		for (Entry<String, Object> entry : map.entrySet()) {
+		for (Entry<String, ?> entry : map.entrySet()) {
 			List<String> line = new ArrayList<String>();
 			line.add(entry.getKey());
 			if (entry.getValue() instanceof Iterable) {

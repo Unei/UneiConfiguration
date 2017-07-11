@@ -8,7 +8,7 @@ public interface IFlatCSVConfiguration extends IFlatConfiguration {
 	
 	public void resetHeaderLine();
 	
-	/*public void setList(String key, List<String> value);
+	public void setList(String key, List<String> value);
 	
-	public List<String> getList(String key);*/
+	public List<String> getList(String key);
 }

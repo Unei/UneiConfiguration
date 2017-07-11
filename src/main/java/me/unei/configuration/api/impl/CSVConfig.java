@@ -124,27 +124,6 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		return this.data.containsKey(key);
 	}
 	
-	@Deprecated
-	public Object get(String key) {
-		return this.data.get(key);
-	}
-	
-	@Deprecated
-	public void set(String key, Object value) {
-		if (!this.canAccess()) {
-			return;
-		}
-		if (value == null) {
-			this.remove(key);
-		} else {
-			if (value instanceof Number || value instanceof CharSequence) {
-				this.setString(key, value.toString());
-        	} else {
-        		data.put(key, value);
-        	}
-		}
-	}
-	
 	public void setString(String key, String value) {
 		if (!this.canAccess()) {
 			return;
@@ -154,6 +133,32 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 			return;
 		}
 		data.put(key, value);
+	}
+	
+	public void setList(String key, List<String> value) {
+		if (!this.canAccess()) {
+			return;
+		}
+		if (value == null) {
+			this.remove(key);
+			return;
+		}
+		data.put(key, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<String> getList(String key) {
+		if (!data.containsKey(key) || data.get(key) == null) {
+			return Collections.emptyList();
+		}
+		if (!(data.get(key) instanceof List)) {
+			return Collections.emptyList();
+		}
+		try {
+			return (List<String>)data.get(key);
+		} catch (ClassCastException e) {
+			return Collections.emptyList();
+		}
 	}
 	
 	public String getString(String key) {
