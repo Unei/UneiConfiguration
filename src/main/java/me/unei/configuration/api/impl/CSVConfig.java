@@ -24,6 +24,7 @@ import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.IFlatCSVConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.UnexpectedClassException;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSVConfiguration
@@ -51,7 +52,7 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		this(new SavedFile(folder, fileName, CSVConfig.CSV_FILE_EXT));
 	}
 	
-	public void save() {
+	public void save() throws UnexpectedClassException {
 		if (!this.canAccess()) {
 			return;
 		}
@@ -123,10 +124,12 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		return this.data.containsKey(key);
 	}
 	
+	@Deprecated
 	public Object get(String key) {
 		return this.data.get(key);
 	}
 	
+	@Deprecated
 	public void set(String key, Object value) {
 		if (!this.canAccess()) {
 			return;
@@ -134,22 +137,30 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		if (value == null) {
 			this.remove(key);
 		} else {
-        	if (value instanceof Double) {
-        		if (((Double)value).isInfinite() || ((Double)value).isNaN()) {
-        			data.put(key, value.toString());
-        		} else {
-        			data.put(key, value);
-        		}
-        	} else if (value instanceof Float) {
-        		if (((Float)value).isInfinite() || ((Float)value).isNaN()) {
-        			data.put(key, value.toString());
-        		} else {
-        			data.put(key, value);
-        		}
+			if (value instanceof Number || value instanceof CharSequence) {
+				this.setString(key, value.toString());
         	} else {
         		data.put(key, value);
         	}
 		}
+	}
+	
+	public void setString(String key, String value) {
+		if (!this.canAccess()) {
+			return;
+		}
+		if (value == null) {
+			this.remove(key);
+			return;
+		}
+		data.put(key, value);
+	}
+	
+	public String getString(String key) {
+		if (!data.containsKey(key) || data.get(key) == null) {
+			return "";
+		}
+		return data.get(key).toString();
 	}
 	
 	public void remove(String key) {

@@ -8,7 +8,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import me.unei.configuration.SavedFile;
-import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.IFlatPropertiesConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.api.exceptions.FileFormatException;
@@ -85,30 +84,6 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 		return data.stringPropertyNames();
 	}
 	
-	public void set(String key, Object value) {
-		if (!this.canAccess()) {
-			return;
-		}
-		if (value == null) {
-			this.remove(key);
-			return;
-		}
-		try {
-			data.setProperty(key, SerializerHelper.toJSONString(value));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public Object get(String key) {
-		try {
-			return SerializerHelper.parseJSON(data.getProperty(key));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	public String get(String key, String defaultValue)
 	{
 		return data.getProperty(key, defaultValue);
@@ -117,6 +92,10 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 	public void setString(String key, String value)
 	{
 		if (!this.canAccess()) {
+			return;
+		}
+		if (value == null) {
+			this.remove(key);
 			return;
 		}
 		data.setProperty(key, value);

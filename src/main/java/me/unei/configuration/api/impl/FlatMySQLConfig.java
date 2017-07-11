@@ -313,10 +313,12 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
         return data.containsKey(key);
     }
 
+    @Deprecated
     public Object get(String key) {
         return data.get(key);
     }
 
+    @Deprecated
     public void set(String key, Object value) {
     	if (!this.canAccess()) {
     		return;
@@ -341,9 +343,30 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
         	}
         }
     }
+    
+    public void setString(String key, String value) {
+    	if (!this.canAccess()) {
+    		return;
+    	}
+    	if (value == null) {
+    		this.remove(key);
+    		return;
+    	}
+    	data.put(key, value);
+    }
+    
+    public String getString(String key) {
+    	if (!data.containsKey(key) || data.get(key) == null) {
+    		return "";
+    	}
+    	return data.get(key).toString();
+    }
 
     public void remove(String key) {
-        set(key, null);
+    	if (!this.canAccess()) {
+    		return;
+    	}
+        data.remove(key);
     }
 
     @Override

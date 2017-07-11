@@ -17,11 +17,16 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
     }
 
     public String getString(String path) {
-        try {
+    	Object get = get(path);
+    	if (get instanceof String) {
+    		return (String) get;
+    	}
+    	return (get != null ? get.toString() : null);
+        /*try {
             return (String) get(path);
         } catch (Exception e) {
             return "";
-        }
+        }*/
     }
 
     public double getDouble(String path) {
@@ -40,7 +45,11 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         try {
             return ((Boolean) get(path)).booleanValue();
         } catch (Exception e) {
-            return false;
+            try {
+            	return (Boolean.valueOf(getString(path)).booleanValue());
+            } catch (NumberFormatException nfe) {
+            	return false;
+            }
         }
     }
 
@@ -48,7 +57,11 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         try {
             return ((Number) get(path)).byteValue();
         } catch (Exception e) {
-            return (byte) 0;
+            try {
+            	return (Byte.valueOf(getString(path)).byteValue());
+            } catch (NumberFormatException nfe) {
+            	return (byte) 0;
+            }
         }
     }
 
@@ -68,7 +81,11 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         try {
             return ((Number) get(path)).intValue();
         } catch (Exception e) {
-            return 0;
+            try {
+            	return (Integer.valueOf(getString(path)).intValue());
+            } catch (NumberFormatException nfe) {
+            	return 0;
+            }
         }
     }
 
@@ -76,7 +93,11 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         try {
             return ((Number) get(path)).longValue();
         } catch (Exception e) {
-            return 0L;
+            try {
+            	return (Long.valueOf(getString(path)).longValue());
+            } catch (NumberFormatException nfe) {
+            	return 0L;
+            }
         }
     }
 

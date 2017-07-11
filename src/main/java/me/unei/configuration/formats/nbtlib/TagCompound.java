@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.ArrayUtils;
 
 import me.unei.configuration.SerializerHelper;
+import me.unei.configuration.api.exceptions.UnexpectedClassException;
 import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.reflection.NBTCompoundReflection;
@@ -55,7 +56,7 @@ public final class TagCompound extends Tag implements INBTCompound {
         }
     }
     
-    public void loadMap(Map<?, ?> datas) {
+    public void loadMap(Map<?, ?> datas) throws UnexpectedClassException {
     	this.tags.clear();
     	for (Entry<?, ?> entry : datas.entrySet()) {
     		String key = entry.getKey().toString();
@@ -105,6 +106,8 @@ public final class TagCompound extends Tag implements INBTCompound {
     			this.setLongArray(key, ArrayUtils.toPrimitive((Long[])value));
     		} else if (value instanceof Serializable) {
     			this.setByteArray(key + "Object", SerializerHelper.serialize(value));
+    		} else {
+    			throw new UnexpectedClassException(value.getClass());
     		}
     	}
     }

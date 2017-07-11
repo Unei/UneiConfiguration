@@ -19,6 +19,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import me.unei.configuration.api.exceptions.UnexpectedClassException;
+
 import org.apache.commons.lang.SerializationUtils;
 
 public final class SerializerHelper
@@ -64,7 +66,7 @@ public final class SerializerHelper
 		return (SerializerHelper.deserialize(data) != null);
 	}
 	
-	public static void writeCSV(Writer w, List<String> keyNames, Map<String, Object> map) throws IOException {
+	public static void writeCSV(Writer w, List<String> keyNames, Map<String, Object> map) throws IOException, UnexpectedClassException {
 		List<List<String>> lines = new ArrayList<List<String>>(map.size());
 		for (Entry<String, Object> entry : map.entrySet()) {
 			List<String> line = new ArrayList<String>();
@@ -212,7 +214,7 @@ public final class SerializerHelper
 		return lines;
 	}
 
-	public static String toJSONString(Object objects) throws IOException {
+	public static String toJSONString(Object objects) throws IOException, UnexpectedClassException {
 		if (objects == null/* || objects.length < 1 || objects[0] == null*/) {
 			return "";
 		}
@@ -224,7 +226,11 @@ public final class SerializerHelper
 		} catch (Exception e) {
 			// Nothing here ...
 		}
-		SerializerHelper.GSON.toJson(objects, objects.getClass(), jw);
+		try {
+			SerializerHelper.GSON.toJson(objects, objects.getClass(), jw);
+		} catch (IllegalArgumentException e) {
+			throw new UnexpectedClassException(objects.getClass(), e);
+		}
 		String res = sw.toString();
 		jw.close();
 		sw.close();

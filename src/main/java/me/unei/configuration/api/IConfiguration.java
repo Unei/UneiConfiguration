@@ -23,6 +23,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
     public long getLong(String path);
     public List<Byte> getByteList(String path);
     public List<Integer> getIntegerList(String path);
+    public List<Long> getLongList(String path);
 
     public IConfiguration getSubSection(String path);
 
@@ -37,6 +38,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
     public void setLong(String path, long value);
     public void setByteList(String path, List<Byte> value);
     public void setIntegerList(String path, List<Integer> value);
+    public void setLongList(String path, List<Long> value);
 
     public void setSubSection(String path, IConfiguration value);
 
