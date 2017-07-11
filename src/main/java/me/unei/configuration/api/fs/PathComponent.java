@@ -29,10 +29,18 @@ public final class PathComponent {
         if (component == null || component.isEmpty()) {
             return component;
         }
-        // TODO: Verify good escaping
+
+        boolean absolute = component.startsWith(String.valueOf(symType.root));
+        if (absolute) {
+            component = component.substring(1);
+        }
+
         component = component.replace(String.valueOf(symType.escape), String.valueOf(new char[]{symType.escape, symType.escape}));
         component = component.replace(String.valueOf(symType.separator), String.valueOf(new char[]{symType.escape, symType.separator}));
-        //component = component.replace(String.valueOf(symType.root), String.valueOf(new char[]{symType.escape, symType.root}));
+
+        if (absolute) {
+            component = symType.escape + symType.root + component;
+        }
         return component;
     }
 
