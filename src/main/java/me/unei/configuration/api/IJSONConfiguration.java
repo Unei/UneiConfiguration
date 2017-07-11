@@ -15,5 +15,4 @@ public interface IJSONConfiguration extends IHRConfiguration {
      * @param data The JSON data as text
      */
     public void loadFromString(String data);
-
 }

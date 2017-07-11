@@ -15,5 +15,4 @@ public interface IYAMLConfiguration extends IHRConfiguration {
      * @param data The YAML data as text
      */
     public void loadFromString(String data);
-
 }

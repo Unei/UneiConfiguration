@@ -1,7 +1,7 @@
 package me.unei.configuration.api.format;
 
 /**
- * A NBT Tag
+ * Represents a NBT Tag
  */
 public interface INBTTag {
 
