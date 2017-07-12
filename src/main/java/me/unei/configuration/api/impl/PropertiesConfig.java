@@ -11,6 +11,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IFlatPropertiesConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.plugin.UneiConfiguration;
 
 public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> implements IFlatPropertiesConfiguration
 {
@@ -41,12 +42,22 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 		if (this.file.getFile() == null) {
 			return;
 		}
+        File tmp = new File(this.file.getFolder(), this.file.getFileName() + PropertiesConfig.PROP_TMP_EXT);
 		try
 		{
+            UneiConfiguration.getInstance().getLogger().fine("Writing Properties to file " + getFileName() + "...");
 			data.store(new FileWriter(file.getFile()), null);
+            if (this.file.getFile().exists()) {
+                UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
+                this.file.getFile().delete();
+            }
+            tmp.renameTo(this.file.getFile());
+            tmp.delete();
+            UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
 		}
 		catch (IOException e)
 		{
+            UneiConfiguration.getInstance().getLogger().warning("An error occured while saving Properties file " + getFileName() + ":");
 			e.printStackTrace();
 		}
 	}
@@ -62,10 +73,14 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 		}
 		try
 		{
+			data.clear();
+            UneiConfiguration.getInstance().getLogger().fine("Reading Properties from file " + getFileName() + "...");
 			data.load(new FileReader(file.getFile()));
+            UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
 		}
 		catch (IOException e)
 		{
+            UneiConfiguration.getInstance().getLogger().warning("An error occured while loading Properties file " + getFileName() + ":");
 			e.printStackTrace();
 		}
 		catch (IllegalArgumentException e)
