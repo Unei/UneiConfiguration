@@ -76,7 +76,7 @@ public final class FileUtils {
     }
 
     /**
-     * Creates a file and all any of its parent directories if required.
+     * Creates a file and any of its parent directories if required.
      *
      * @see File#mkdirs()
      * @see File#createNewFile()
