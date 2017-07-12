@@ -76,8 +76,13 @@ public final class FileUtils {
     }
 
     /**
-     * @param file TODO to be completed
-     * @return TODO to be completed
+     * Creates a file and all any of its parent directories if required.
+     *
+     * @see File#mkdirs()
+     * @see File#createNewFile()
+     *
+     * @param file the file to create
+     * @return <tt>true</tt> if the file creation succeeded without any error
      * 
      * @throws  NullPointerException
      *          If the {@link File file} given as parameter is null
