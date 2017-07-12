@@ -1,3 +1,3 @@
 package me.unei.configuration.api;
 
-public interface IFlatSQLiteConfiguration extends IFlatSQLConfiguration {}
+public interface IFlatSQLiteConfiguration extends ISQLConfiguration, IFlatConfiguration {}

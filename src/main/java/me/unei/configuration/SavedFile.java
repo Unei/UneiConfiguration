@@ -4,6 +4,12 @@ import java.io.File;
 
 import me.unei.configuration.plugin.UneiConfiguration;
 
+/**
+ * A Representation of a file.
+ * 
+ * @version 1.2.0
+ * @since 0.0.0
+ */
 public final class SavedFile {
 
     private File folder;
@@ -86,6 +92,14 @@ public final class SavedFile {
         return this.initialized;
     }
 
+    /**
+     * Returns <tt>true</tt> if it is currently possible to access and
+     * modify this file.
+     *
+     * @see SavedFile#lock()
+     *
+     * @return <tt>true</tt> if this file is accessible
+     */
     public boolean canAccess() {
         return this.canAccess;
     }
@@ -105,6 +119,12 @@ public final class SavedFile {
         return this.folder;
     }
 
+    /**
+     * Returns the name of the {@link File file} that
+     * represents this SavedFile without extension.
+     *
+     * @return the name of this file
+     */
     public String getFileName() {
         return this.fileName;
     }

@@ -1,3 +1,3 @@
 package me.unei.configuration.api;
 
-public interface IMySQLConfiguration extends ISQLConfiguration {}
+public interface IMySQLConfiguration extends ISQLConfiguration, IConfiguration {}

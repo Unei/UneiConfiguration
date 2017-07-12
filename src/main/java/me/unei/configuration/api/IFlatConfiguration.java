@@ -78,7 +78,7 @@ public interface IFlatConfiguration {
     public boolean contains(String key);
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
      * the specified key as name as {@link String String}, if possible.
      *
      * @param key the name of the child to retrieve
@@ -87,7 +87,7 @@ public interface IFlatConfiguration {
     public String getString(String key);
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
      * the specified key as name as double, if possible.
      *
      * @param key the name of the child to retrieve
@@ -96,7 +96,7 @@ public interface IFlatConfiguration {
     public double getDouble(String key);
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
      * the specified key as name as boolean, if possible.
      *
      * @param key the name of the child to retrieve
@@ -105,7 +105,7 @@ public interface IFlatConfiguration {
     public boolean getBoolean(String key);
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
      * the specified key as name as byte, if possible.
      *
      * @param key the name of the child to retrieve
@@ -114,7 +114,16 @@ public interface IFlatConfiguration {
     public byte getByte(String key);
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
+     * the specified key as name as short, if possible.
+     *
+     * @param key the name of the child to retrieve
+     * @return the direct child element with the specified name as short
+     */
+    public short getShort(String key);
+
+    /**
+     * Returns the direct child element of this configuration which has
      * the specified key as name as float, if possible.
      *
      * @param key the name of the child to retrieve
@@ -123,7 +132,7 @@ public interface IFlatConfiguration {
     public float getFloat(String key);
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
      * the specified key as name as int, if possible.
      *
      * @param key the name of the child to retrieve
@@ -132,7 +141,7 @@ public interface IFlatConfiguration {
     public int getInteger(String key);
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
      * the specified key as name as long, if possible.
      *
      * @param key the name of the child to retrieve
@@ -177,6 +186,15 @@ public interface IFlatConfiguration {
     public void setByte(String key, byte value);
 
     /**
+     * Sets the specified short as a child of this configuration with
+     * the specified key as name.
+     *
+     * @param key the name to give to the child
+     * @param value the short to set as child
+     */
+    public void setShort(String key, short value);
+
+    /**
      * Sets the specified float as a child of this configuration with
      * the specified key as name.
      *
@@ -204,7 +222,7 @@ public interface IFlatConfiguration {
     public void setLong(String key, long value);
 
     /**
-     * Removes any direct child element of this configuration wich has
+     * Removes any direct child element of this configuration which has
      * the specified key as name.
      *
      * @param key the name of the child to remove

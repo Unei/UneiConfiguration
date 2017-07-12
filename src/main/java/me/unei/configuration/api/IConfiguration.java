@@ -21,7 +21,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
     public IConfiguration getParent();
 
     /**
-     * Returns the direct child element of this configuration wich has
+     * Returns the direct child element of this configuration which has
      * the specified name, as an {@link IConfiguration IConfiguration}.
      *
      * @param name the name of the child to retrieve
@@ -30,13 +30,11 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
     public IConfiguration getChild(String name);
 
     /**
-     * Returns <tt>true</tt> if the element at the specified path,
-     * starting at this configuration, is defined.
+     * Returns the name of this configuration section.
      *
-     * @param path the path pointing to the element to check
-     * @return <tt>true</tt> if the element at the specified path is defined
+     * @return the name of this configuration section
      */
-    public boolean contains(String path);
+    public String getName();
 
     /**
      * Returns the element at the specified path, starting at
@@ -46,14 +44,14 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      * @return the element at the specified path
      */
     public Object get(String path);
-
+/*
     /**
      * Returns the element at the specified path, starting at
      * this configuration, as {@link String String}, if possible.
      *
      * @param path the path pointing to the element to retrieve
      * @return the element at the specified path as {@link String String}
-     */
+     * /
     public String getString(String path);
 
     /**
@@ -62,7 +60,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to retrieve
      * @return the element at the specified path as double
-     */
+     * /
     public double getDouble(String path);
 
     /**
@@ -71,7 +69,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to retrieve
      * @return the element at the specified path as boolean
-     */
+     * /
     public boolean getBoolean(String path);
 
     /**
@@ -80,7 +78,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to retrieve
      * @return the element at the specified path as byte
-     */
+     * /
     public byte getByte(String path);
 
     /**
@@ -89,7 +87,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to retrieve
      * @return the element at the specified path as float
-     */
+     * /
     public float getFloat(String path);
 
     /**
@@ -98,7 +96,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to retrieve
      * @return the element at the specified path as int
-     */
+     * /
     public int getInteger(String path);
 
     /**
@@ -107,9 +105,9 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to retrieve
      * @return the element at the specified path as long
-     */
+     * /
     public long getLong(String path);
-
+*/
     /**
      * Returns the element at the specified path, starting at
      * this configuration, as {@link Byte Byte} {@link List List}, if possible.
@@ -154,14 +152,14 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      * @param value the element to set at the specified path
      */
     public void set(String path, Object value);
-
+/*
     /**
      * Sets the element at the specified path, starting at
      * this configuration, to the specified {@link String String}.
      *
      * @param path the path pointing to the element to set
      * @param value the {@link String String} to set at the specified path
-     */
+     * /
     public void setString(String path, String value);
 
     /**
@@ -170,7 +168,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to set
      * @param value the double to set at the specified path
-     */
+     * /
     public void setDouble(String path, double value);
 
     /**
@@ -179,7 +177,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to set
      * @param value the boolean to set at the specified path
-     */
+     * /
     public void setBoolean(String path, boolean value);
 
     /**
@@ -188,7 +186,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to set
      * @param value the byte to set at the specified path
-     */
+     * /
     public void setByte(String path, byte value);
 
     /**
@@ -197,7 +195,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to set
      * @param value the float to set at the specified path
-     */
+     * /
     public void setFloat(String path, float value);
 
     /**
@@ -206,7 +204,7 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to set
      * @param value the int to set at the specified path
-     */
+     * /
     public void setInteger(String path, int value);
 
     /**
@@ -215,9 +213,9 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      *
      * @param path the path pointing to the element to set
      * @param value the long to set at the specified path
-     */
+     * /
     public void setLong(String path, long value);
-
+*/
     /**
      * Sets the element at the specified path, starting at
      * this configuration, to the specified {@link Byte Byte} {@link List List}.
@@ -253,12 +251,12 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      * @param value the sub-section to set at the specified path
      */
     public void setSubSection(String path, IConfiguration value);
-
+/*
     /**
      * Removes any element with the specified path, starting at
      * this configuration.
      *
      * @param path the path of the element to remove
-     */
-    public void remove(String path);
+     * /
+    public void remove(String path);*/
 }

@@ -65,6 +65,18 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         }
     }
 
+    public short getShort(String path) {
+        try {
+            return ((Number) get(path)).shortValue();
+        } catch (Exception e) {
+            try {
+            	return (Short.valueOf(getString(path)).shortValue());
+            } catch (NumberFormatException nfe) {
+            	return (short) 0;
+            }
+        }
+    }
+
     public float getFloat(String path) {
         try {
             return ((Number) get(path)).floatValue();
@@ -150,6 +162,10 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
     }
 
     public void setByte(String path, byte value) {
+        set(path, value);
+    }
+
+    public void setShort(String path, short value) {
         set(path, value);
     }
 

@@ -23,8 +23,16 @@ import me.unei.configuration.api.exceptions.UnexpectedClassException;
 
 import org.apache.commons.lang.SerializationUtils;
 
+/**
+ * 
+ * @version 1.3.0
+ * @since 0.0.2
+ */
 public final class SerializerHelper
 {
+	/**
+	 * DO NOT ALLOCATE THIS MANUALLY, use {@link SerializerHelper#initGSON() initGSON()} instead.
+	 */
 	private static Gson GSON = null;
 	
 	private static void initGSON()

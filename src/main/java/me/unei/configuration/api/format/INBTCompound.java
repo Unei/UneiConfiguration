@@ -127,7 +127,7 @@ public interface INBTCompound extends INBTTag {
     public void setBoolean(String key, boolean value);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name.
      *
      * @param key the name of the child to retrieve
@@ -137,7 +137,7 @@ public interface INBTCompound extends INBTTag {
 
     /**
      * Returns the type as byte of the child element of this tag
-     * wich has the specified key as name.
+     * which has the specified key as name.
      *
      * @param key the name of the child from which to retrieve the type
      * @return the type as byte of the direct child element with the specified name
@@ -154,7 +154,7 @@ public interface INBTCompound extends INBTTag {
     public boolean hasKey(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as byte, if possible.
      *
      * @param key the name of the child to retrieve
@@ -163,7 +163,7 @@ public interface INBTCompound extends INBTTag {
     public byte getByte(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as short, if possible.
      *
      * @param key the name of the child to retrieve
@@ -172,7 +172,7 @@ public interface INBTCompound extends INBTTag {
     public short getShort(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as int, if possible.
      *
      * @param key the name of the child to retrieve
@@ -181,7 +181,7 @@ public interface INBTCompound extends INBTTag {
     public int getInt(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as long, if possible.
      *
      * @param key the name of the child to retrieve
@@ -190,7 +190,7 @@ public interface INBTCompound extends INBTTag {
     public long getLong(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as float, if possible.
      *
      * @param key the name of the child to retrieve
@@ -199,7 +199,7 @@ public interface INBTCompound extends INBTTag {
     public float getFloat(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as double, if possible.
      *
      * @param key the name of the child to retrieve
@@ -208,7 +208,7 @@ public interface INBTCompound extends INBTTag {
     public double getDouble(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as {@link String String}, if possible.
      *
      * @param key the name of the child to retrieve
@@ -217,7 +217,7 @@ public interface INBTCompound extends INBTTag {
     public String getString(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as byte array as byte, if possible.
      *
      * @param key the name of the child to retrieve
@@ -226,7 +226,7 @@ public interface INBTCompound extends INBTTag {
     public byte[] getByteArray(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as int array, if possible.
      *
      * @param key the name of the child to retrieve
@@ -235,7 +235,7 @@ public interface INBTCompound extends INBTTag {
     public int[] getIntArray(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as long array, if possible.
      *
      * @param key the name of the child to retrieve
@@ -244,7 +244,7 @@ public interface INBTCompound extends INBTTag {
     public long[] getLongArray(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as an {@link INBTCompound INBTCompound}, if possible.
      *
      * @param key the name of the child to retrieve
@@ -253,7 +253,7 @@ public interface INBTCompound extends INBTTag {
     public INBTCompound getCompound(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as boolean, if possible.
      *
      * @param key the name of the child to retrieve
@@ -262,7 +262,7 @@ public interface INBTCompound extends INBTTag {
     public boolean getBoolean(String key);
 
     /**
-     * Returns the direct child element of this tag wich has
+     * Returns the direct child element of this tag which has
      * the specified key as name as an {@link INBTList INBTList}, if possible.
      *
      * @param key the name of the child to retrieve
@@ -272,7 +272,7 @@ public interface INBTCompound extends INBTTag {
     public INBTList getList(String key, byte type);
 
     /**
-     * Removes any direct child element of this tag wich has
+     * Removes any direct child element of this tag which has
      * the specified key as name.
      *
      * @param key the name of the child to remove

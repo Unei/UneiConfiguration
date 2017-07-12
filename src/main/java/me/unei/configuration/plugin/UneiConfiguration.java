@@ -8,6 +8,9 @@ import me.unei.configuration.reflection.NMSReflection;
 
 public final class UneiConfiguration implements IPlugin {
 
+	/**
+	 * NEVER USE THIS.
+	 */
     private static UneiConfiguration Instance = null;
 
     private final IPlugin source;
@@ -58,6 +61,9 @@ public final class UneiConfiguration implements IPlugin {
         return source.getType();
     }
 
+    /**
+     * This method is safe as long as the {@link Standalone} class is present.
+     */
     public static UneiConfiguration getInstance() {
     	if (UneiConfiguration.Instance == null) {
     		new Standalone();

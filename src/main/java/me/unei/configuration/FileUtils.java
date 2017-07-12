@@ -5,8 +5,17 @@ import me.unei.configuration.plugin.UneiConfiguration;
 import java.io.*;
 import java.util.logging.Level;
 
+/**
+ * Simplify {@link java.io.File file} management.
+ * 
+ * @version 1.0.0
+ * @since 0.0.0
+ */
 public final class FileUtils {
 
+	/**
+	 * The allocated buffer size for a copy.
+	 */
     private static final int BUFFER_SIZE = 12;
 
     public static int copy(InputStream is, OutputStream os) throws IOException, NullPointerException {
@@ -66,7 +75,19 @@ public final class FileUtils {
         return tmp;
     }
 
-    public static boolean createFile(File file) throws SecurityException, IOException {
+    /**
+     * @throws  NullPointerException
+     *          If the {@link File file} given as parameter is null
+     *          
+     * @throws  IOException
+     *          If an I/O error occurred
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String) SecurityManager.checkWrite(String)}</code>
+     *          method denies write access to the file
+     */
+    public static boolean createFile(File file) throws SecurityException, IOException, NullPointerException {
         if (!file.getParentFile().exists()) {
             UneiConfiguration.getInstance().getLogger().log(Level.FINE, "Creating directory tree for file " + file.getName() + " : " + file.getParentFile().getPath());
             if (!file.getParentFile().mkdirs()) {

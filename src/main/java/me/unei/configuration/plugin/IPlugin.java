@@ -8,7 +8,7 @@ public interface IPlugin {
 
     /**
      * Called when the plugin has just been loaded, after the plugin is loaded but before it has been enabled.
-     * When mulitple plugins are loaded, the onLoad() for all plugins is called before any onEnable() is called.
+     * When multiple plugins are loaded, the onLoad() for all plugins is called before any onEnable() is called.
      *
      * @see org.bukkit.plugin.Plugin#onLoad()
      * @see net.md_5.bungee.api.plugin.Plugin#onLoad()
@@ -71,6 +71,9 @@ public interface IPlugin {
      */
     public IPlugin.Type getType();
 
+    /**
+     * Plugin types.
+     */
     public static enum Type {
 
         /**
