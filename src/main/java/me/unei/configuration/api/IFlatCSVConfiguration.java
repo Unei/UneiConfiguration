@@ -17,7 +17,7 @@ public interface IFlatCSVConfiguration extends IFlatConfiguration {
 	 * which are not part of the data, and that contains the different keys,
 	 * to the default header.
 	 *
-	 * Ususally, the default header will contain a first value <tt>Key</tt> and
+	 * Usually, the default header will contain a first value <tt>Key</tt> and
 	 * a second one <tt>Value</tt> separated by a comma, but this may change
 	 * over time and/or in different implementations.
 	 */
