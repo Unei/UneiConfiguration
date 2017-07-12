@@ -45,8 +45,11 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
         File tmp = new File(this.file.getFolder(), this.file.getFileName() + PropertiesConfig.PROP_TMP_EXT);
 		try
 		{
+			if (tmp.exists()) {
+				tmp.delete();
+			}
             UneiConfiguration.getInstance().getLogger().fine("Writing Properties to file " + getFileName() + "...");
-			data.store(new FileWriter(file.getFile()), null);
+			data.store(new FileWriter(tmp), null);
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
                 this.file.getFile().delete();
