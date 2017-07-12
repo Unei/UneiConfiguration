@@ -15,9 +15,13 @@ public interface IFlatCSVConfiguration extends IFlatConfiguration {
 	/**
 	 * Resets the {@link List List} of lines located at the top of the file,
 	 * which are not part of the data, and that contains the different keys,
-	 * to an empty {@link List List}.
+	 * to the default header.
+	 *
+	 * Ususally, the default header will contain a first value <tt>Key</tt> and
+	 * a second one <tt>Value</tt> separated by a comma, but this may change
+	 * over time and/or in different implementations.
 	 */
-	public void resetHeaderLine(); //TODO Javadoc - Default Header is not empty !!
+	public void resetHeaderLine();
 
 	/**
 	 * Sets the value relative to the specified key to the specified
