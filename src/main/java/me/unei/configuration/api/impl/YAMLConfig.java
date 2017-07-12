@@ -60,14 +60,22 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 
     private Map<String, Object> data = new HashMap<String, Object>();
 
+    public YAMLConfig(SavedFile file) {
+    	this(file, PathSymbolsType.BUKKIT);
+    }
+    
+    public YAMLConfig(SavedFile file, PathSymbolsType symType) {
+    	super(file, symType);
+    	
+    	this.init();
+    }
+    
     public YAMLConfig(File folder, String fileName) {
         this(folder, fileName, PathSymbolsType.BUKKIT);
     }
 
     public YAMLConfig(File folder, String fileName, PathSymbolsType symType) {
-        super(new SavedFile(folder, fileName, YAMLConfig.YAML_FILE_EXT), symType);
-
-        this.init();
+        this(new SavedFile(folder, fileName, YAMLConfig.YAML_FILE_EXT), symType);
     }
 
     public YAMLConfig(String data) {

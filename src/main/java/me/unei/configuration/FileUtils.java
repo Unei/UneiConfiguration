@@ -76,6 +76,9 @@ public final class FileUtils {
     }
 
     /**
+     * @param file TODO to be completed
+     * @return TODO to be completed
+     * 
      * @throws  NullPointerException
      *          If the {@link File file} given as parameter is null
      *          

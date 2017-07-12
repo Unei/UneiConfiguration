@@ -46,15 +46,23 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
     }
 
     private Map<String, Object> data = new HashMap<String, Object>();
+    
+    public JSONConfig(SavedFile file) {
+    	this(file, PathSymbolsType.BUKKIT);
+    }
+    
+    public JSONConfig(SavedFile file, PathSymbolsType symType) {
+    	super(file, symType);
+    	
+    	this.init();
+    }
 
     public JSONConfig(File folder, String fileName) {
         this(folder, fileName, PathSymbolsType.BUKKIT);
     }
 
     public JSONConfig(File folder, String fileName, PathSymbolsType symType) {
-        super(new SavedFile(folder, fileName, JSONConfig.JSON_FILE_EXT), symType);
-
-        this.init();
+        this(new SavedFile(folder, fileName, JSONConfig.JSON_FILE_EXT), symType);
     }
 
     public JSONConfig(String data) {

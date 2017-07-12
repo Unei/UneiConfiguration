@@ -126,7 +126,7 @@ public final class PathComponent {
         }
 
         /**
-         * @deprecated use {@link PathNavigator#cleanPath(PathComponentsList)} instead
+         * @deprecated use {@link PathNavigator#cleanPath(PathComponent.PathComponentsList)} instead
          */
         @Deprecated
         public void cleanPath() {

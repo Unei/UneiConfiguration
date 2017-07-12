@@ -31,11 +31,16 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     private Connection connection = null;
     private String tableName = "_";
 
+    public FlatSQLiteConfig(SavedFile file, String tableName) {
+    	super(file);
+    	
+    	this.tableName = tableName;
+    	
+    	this.subinit();
+    }
+    
     public FlatSQLiteConfig(File folder, String fileName, String tableName) {
-        super(new SavedFile(folder, fileName, FlatSQLiteConfig.SQLITE_FILE_EXT));
-        this.tableName = tableName;
-
-        this.subinit();
+        this(new SavedFile(folder, fileName, FlatSQLiteConfig.SQLITE_FILE_EXT), tableName);
     }
 
     private void subinit() {

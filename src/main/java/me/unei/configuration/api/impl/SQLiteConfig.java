@@ -41,15 +41,24 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
     private Connection connection = null;
     private String tableName = "_";
 
+    public SQLiteConfig(SavedFile file, String tableName) {
+    	this(file, tableName, PathSymbolsType.BUKKIT);
+    }
+    
+    public SQLiteConfig(SavedFile file, String tableName, PathSymbolsType symType) {
+    	super(file, symType);
+    	
+    	this.tableName = tableName;
+    	
+    	this.subinit();
+    }
+    
     public SQLiteConfig(File folder, String fileName, String tableName) {
         this(folder, fileName, tableName, PathSymbolsType.BUKKIT);
     }
 
     public SQLiteConfig(File folder, String fileName, String tableName, PathSymbolsType symType) {
-        super(new SavedFile(folder, fileName, SQLiteConfig.SQLITE_FILE_EXT), symType);
-        this.tableName = tableName;
-
-        this.subinit();
+        this(new SavedFile(folder, fileName, SQLiteConfig.SQLITE_FILE_EXT), tableName, symType);
     }
 
     private SQLiteConfig(SQLiteConfig p_parent, String p_nodeName) {

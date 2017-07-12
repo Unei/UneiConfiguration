@@ -63,6 +63,8 @@ public final class UneiConfiguration implements IPlugin {
 
     /**
      * This method is safe as long as the {@link Standalone} class is present.
+     * 
+     * @return A not null instance of {@link UneiConfiguration}.
      */
     public static UneiConfiguration getInstance() {
     	if (UneiConfiguration.Instance == null) {
