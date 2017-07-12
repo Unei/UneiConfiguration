@@ -5,7 +5,7 @@ import java.io.File;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 /**
- * A Representation of a file.
+ * A representation of a file.
  * 
  * @version 1.2.0
  * @since 0.0.0

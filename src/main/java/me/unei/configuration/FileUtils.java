@@ -1,12 +1,20 @@
 package me.unei.configuration;
 
-import me.unei.configuration.plugin.UneiConfiguration;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.logging.Level;
 
+import me.unei.configuration.plugin.UneiConfiguration;
+
 /**
- * Simplify {@link java.io.File file} management.
+ * Simplifies {@link java.io.File file} management.
  * 
  * @version 1.0.0
  * @since 0.0.0
@@ -86,7 +94,7 @@ public final class FileUtils {
      * 
      * @throws  NullPointerException
      *          If the {@link File file} given as parameter is null
-     *          
+     * 
      * @throws  IOException
      *          If an I/O error occurred
      *

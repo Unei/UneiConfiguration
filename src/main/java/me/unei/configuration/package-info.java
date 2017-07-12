@@ -1,5 +1,5 @@
 /**
- * Main package of the Unei Configuration API.
+ * Main package for the UneiConfiguration API.
  * 
  * <div>
  * <h3>Sub-packages :</h3>
@@ -12,7 +12,7 @@
  * - {@link me.unei.configuration.SavedFile SavedFile}<br>
  * </div>
  * 
- * @version 1.1.4
+ * @version 1.2.3
  * @since 0.0.0
  */
 package me.unei.configuration;

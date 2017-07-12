@@ -14,7 +14,7 @@ import me.unei.configuration.api.exceptions.FileFormatException;
 
 public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> implements IFlatPropertiesConfiguration
 {
-	public static final String PROP_FILE_EXT = ".cnf";
+	public static final String PROP_FILE_EXT = ".properties";
 	public static final String PROP_TMP_EXT = ".tmp";
 	
 	private Properties data;
@@ -112,5 +112,10 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 			return;
 		}
 		this.data.remove(key);
+	}
+	
+	@Override
+	public String toString() {
+		return "PropertiesConfig=" + this.data.toString();
 	}
 }
