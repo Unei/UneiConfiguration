@@ -1,9 +1,14 @@
 package me.unei.configuration.api.impl;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Set;
 
@@ -42,14 +47,17 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 		if (this.file.getFile() == null) {
 			return;
 		}
-        File tmp = new File(this.file.getFolder(), this.file.getFileName() + PropertiesConfig.PROP_TMP_EXT);
+        File tmp = new File(this.file.getFolder(), this.file.getFullName() + PropertiesConfig.PROP_TMP_EXT);
 		try
 		{
 			if (tmp.exists()) {
 				tmp.delete();
 			}
             UneiConfiguration.getInstance().getLogger().fine("Writing Properties to file " + getFileName() + "...");
-			data.store(new FileWriter(tmp), null);
+            Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
+			data.store(w, null);
+			w.flush();
+			w.close();
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
                 this.file.getFile().delete();
@@ -78,7 +86,9 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 		{
 			data.clear();
             UneiConfiguration.getInstance().getLogger().fine("Reading Properties from file " + getFileName() + "...");
-			data.load(new FileReader(file.getFile()));
+            Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
+			data.load(r);
+			r.close();
             UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
 		}
 		catch (IOException e)

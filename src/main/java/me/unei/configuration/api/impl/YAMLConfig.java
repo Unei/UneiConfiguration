@@ -13,14 +13,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.base.Charsets;
-
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.DumperOptions.LineBreak;
 import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
+
+import com.google.common.base.Charsets;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
@@ -147,7 +147,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         if (this.file.getFile() == null) {
             return;
         }
-        File tmp = new File(this.file.getFolder(), this.file.getFileName() + YAMLConfig.YAML_TMP_EXT);
+        File tmp = new File(this.file.getFolder(), this.file.getFullName() + YAMLConfig.YAML_TMP_EXT);
         UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);

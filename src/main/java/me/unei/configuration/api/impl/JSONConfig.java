@@ -142,7 +142,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         if (this.file.getFile() == null) {
             return;
         }
-        File tmp = new File(this.file.getFolder(), this.file.getFileName() + JSONConfig.JSON_TMP_EXT);
+        File tmp = new File(this.file.getFolder(), this.file.getFullName() + JSONConfig.JSON_TMP_EXT);
         UneiConfiguration.getInstance().getLogger().fine("Writing JSON to file " + getFileName() + "...");
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);

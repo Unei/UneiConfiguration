@@ -59,7 +59,7 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		if (this.file.getFile() == null) {
 			return;
 		}
-		File tmp = new File(file.getFolder(), file.getFileName() + CSVConfig.CSV_TMP_EXT);
+		File tmp = new File(file.getFolder(), file.getFullName() + CSVConfig.CSV_TMP_EXT);
 		UneiConfiguration.getInstance().getLogger().fine("Writing CSV data to file " + getFileName() + "...");
 		try {
 			Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);

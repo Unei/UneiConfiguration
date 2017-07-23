@@ -7,7 +7,7 @@ import me.unei.configuration.plugin.UneiConfiguration;
 /**
  * A representation of a file.
  * 
- * @version 1.2.0
+ * @version 1.3.0
  * @since 0.0.0
  */
 public final class SavedFile {
@@ -127,5 +127,15 @@ public final class SavedFile {
      */
     public String getFileName() {
         return this.fileName;
+    }
+
+    /**
+     * Returns the name of the {@link File file} that
+     * represents this SavedFile with extension.
+     *
+     * @return the name of this file
+     */
+    public String getFullName() {
+    	return this.fileName + this.extension;
     }
 }

@@ -124,7 +124,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		if (this.file.getFile() == null) {
 			return;
 		}
-		File tmp = new File(this.file.getFolder(), this.file.getFileName() + BinaryConfig.BINARY_TMP_EXT);
+		File tmp = new File(this.file.getFolder(), this.file.getFullName() + BinaryConfig.BINARY_TMP_EXT);
 		UneiConfiguration.getInstance().getLogger().fine("Writing Binary to file " + getFileName() + "...");
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tmp));

@@ -177,7 +177,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
             this.parent.save();
             return;
         }
-        File tmp = new File(this.file.getFolder(), this.file.getFileName() + NBTConfig.NBT_TMP_EXT);
+        File tmp = new File(this.file.getFolder(), this.file.getFullName() + NBTConfig.NBT_TMP_EXT);
         TagCompound compound = new TagCompound();
         compound.loadMap(data);
         try {
