@@ -17,6 +17,8 @@ public final class Standalone implements IPlugin
 		plugin = new UneiConfiguration(this);
 		
 		this.logger = new MyLogger(plugin);
+		
+		this.onLoad();
 	}
 	
 	public void onLoad()
@@ -62,7 +64,6 @@ public final class Standalone implements IPlugin
 		{
 			super(plugin.getClass().getCanonicalName(), null);
 			this.myName = "[UneiConfiguration] ";
-			setParent(Logger.getGlobal());
 			setLevel(Level.ALL);
 		}
 		
