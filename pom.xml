@@ -13,10 +13,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.version.minecraft>1.12-R0.1-SNAPSHOT</project.version.minecraft>
     <project.version.bungeecord>1.12-SNAPSHOT</project.version.bungeecord>
+    
+    <manifest.built-by>UneiTeam</manifest.built-by>
   </properties>
 
   <build>
-    <finalName>UneiConfiguration</finalName>
+    <finalName>${project.name}-${project.version}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -43,6 +45,11 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.0.2</version>
         <configuration>
+          <archive>
+            <manifestEntries>
+              <Built-By>${manifest.built-by}</Built-By>
+            </manifestEntries>
+          </archive>
           <outputDirectory>.</outputDirectory>
         </configuration>
       </plugin>
@@ -52,6 +59,11 @@
       	<artifactId>maven-javadoc-plugin</artifactId>
       	<version>2.10.4</version>
       	<configuration>
+      		<archive>
+      			<manifestEntries>
+      				<Built-By>${manifest.built-by}</Built-By>
+      			</manifestEntries>
+      		</archive>
       		<excludePackageNames>*.bungee;*.bukkit;*.reflection</excludePackageNames>
       		<jarOutputDirectory>.</jarOutputDirectory>
       	</configuration>
@@ -65,7 +77,7 @@
       	</executions>
       </plugin>
       
-      <plugin>
+      <!--plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
@@ -76,11 +88,35 @@
           </execution>
         </executions>
         <configuration>
+          <descriptor>src/assembly/jar-with-deps.xml</descriptor>
+          <archive>
+            <addMavenDescriptor>true</addMavenDescriptor>
+            <manifestEntries>
+              <Built-By>UneiTeam</Built-By>
+            </manifestEntries>
+          </archive>
           <outputDirectory>.</outputDirectory>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
         </configuration>
+      </plugin-->
+      
+      <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
+      	<artifactId>maven-shade-plugin</artifactId>
+      	<version>3.0.0</version>
+      	<executions>
+      	  <execution>
+      	    <phase>package</phase>
+      	    <goals>
+      	      <goal>shade</goal>
+      	    </goals>
+      	    <configuration>
+      	      <outputDirectory>.</outputDirectory>
+      	      <shadedArtifactAttached>true</shadedArtifactAttached>
+      	      <shadedArtifactId>${project.name}</shadedArtifactId>
+      	      <shadedClassifierName>shaded</shadedClassifierName>
+      	    </configuration>
+      	  </execution>
+      	</executions>
       </plugin>
     </plugins>
   </build>
