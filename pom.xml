@@ -13,12 +13,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.version.minecraft>1.12-R0.1-SNAPSHOT</project.version.minecraft>
     <project.version.bungeecord>1.12-SNAPSHOT</project.version.bungeecord>
-    
+
     <manifest.built-by>UneiTeam</manifest.built-by>
   </properties>
 
   <build>
-    <finalName>${project.name}-${project.version}</finalName>
+    <finalName>${project.name}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -53,7 +53,7 @@
           <outputDirectory>.</outputDirectory>
         </configuration>
       </plugin>
-      
+
       <plugin>
       	<groupId>org.apache.maven.plugins</groupId>
       	<artifactId>maven-javadoc-plugin</artifactId>
@@ -76,29 +76,7 @@
       		</execution>
       	</executions>
       </plugin>
-      
-      <!--plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <descriptor>src/assembly/jar-with-deps.xml</descriptor>
-          <archive>
-            <addMavenDescriptor>true</addMavenDescriptor>
-            <manifestEntries>
-              <Built-By>UneiTeam</Built-By>
-            </manifestEntries>
-          </archive>
-          <outputDirectory>.</outputDirectory>
-        </configuration>
-      </plugin-->
-      
+
       <plugin>
       	<groupId>org.apache.maven.plugins</groupId>
       	<artifactId>maven-shade-plugin</artifactId>
@@ -111,6 +89,7 @@
       	    </goals>
       	    <configuration>
       	      <outputDirectory>.</outputDirectory>
+              <finalName>${project.build.finalName}-jar-with-dependencies</finalName>
       	      <shadedArtifactAttached>true</shadedArtifactAttached>
       	      <shadedArtifactId>${project.name}</shadedArtifactId>
       	      <shadedClassifierName>shaded</shadedClassifierName>
