@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
+import me.unei.configuration.plugin.Updater.UpdateCheckCallback;
 import me.unei.configuration.reflection.NMSReflection;
 
 public final class UneiConfiguration implements IPlugin {
@@ -23,7 +24,6 @@ public final class UneiConfiguration implements IPlugin {
 
     public void onLoad() {
         this.getLogger().fine("Loading UNEI Configuration API...");
-        Updater.getUpdater(this).checkVersionAsync(null);
 
         if (NMSReflection.canUseNMS()) {
             this.getLogger().fine("NMS classes detected !");
@@ -76,5 +76,13 @@ public final class UneiConfiguration implements IPlugin {
     
     public static Updater getUpdater() {
     	return Updater.getUpdater(UneiConfiguration.getInstance());
+    }
+    
+    public static void checkVersionAsync(UpdateCheckCallback callback) {
+    	UneiConfiguration.getUpdater().checkVersionAsync(callback);
+    }
+    
+    public static boolean checkVersion() {
+    	return UneiConfiguration.getUpdater().checkVersion();
     }
 }

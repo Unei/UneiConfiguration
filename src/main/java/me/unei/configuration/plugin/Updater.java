@@ -75,20 +75,20 @@ public final class Updater
 	public boolean checkVersion()
 	{
 		this.plugin.getLogger().fine("Checking plugin version...");
-        String latest = this.getLatestVersion();
-        String myversion = this.getCurrentVersion();
-        if (latest == null || myversion == null) {
-        	this.plugin.getLogger().info(this.getClassName() + " was enable to check his version.");
-        	return false;
-        } else if (!latest.equalsIgnoreCase(myversion)) {
-        	this.plugin.getLogger().warning(this.getClassName() + " seems to be out of date !");
-        	this.plugin.getLogger().warning("Latest version is '" + latest + "' but current is '" + myversion + "'.");
-        	this.plugin.getLogger().warning("Latest version was released the " + this.getReadableLastUpdatedDate());
-        	this.plugin.getLogger().warning("We recomend to update " + this.getClassName() + ", more info on http://unei.gitlab.io/");
-        	return false;
-        }
-        this.plugin.getLogger().fine("Version check complete : You are using the latest one !");
-        return true;
+		String latest = this.getLatestVersion();
+		String myversion = this.getCurrentVersion();
+		if (latest == null || myversion == null) {
+			this.plugin.getLogger().info(this.getClassName() + " was enable to check his version.");
+			return false;
+		} else if (!latest.equalsIgnoreCase(myversion)) {
+			this.plugin.getLogger().warning(this.getClassName() + " seems to be out of date !");
+			this.plugin.getLogger().warning("Latest version is '" + latest + "' but current is '" + myversion + "'.");
+			this.plugin.getLogger().warning("Latest version was released the " + this.getReadableLastUpdatedDate());
+			this.plugin.getLogger().warning("We recomend to update " + this.getClassName() + ", more info on http://unei.gitlab.io/");
+			return false;
+		}
+		this.plugin.getLogger().fine("Version check complete : You are using the latest one !");
+		return true;
 	}
 	
 	private String getReadableLastUpdatedDate()
@@ -113,22 +113,22 @@ public final class Updater
 			return this.cachedCurrentVersion;
 		}
 		String version;
-    	Properties pom = new Properties();
-    	InputStream in = this.plugin.getResource(this.pomResourcePath);
-    	try {
-    		pom.load(in);
-    		in.close();
-    	} catch (IOException e) {
+		Properties pom = new Properties();
+		InputStream in = this.plugin.getResource(this.pomResourcePath);
+		try {
+			pom.load(in);
+			in.close();
+		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
-    	}
-    	version = pom.getProperty("version");
-    	if (version != null)
-    	{
-    		this.cachedCurrentVersion = version;
-    		return version;
-    	}
-    	return "UNKNOWN";
+		}
+		version = pom.getProperty("version");
+		if (version != null)
+		{
+			this.cachedCurrentVersion = version;
+			return version;
+		}
+		return "UNKNOWN";
 	}
 	
 	public MavenMeta getMavenMeta()
@@ -185,42 +185,42 @@ public final class Updater
 		
 		public boolean parseData(String url)
 		{
-    		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    		try
-    		{
-    			XPathFactory xpf = XPathFactory.newInstance();
-    			XPath path = xpf.newXPath();
-    			factory.setIgnoringElementContentWhitespace(true);
-    			DocumentBuilder builder = factory.newDocumentBuilder();
-    			
-    			Document doc = builder.parse(url);
-    			Node root = doc.getDocumentElement();
-    			this.latest = path.evaluate(MavenMeta.LATEST_PATH, root);
-    			this.lastUpdated = path.evaluate(MavenMeta.LAST_UPDATED_PATH, root);
-    			this.lastUpdatedDate = MavenMeta.dateFormat.parse(this.lastUpdated);
-    			return true;
-    		}
-    		catch (ParserConfigurationException ignored)
-    		{
-    			//
-    		}
-    		catch (SAXException ignored)
-    		{
-    			//
-    		}
-    		catch (XPathExpressionException ignored)
-    		{
-    			//
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			try
+			{
+				XPathFactory xpf = XPathFactory.newInstance();
+				XPath path = xpf.newXPath();
+				factory.setIgnoringElementContentWhitespace(true);
+				DocumentBuilder builder = factory.newDocumentBuilder();
+				
+				Document doc = builder.parse(url);
+				Node root = doc.getDocumentElement();
+				this.latest = path.evaluate(MavenMeta.LATEST_PATH, root);
+				this.lastUpdated = path.evaluate(MavenMeta.LAST_UPDATED_PATH, root);
+				this.lastUpdatedDate = MavenMeta.dateFormat.parse(this.lastUpdated);
+				return true;
 			}
-    		catch (IOException ignored)
-    		{
+			catch (ParserConfigurationException ignored)
+			{
 				//
 			}
-    		catch (ParseException ignored)
-    		{
+			catch (SAXException ignored)
+			{
 				//
 			}
-    		return false;
+			catch (XPathExpressionException ignored)
+			{
+				//
+			}
+			catch (IOException ignored)
+			{
+				//
+			}
+			catch (ParseException ignored)
+			{
+				//
+			}
+			return false;
 		}
 		
 		public String getLatestVersion()
