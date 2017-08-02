@@ -4,7 +4,7 @@
 
   <groupId>me.unei</groupId>
   <artifactId>uneiconfiguration</artifactId>
-  <version>1.2.6-SNAPSHOT</version>
+  <version>1.2.6-RELEASE</version>
   <packaging>jar</packaging>
 
   <name>UneiConfiguration</name>
