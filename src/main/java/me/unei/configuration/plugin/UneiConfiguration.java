@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
-import me.unei.configuration.plugin.Updater.UpdateCheckCallback;
 import me.unei.configuration.reflection.NMSReflection;
 
 public final class UneiConfiguration implements IPlugin {
@@ -78,11 +77,11 @@ public final class UneiConfiguration implements IPlugin {
     	return Updater.getUpdater(UneiConfiguration.getInstance());
     }
     
-    public static void checkVersionAsync(UpdateCheckCallback callback) {
+    public static void checkVersionAsync(Updater.Callback callback) {
     	UneiConfiguration.getUpdater().checkVersionAsync(callback);
     }
     
-    public static boolean checkVersion() {
+    public static Updater.Result checkVersion() {
     	return UneiConfiguration.getUpdater().checkVersion();
     }
 }
