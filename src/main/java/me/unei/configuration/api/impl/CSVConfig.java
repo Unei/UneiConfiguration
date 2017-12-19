@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.google.common.base.Charsets;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.SerializerHelper;
@@ -62,7 +61,7 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		File tmp = new File(file.getFolder(), file.getFullName() + CSVConfig.CSV_TMP_EXT);
 		UneiConfiguration.getInstance().getLogger().fine("Writing CSV data to file " + getFileName() + "...");
 		try {
-			Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
+			Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
 			SerializerHelper.writeCSV(w, keyLine, data);
 			w.flush();
 			w.close();
@@ -89,7 +88,7 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		}
 		try {
 			UneiConfiguration.getInstance().getLogger().fine("Reading CSV from file " + getFileName() + "...");
-			Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
+			Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
 			Map<String, Object> tmpData = SerializerHelper.readCSV(r, keyLine);
 			r.close();
 			if (tmpData != null && !tmpData.isEmpty()) {

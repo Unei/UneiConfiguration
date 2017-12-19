@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,8 +20,6 @@ import org.yaml.snakeyaml.DumperOptions.LineBreak;
 import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
-
-import com.google.common.base.Charsets;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
@@ -150,7 +149,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         File tmp = new File(this.file.getFolder(), this.file.getFullName() + YAMLConfig.YAML_TMP_EXT);
         UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
         try {
-            Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
+            Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
             YAMLConfig.BEAUTIFIED_YAML.dump(data, w);
             w.close();
             if (this.file.getFile().exists()) {
@@ -182,7 +181,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         this.data.clear();
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
-            Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
+            Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
             Map<?, ?> tmpData;
             try {
             	tmpData = YAMLConfig.BEAUTIFIED_YAML.loadAs(r, Map.class);

@@ -9,12 +9,12 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -145,7 +145,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         File tmp = new File(this.file.getFolder(), this.file.getFullName() + JSONConfig.JSON_TMP_EXT);
         UneiConfiguration.getInstance().getLogger().fine("Writing JSON to file " + getFileName() + "...");
         try {
-            Writer w = new OutputStreamWriter(new FileOutputStream(tmp), Charsets.UTF_8);
+            Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
             JsonWriter jw = new JsonWriter(w);
             jw.setIndent("  ");
             JSONConfig.GSON.toJson(data, Map.class, jw);
@@ -179,7 +179,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         this.data.clear();
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading JSON from file " + getFileName() + "...");
-            Reader r = new InputStreamReader(new FileInputStream(file.getFile()), Charsets.UTF_8);
+            Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
             Map<?, ?> tmpData;
             try {
             	tmpData = JSONConfig.GSON.fromJson(r, Map.class);
