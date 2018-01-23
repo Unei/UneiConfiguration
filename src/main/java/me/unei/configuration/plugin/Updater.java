@@ -28,7 +28,7 @@ public class Updater {
 	public static final String MAVEN_REPO_URL = "https://unei.gitlab.io/maven/<group>/<artifact>/maven-metadata.xml";
 
 	private static final Map<IPlugin, Updater> cachedUpdaters = new HashMap<IPlugin, Updater>();
-	private static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//	private static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
 	private IPlugin plugin;
 	private String pomResourcePath;
@@ -129,15 +129,17 @@ public class Updater {
 	}
 
 	public String getLatestVersion() {
-		return this.getMavenMeta().getLatestVersion();
+		MavenMeta meta = this.getMavenMeta();
+		return (meta != null) ? meta.getLatestVersion() : null;
 	}
 
 	public Date getLastUpdateTime() {
-		return this.getMavenMeta().getLastUpdateTime();
+		MavenMeta meta = this.getMavenMeta();
+		return (meta != null) ? meta.getLastUpdateTime() : null;
 	}
 
 	public String getReadableLastUpdateTime() {
-		Date updateTime = this.getMavenMeta().getLastUpdateTime();
+		Date updateTime = this.getLastUpdateTime();
 		if (updateTime == null) return "UNKNOWN";
 
 		Date now = new Date();
