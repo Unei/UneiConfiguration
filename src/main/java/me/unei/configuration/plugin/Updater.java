@@ -175,6 +175,12 @@ public class Updater {
 		return Math.floor(delta / year) + " years ago";
 	}
 	
+	@Deprecated
+	public static abstract class UpdateCheckCallback {
+		@Deprecated
+		public abstract void run(boolean res);
+	}
+	
 	public static abstract class Callback {
 
 		public void run(Updater updater, Updater.Result result) {

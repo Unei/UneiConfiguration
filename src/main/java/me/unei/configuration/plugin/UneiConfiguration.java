@@ -81,6 +81,16 @@ public final class UneiConfiguration implements IPlugin {
     	UneiConfiguration.getUpdater().checkVersionAsync(callback);
     }
     
+    @Deprecated
+    public static void checkVersionAsync(Updater.UpdateCheckCallback callback) {
+    	UneiConfiguration.getUpdater().checkVersionAsync(new Updater.Callback() {
+    		public void run(Updater up, Updater.Result res)
+    		{
+    			callback.run(res == Updater.Result.UPDATE_AVAILABLE);
+			}
+		});
+    }
+    
     public static Updater.Result checkVersion() {
     	return UneiConfiguration.getUpdater().checkVersion();
     }
