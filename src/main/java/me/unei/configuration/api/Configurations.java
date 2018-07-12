@@ -68,7 +68,7 @@ public final class Configurations
 		 */
 		NBT("NBT"),
 		/**
-		 * A Java Properties Configuration type. (often used for languages configuration files).
+		 * A Java Properties Configuration type. (Often used for languages configuration files).
 		 */
 		Properties("(Flat) Properties", "Properties", "lang"),
 		/**
@@ -78,7 +78,7 @@ public final class Configurations
 		 */
 		SQLite("SQLite"),
 		/**
-		 * An YAML Configuration type. (Type used for CraftBukki/Spigot/Forge/... configuration files).
+		 * A YAML Configuration type. (Type used for CraftBukki/Spigot/Forge/... configuration files).
 		 */
 		YAML("YAML");
 		
