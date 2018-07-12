@@ -77,11 +77,15 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         this(new SavedFile(folder, fileName, YAMLConfig.YAML_FILE_EXT), symType);
     }
 
-    public YAMLConfig(String data) {
-        super(new SavedFile(), PathSymbolsType.BUKKIT);
+    public YAMLConfig(String data, PathSymbolsType symType) {
+        super(new SavedFile(), symType);
 
         this.init();
         this.loadFromString(data);
+    }
+
+    public YAMLConfig(String data) {
+    	this(data, PathSymbolsType.BUKKIT);
     }
 
     private YAMLConfig(YAMLConfig p_parent, String p_nodeName) {
@@ -111,7 +115,8 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         return (YAMLConfig) super.getRoot();
     }
 
-    public YAMLConfig getChild(String name) {
+    @Override
+	public YAMLConfig getChild(String name) {
         if (!this.canAccess()) {
             return null;
         }
@@ -135,7 +140,8 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 		return dir.data;
     }
 
-    public void save() {
+    @Override
+	public void save() {
         if (!this.canAccess()) {
             return;
         }
@@ -165,7 +171,8 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         }
     }
 
-    public void reload() throws FileFormatException {
+    @Override
+	public void reload() throws FileFormatException {
         if (!this.canAccess()) {
             return;
         }
@@ -222,17 +229,20 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         }
     }
 
-    public Set<String> getKeys() {
+    @Override
+	public Set<String> getKeys() {
         return this.data.keySet();
     }
 
-    public boolean contains(String path) {
+    @Override
+	public boolean contains(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         return node.containsKey(list.lastChild());
     }
 
-    public Object get(String path) {
+    @Override
+	public Object get(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         return node.get(list.lastChild());
@@ -253,7 +263,8 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         return null;
     }
 
-    public void set(String path, Object value) {
+    @Override
+	public void set(String path, Object value) {
     	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
     	Map<String, Object> node = this.getParentMap(list);
     	if (value == null) {
@@ -263,7 +274,8 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     	}
     }
 
-    public void setSubSection(String path, IConfiguration value) {
+    @Override
+	public void setSubSection(String path, IConfiguration value) {
         if (!(value instanceof YAMLConfig)) {
             //TODO ConfigType conversion
             return;
@@ -271,23 +283,28 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         set(path, ((YAMLConfig) value).data);
     }
 
-    public void remove(String path) {
+    @Override
+	public void remove(String path) {
         set(path, null);
     }
     
-    public String toFormattedString() {
+    @Override
+	public String toFormattedString() {
     	return YAMLConfig.BEAUTIFIED_YAML.dumpAsMap(data);
     }
     
-    public String toMinimizedString() {
+    @Override
+	public String toMinimizedString() {
     	return YAMLConfig.MINIFIED_YAML.dumpAsMap(data);
     }
 
-    public String saveToString() {
+    @Override
+	public String saveToString() {
         return this.toFormattedString();
     }
 
-    public void loadFromString(String p_data) {
+    @Override
+	public void loadFromString(String p_data) {
         this.data.clear();
         Map<?, ?> tmpMap = YAMLConfig.MINIFIED_YAML.loadAs(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {

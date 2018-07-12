@@ -15,13 +15,19 @@ public final class UneiConfiguration implements IPlugin {
     
     private final IPlugin source;
 
+    /**
+     * <p><b>Please, do not use this if you don't known EXACTLY what you are doing</b></p>
+     * 
+     * @param plugin The real plugin instance.
+     */
     public UneiConfiguration(IPlugin plugin) {
         this.source = plugin;
         NMSReflection.doNothing();
         UneiConfiguration.Instance = this;
     }
 
-    public void onLoad() {
+    @Override
+	public void onLoad() {
         this.getLogger().fine("Loading UNEI Configuration API...");
 
         if (NMSReflection.canUseNMS()) {
@@ -30,19 +36,23 @@ public final class UneiConfiguration implements IPlugin {
         }
     }
 
-    public void onEnable() {
+    @Override
+	public void onEnable() {
         this.getLogger().fine("Enabling UNEI Configuration API...");
     }
 
-    public void onDisable() {
+    @Override
+	public void onDisable() {
         this.getLogger().fine("Disabling UNEI Configuration API...");
     }
 
-    public File getDataFolder() {
+    @Override
+	public File getDataFolder() {
         return source.getDataFolder();
     }
 
-    public Logger getLogger() {
+    @Override
+	public Logger getLogger() {
     	try
     	{
     		return source.getLogger();
@@ -53,11 +63,13 @@ public final class UneiConfiguration implements IPlugin {
     	}
     }
 
-    public InputStream getResource(String path) {
+    @Override
+	public InputStream getResource(String path) {
         return source.getResource(path);
     }
 
-    public IPlugin.Type getType() {
+    @Override
+	public IPlugin.Type getType() {
         return source.getType();
     }
     
@@ -82,9 +94,10 @@ public final class UneiConfiguration implements IPlugin {
     }
     
     @Deprecated
-    public static void checkVersionAsync(Updater.UpdateCheckCallback callback) {
+    public static void checkVersionAsync(final Updater.UpdateCheckCallback callback) {
     	UneiConfiguration.getUpdater().checkVersionAsync(new Updater.Callback() {
-    		public void run(Updater up, Updater.Result res)
+    		@Override
+			public void run(Updater up, Updater.Result res)
     		{
     			callback.run(res == Updater.Result.UPDATE_AVAILABLE);
 			}

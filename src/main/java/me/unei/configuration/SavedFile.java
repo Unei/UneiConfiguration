@@ -5,9 +5,9 @@ import java.io.File;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 /**
- * A representation of a file.
+ * An abstract representation of file.
  * 
- * @version 1.3.0
+ * @version 1.3.2
  * @since 0.0.0
  */
 public final class SavedFile {
@@ -23,11 +23,24 @@ public final class SavedFile {
 
     private boolean initialized;
 
+    /**
+     * Create a virtual non-existent file.
+     * 
+     * <p>Use this if you don't need a real file on the system
+     * but the configuration needs a File instance.</p>
+     */
     public SavedFile() {
         this(null, null, null);
         this.dummyFile = true;
     }
 
+    /**
+     * Create a `SavedFile` instance from a parent {@linkplain File abstract pathname} and a child pathname string.
+     * 
+     * @param folder The directory containing the configuration file.
+     * @param fileName The name of the configuration file (without extension).
+     * @param extension The extension (including the dot '.') of the configuration file.
+     */
     public SavedFile(File folder, String fileName, String extension) {
         this.folder = (folder == null ? new File(".") : folder);
         if (fileName != null) {
@@ -41,6 +54,11 @@ public final class SavedFile {
         }
     }
     
+    /**
+     * Create a `SavedFile` instance from a Java {@link File abstract pathname} representation.
+     * 
+     * @param file The abstract pathname of the configuration file.
+     */
     public SavedFile(File file) {
     	if (file == null) {
     		throw new NullPointerException("file cannot be null");
@@ -59,6 +77,16 @@ public final class SavedFile {
     	}
     }
 
+    /**
+     * Initiate this configuration file.
+     * 
+     * <p>Creates parent folders and the file if not exists and not virtual.</p>
+     * <p>When `true` is returned, this SavedFile can be used safely.</p>
+     * 
+     * @return Returns `true` if the initialization was successful, `false` otherwise.
+     * 
+     * @see #isInitialized()
+     */
     public boolean init() {
     	if (this.isInitialized()) {
     		return true;
@@ -88,6 +116,11 @@ public final class SavedFile {
         return true;
     }
 
+    /**
+     * Gets whenever this `SavedFile` has been initialized.
+     * 
+     * @return Returns `true` if {@linkplain #init()} was called before.
+     */
     public boolean isInitialized() {
         return this.initialized;
     }
@@ -104,10 +137,24 @@ public final class SavedFile {
         return this.canAccess;
     }
 
+    /**
+     * Locks this file to disable getting it.
+     * 
+     * <p><b>Warning:</b> this operation is not reversible, use it carefully.</p>
+     * 
+     * <p>{@link #getFile()} will always return `null` after this operation.</p>
+     */
     public void lock() {
         this.canAccess = false;
     }
 
+    /**
+     * Gets the Java {@link File abstract pathname} representation of this file if accessible.
+     * 
+     * @see #canAccess()
+     * 
+     * @return Returns the Java abstract pathname of this file.
+     */
     public File getFile() {
         if (!this.canAccess() || this.dummyFile) {
             return null;
@@ -115,6 +162,11 @@ public final class SavedFile {
         return this.datFile;
     }
 
+    /**
+     * Gets the Java {@link File abstract pathname} representation of the folder containing this file.
+     * 
+     * @return Returns the Java abstract pathname of this file's parent directory.
+     */
     public File getFolder() {
         return this.folder;
     }

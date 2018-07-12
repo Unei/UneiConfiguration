@@ -65,11 +65,15 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         this(new SavedFile(folder, fileName, JSONConfig.JSON_FILE_EXT), symType);
     }
 
-    public JSONConfig(String data) {
-        super(new SavedFile(), PathSymbolsType.BUKKIT);
+    public JSONConfig(String data, PathSymbolsType symType) {
+        super(new SavedFile(), symType);
 
         this.init();
         this.loadFromString(data);
+    }
+    
+    public JSONConfig(String data) {
+    	this(data, PathSymbolsType.BUKKIT);
     }
 
     private JSONConfig(JSONConfig p_parent, String p_nodeName) {
@@ -99,7 +103,8 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         return (JSONConfig) super.getRoot();
     }
 
-    public JSONConfig getChild(String name) {
+    @Override
+	public JSONConfig getChild(String name) {
         if (!this.canAccess()) {
             return null;
         }
@@ -131,7 +136,8 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         return dir.data;
     }
 
-    public void save() {
+    @Override
+	public void save() {
         if (!this.canAccess()) {
             return;
         }
@@ -163,7 +169,8 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         }
     }
 
-    public void reload() throws FileFormatException {
+    @Override
+	public void reload() throws FileFormatException {
         if (!this.canAccess()) {
             return;
         }
@@ -209,17 +216,20 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         }
     }
 
-    public Set<String> getKeys() {
+    @Override
+	public Set<String> getKeys() {
         return this.data.keySet();
     }
 
-    public boolean contains(String path) {
+    @Override
+	public boolean contains(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         return node.containsKey(list.lastChild());
     }
 
-    public Object get(String path) {
+    @Override
+	public Object get(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
         Map<String, Object> node = this.getParentMap(list);
         return node.get(list.lastChild());
@@ -240,7 +250,8 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         return null;
     }
 
-    public void set(String path, Object value) {
+    @Override
+	public void set(String path, Object value) {
     	if (!this.canAccess()) {
     		return;
     	}
@@ -267,7 +278,8 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         }
     }
 
-    public void setSubSection(String path, IConfiguration value) {
+    @Override
+	public void setSubSection(String path, IConfiguration value) {
         if (!(value instanceof JSONConfig)) {
             //TODO ConfigType conversion
             return;
@@ -275,10 +287,12 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         set(path, ((JSONConfig) value).data);
     }
 
-    public void remove(String path) {
+    @Override
+	public void remove(String path) {
         set(path, null);
     }
 
+	@Override
 	public String toFormattedString() {
 		StringWriter sw = new StringWriter();
         JsonWriter jw = new JsonWriter(sw);
@@ -295,15 +309,18 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
         return res;
 	}
 
+	@Override
 	public String toMinimizedString() {
 		return JSONConfig.GSON.toJson(data, Map.class);
 	}
 
-    public String saveToString() {
+    @Override
+	public String saveToString() {
         return this.toFormattedString();
     }
 
-    public void loadFromString(String p_data) {
+    @Override
+	public void loadFromString(String p_data) {
     	if (!this.canAccess()) {
     		return;
     	}
