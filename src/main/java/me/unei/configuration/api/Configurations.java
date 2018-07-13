@@ -78,7 +78,7 @@ public final class Configurations
 		 */
 		SQLite("SQLite"),
 		/**
-		 * A YAML Configuration type. (Type used for CraftBukki/Spigot/Forge/... configuration files).
+		 * A YAML Configuration type. (Type used for CraftBukkit/Spigot/Forge/... configuration files).
 		 */
 		YAML("YAML");
 		

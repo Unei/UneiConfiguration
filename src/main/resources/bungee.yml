@@ -1,6 +1,6 @@
 name: uneiConfiguration
 main: me.unei.configuration.bungee.BungeePlugin
-version: 1.2.5
+version: 1.2.7
 description: A BungeeCord configuration loader plugin
 author: UneiTeam
 authors: ["JesFot", "au2001"]

@@ -4,14 +4,14 @@
 
   <groupId>me.unei</groupId>
   <artifactId>uneiconfiguration</artifactId>
-  <version>1.2.6-RELEASE</version>
+  <version>1.2.7-RELEASE</version>
   <packaging>jar</packaging>
 
   <name>UneiConfiguration</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.version.minecraft>1.12-R0.1-SNAPSHOT</project.version.minecraft>
+    <project.version.minecraft>1.12.2-R0.1-SNAPSHOT</project.version.minecraft>
     <project.version.bungeecord>1.12-SNAPSHOT</project.version.bungeecord>
 
     <manifest.built-by>UneiTeam</manifest.built-by>
@@ -46,7 +46,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.1.0</version>
         <configuration>
           <archive>
             <manifestEntries>
@@ -59,7 +59,7 @@
       <plugin>
       	<groupId>org.apache.maven.plugins</groupId>
       	<artifactId>maven-javadoc-plugin</artifactId>
-      	<version>2.10.4</version>
+      	<version>3.0.1</version>
       	<configuration>
       		<archive>
       			<manifestEntries>
@@ -81,7 +81,7 @@
       <plugin>
       	<groupId>org.apache.maven.plugins</groupId>
       	<artifactId>maven-shade-plugin</artifactId>
-      	<version>3.0.0</version>
+      	<version>3.1.1</version>
       	<executions>
       	  <execution>
       	    <id>shade</id>
@@ -157,19 +157,19 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.8.0</version>
+      <version>2.8.5</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.18</version>
+      <version>1.21</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
-      <version>3.14.2</version>
+      <version>3.23.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
