@@ -1,5 +1,8 @@
 package me.unei.configuration.api.exceptions;
 
+/**
+ * An exception thrown when a MySQL link could not be established.
+ */
 public class MySQLConnectionException extends FileFormatException
 {
 	private static final long serialVersionUID = 4921924935531636118L;

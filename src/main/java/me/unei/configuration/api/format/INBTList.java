@@ -1,5 +1,8 @@
 package me.unei.configuration.api.format;
 
+/**
+ * Represents a NBT Tag list.
+ */
 public interface INBTList extends INBTTag {
 
     /**

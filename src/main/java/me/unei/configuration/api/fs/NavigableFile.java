@@ -1,5 +1,8 @@
 package me.unei.configuration.api.fs;
 
+/**
+ * Represent a section with a parent section and a child section.
+ */
 public interface NavigableFile {
 
     /**

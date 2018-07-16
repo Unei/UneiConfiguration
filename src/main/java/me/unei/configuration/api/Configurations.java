@@ -15,6 +15,11 @@ import me.unei.configuration.api.impl.PropertiesConfig;
 import me.unei.configuration.api.impl.SQLiteConfig;
 import me.unei.configuration.api.impl.YAMLConfig;
 
+/**
+ * All the configuration constructors grouped in one single class.
+ * 
+ * @see FlatConfigurations
+ */
 public final class Configurations
 {
 	/**
@@ -135,6 +140,11 @@ public final class Configurations
 		}
 	}
 	
+	/**
+	 * All the flat configuration constructors grouped in one single class.
+	 * 
+	 * @see Configurations
+	 */
 	public static final class FlatConfigurations
 	{
 		public static IFlatPropertiesConfiguration newPropertiesConfig(SavedFile file)
@@ -167,6 +177,17 @@ public final class Configurations
 			return new FlatSQLiteConfig(folder, fileName, tableName);
 		}
 
+		/**
+		 * Create a new Flat MySQL configuration link instance.
+		 * 
+		 * @param host The MySQL connection host name.
+		 * @param port The MySQL connection port.
+		 * @param base The name of the MySQL base.
+		 * @param user The user name used to connect to the base.
+		 * @param pass The user password.
+		 * @param tableName The name of the table to access.
+		 * @return Returns a FlatMySQL configuration abstraction.
+		 */
 		public static IFlatMySQLConfiguration newFlatMySQLConfig(String host, int port, String base, String user, String pass, String tableName)
 		{
 			return new FlatMySQLConfig(host, port, base, user, pass, tableName);
@@ -327,17 +348,47 @@ public final class Configurations
 		}
 		return SQLiteConfig.getForPath((SQLiteConfig) root, path);
 	}
-	
+
+	/**
+	 * Create a new MySQL configuration link instance.
+	 * 
+	 * @param host The MySQL connection host name.
+	 * @param port The MySQL connection port.
+	 * @param base The name of the MySQL base.
+	 * @param user The user name used to connect to the base.
+	 * @param pass The user password.
+	 * @param tableName The name of the table to access.
+	 * @return Returns a MySQL configuration abstraction.
+	 */
 	public static IMySQLConfiguration newMySQLConfig(String host, int port, String base, String user, String pass, String tableName)
 	{
 		return new MySQLConfig(host, port, base, user, pass, tableName, DefaultPathSymbolsType);
 	}
-	
+
+	/**
+	 * Create a new MySQL configuration section link instance.
+	 * 
+	 * @param host The MySQL connection host name.
+	 * @param port The MySQL connection port.
+	 * @param base The name of the MySQL base.
+	 * @param user The user name used to connect to the base.
+	 * @param pass The user password.
+	 * @param tableName The name of the table to access.
+	 * @param path The configuration section path.
+	 * @return Returns a MySQL configuration abstraction.
+	 */
 	public static IMySQLConfiguration newMySQLConfig(String host, int port, String base, String user, String pass, String tableName, String path)
 	{
 		return MySQLConfig.getForPath(host, port, base, user, pass, tableName, path, DefaultPathSymbolsType);
 	}
 	
+	/**
+	 * Gets a MySQL configuration sub-section at the given path.
+	 * 
+	 * @param root The MySQLConfig parent section.
+	 * @param path The path relative to the `root` section.
+	 * @return Returns a configuration sub-section.
+	 */
 	public static IMySQLConfiguration newMySQLConfig(IConfiguration root, String path)
 	{
 		if (!(root instanceof MySQLConfig))
@@ -407,6 +458,17 @@ public final class Configurations
 		}
 	}
 	
+	/**
+	 * Gets a configuration sub-section at the given path.
+	 * 
+	 * @param type The type of the configuration.
+	 * @param root The configuration parent section.
+	 * @param path The path relative to the `root` section.
+	 * @return Returns a configuration sub-section.
+	 * 
+	 * @throws IllegalArgumentException If `root` is a flat configuration type (flat = no sections).
+	 * @throws IllegalArgumentException If `type` is MySQL or FlatMySQL (they need special arguments).
+	 */
 	public static IConfiguration newSubConfig(ConfigurationType type, IConfiguration root, String path)
 	{
 		switch (type)

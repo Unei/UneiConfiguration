@@ -1,5 +1,8 @@
 package me.unei.configuration.api.format;
 
+/**
+ * Represents a NBT String.
+ */
 public interface INBTString extends INBTTag {
 
     /**

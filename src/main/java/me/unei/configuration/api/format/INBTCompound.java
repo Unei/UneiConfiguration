@@ -2,6 +2,9 @@ package me.unei.configuration.api.format;
 
 import java.util.Set;
 
+/**
+ * Represents a NBT Compound Tag.
+ */
 public interface INBTCompound extends INBTTag {
 
     /**

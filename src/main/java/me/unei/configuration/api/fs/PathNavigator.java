@@ -5,11 +5,21 @@ import java.util.function.Consumer;
 import me.unei.configuration.api.fs.PathComponent.PathComponentType;
 import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 
+/**
+ * Section navigator.
+ *
+ * @param <T> The section type.
+ */
 public final class PathNavigator<T extends NavigableFile> {
 	
 	private PathComponentsList currentPath;
 	private T currentNode;
 	
+	/**
+	 * Create a new navigator for the given section.
+	 * 
+	 * @param rootFile The section where we start.
+	 */
 	public PathNavigator(T rootFile) {
 		this.currentNode = rootFile;
 		this.currentPath = rootFile.getRealListPath();
@@ -17,6 +27,14 @@ public final class PathNavigator<T extends NavigableFile> {
 		// PathSymbolsType.BUKKIT);
 	}
 	
+	/**
+	 * Create a new navigator for the given section.
+	 * 
+	 * @param rootFile The section where we start.
+	 * @param type The type of the symbols in paths.
+	 * 
+	 * @deprecated The {@linkplain PathSymbolsType type of the symbols} are given as parameter every times.
+	 */
 	@Deprecated
 	public PathNavigator(T rootFile, PathSymbolsType type) {
 		this.currentNode = rootFile;
@@ -32,11 +50,17 @@ public final class PathNavigator<T extends NavigableFile> {
 		}
 	}
 	
+	/**
+	 * Navigate to the root section.
+	 */
 	public void goToRoot() {
 		this.currentPath.clear();
 		this.currentNode = getChecked(this.currentNode.getRoot());
 	}
 	
+	/**
+	 * Navigate to the parent section.
+	 */
 	public void goToParent() {
 		if (!this.currentPath.isEmpty()) {
 			this.currentPath.remove(this.currentPath.size() - 1);
@@ -44,6 +68,11 @@ public final class PathNavigator<T extends NavigableFile> {
 		}
 	}
 	
+	/**
+	 * Navigate to the `name` child section.
+	 * 
+	 * @param name The name of the child section to go to.
+	 */
 	public void goToChild(String name) {
 		if (name == null || name.isEmpty()) {
 			return;
@@ -52,14 +81,32 @@ public final class PathNavigator<T extends NavigableFile> {
 		this.currentNode = getChecked(this.currentNode.getChild(name));
 	}
 	
+	/**
+	 * Gets the current path.
+	 * 
+	 * @return Returns the path as a string.
+	 */
 	public String getCurrentPath() {
 		return currentPath.toString();
 	}
 	
+	/**
+	 * Gets the current section.
+	 * 
+	 * @return Returns the actual node.
+	 */
 	public T getCurrentNode() {
 		return this.currentNode;
 	}
 	
+	/**
+	 * Navigate following the given path and execute an action on each nodes.
+	 * 
+	 * @param path The path of the destination.
+	 * @param action An action to execute on each node of the path.
+	 * 
+	 * @throws NullPointerException If the `action` parameter is null.
+	 */
 	public void followAndApply(PathComponentsList path, Consumer<T> action) {
 		if (action == null) {
 			throw new NullPointerException("action must not be null.");
@@ -85,6 +132,13 @@ public final class PathNavigator<T extends NavigableFile> {
 		}
 	}
 	
+	/**
+	 * Parse a string, natural, path into multiples, easy to use, components.
+	 * 
+	 * @param path The path to parse.
+	 * @param type The types of the symbols used in the path.
+	 * @return Returns the parsed path.
+	 */
 	public static PathComponentsList parsePath(String path, PathSymbolsType type) {
 		if (path == null || path.isEmpty()) {
 			return new PathComponentsList(type);
@@ -136,6 +190,14 @@ public final class PathNavigator<T extends NavigableFile> {
 		return components;
 	}
 	
+	/**
+	 * Clean the path components.
+	 * 
+	 * <p>Removes the 'parent' and 'child' components where unneeded.</p>
+	 * 
+	 * @param path The path to clean.
+	 * @return Returns the new {@link PathComponentsList} after the cleaning.
+	 */
 	public static PathComponentsList cleanPath(PathComponentsList path) {
 		PathComponentsList cleanPath = new PathComponentsList(path.getSymbolsType());
 		for (PathComponent component : path) {
@@ -162,6 +224,14 @@ public final class PathNavigator<T extends NavigableFile> {
 		return cleanPath;
 	}
 	
+	/**
+	 * Navigate following the given `path`.
+	 * 
+	 * @param path The path of the destination.
+	 * @return Returns `true` if navigation was successful, `false` otherwise.
+	 * 
+	 * @see #navigate(String, PathSymbolsType)
+	 */
 	public boolean followPath(PathComponentsList path) {
 		if (path == null) {
 			return false;
@@ -189,10 +259,26 @@ public final class PathNavigator<T extends NavigableFile> {
 		return true;
 	}
 	
+	/**
+	 * Navigate following the given `path`.
+	 * 
+	 * @param path The path of the destination.
+	 * @param type The types of the symbols used in the path.
+	 * @return Returns `true` if navigation was successful, `false` otherwise.
+	 * 
+	 * @see #followPath(PathComponentsList)
+	 */
 	public boolean navigate(String path, PathSymbolsType type) {
 		return followPath(PathNavigator.parsePath(path, type));
 	}
 	
+	/**
+	 * Checks whenever a path string starts with the 'root' node.
+	 * 
+	 * @param path The path to check.
+	 * @param type The types of the symbols used in the path.
+	 * @return Returns `true` if the given path is absolute, `false` otherwise.
+	 */
 	private static boolean isAbsolute(String path, PathSymbolsType type) {
 		if (path == null || path.isEmpty()) {
 			return false;
@@ -212,10 +298,26 @@ public final class PathNavigator<T extends NavigableFile> {
 		return true;
 	}
 	
+	/**
+	 * Checks whenever the next(s) characters are a 'parent' node.
+	 * 
+	 * @param path The path to check.
+	 * @param index The index in the path string where the check should occur.
+	 * @param type The types of the symbols used in the path.
+	 * @return Returns `true` if the next(s) character(s) is/are the 'parent' one(s).
+	 */
 	private static boolean hasParentChar(String path, int index, PathSymbolsType type) {
 		return path.startsWith(type.parent, index);
 	}
 	
+	/**
+	 * Checks whenever the next(s) characters are an elements separator(s).
+	 * 
+	 * @param path The path to check.
+	 * @param index The index in the path string where the check should occur.
+	 * @param type The types of the symbols used in the path.
+	 * @return Returns `true` if the next(s) character(s) is/are the elements separator(s) one(s).
+	 */
 	private static boolean hasSeperatorChar(String path, int index, PathSymbolsType type) {
 		if (index < 0 || index >= path.length()) {
 			return false;
@@ -223,8 +325,32 @@ public final class PathNavigator<T extends NavigableFile> {
 		return path.charAt(index) == type.separator;
 	}
 	
+	/**
+	 * Represents the different types of symbols used in string paths.
+	 */
 	public static enum PathSymbolsType {
-		BUKKIT('\\', '.', '.', ".."), UNIX('\\', '/', '/', "..");
+		/**
+		 * The default Bukkit path symbols type.
+		 * 
+		 * <ul>
+		 * <li>Escape char:    '\'</li>
+		 * <li>Separator char: '.'</li>
+		 * <li>Root char:      '.'</li>
+		 * <li>Parent string:  '..'</li>
+		 * </ul>
+		 */
+		BUKKIT('\\', '.', '.', ".."),
+		/**
+		 * The default Unix path symbols type.
+		 * 
+		 * <ul>
+		 * <li>Escape char:    '\'</li>
+		 * <li>Separator char: '/'</li>
+		 * <li>Root char:      '/'</li>
+		 * <li>Parent string:  '..'</li>
+		 * </ul>
+		 */
+		UNIX('\\', '/', '/', "..");
 		
 		public final char escape;
 		public final char separator;
@@ -238,6 +364,14 @@ public final class PathNavigator<T extends NavigableFile> {
 			this.parent = p_parent;
 		}
 		
+		/**
+		 * Try to detect the type of symbols used in the given 'apath'.
+		 * 
+		 * @param apath A path to test.
+		 * @return Returns a PathSymbolsType detected in the path.
+		 * 
+		 * @deprecated This won't detect the type for sure and can lead to data-reading errors.
+		 */
 		@Deprecated
 		public static PathSymbolsType tryDetectType(String apath) {
 			int li = apath.lastIndexOf(UNIX.parent);
