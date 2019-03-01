@@ -3,7 +3,7 @@ package me.unei.configuration.api.fs;
 /**
  * Represent a section with a parent section and a child section.
  */
-public interface NavigableFile {
+public interface NavigableFile { // TODO: integrate index management.
 
     /**
      * Returns the path to get from this navigable file's

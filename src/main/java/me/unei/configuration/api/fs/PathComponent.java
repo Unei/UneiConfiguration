@@ -8,12 +8,13 @@ import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 /**
  * Represent a component of an abstract path.
  * 
- * <p>could be Root, Parent or Child (named).</p>
+ * <p>could be Root, Parent, Child (named) or Index (indexed).</p>
  */
 public final class PathComponent {
 	
 	private final PathComponentType type;
 	private final String value;
+	private final int index;
 	
 	/**
 	 * Create a new component of the given type with a name.
@@ -24,6 +25,23 @@ public final class PathComponent {
 	public PathComponent(PathComponentType type, String value) {
 		this.type = type;
 		this.value = value;
+		if (type == PathComponentType.INDEX) {
+			this.index = Integer.valueOf(value);
+		} else {
+			this.index = -1;
+		}
+	}
+	
+	/**
+	 * Create a new component of the given type with a name.
+	 * 
+	 * @param type The type of the component.
+	 * @param index The index of the component.
+	 */
+	public PathComponent(PathComponentType type, int index) {
+		this.type = type;
+		this.value = Integer.toString(index);
+		this.index = index;
 	}
 	
 	/**
@@ -42,6 +60,15 @@ public final class PathComponent {
 	 */
 	public String getValue() {
 		return this.value;
+	}
+	
+	/**
+	 * Gets the component index (if type of {@link PathComponentType#INDEX}).
+	 * 
+	 * @return Returns the component index.
+	 */
+	public int getIndex() {
+		return this.index;
 	}
 	
 	/**
@@ -65,6 +92,10 @@ public final class PathComponent {
 				String.valueOf(new char[] { symType.escape, symType.escape }));
 		component = component.replace(String.valueOf(symType.separator),
 				String.valueOf(new char[] { symType.escape, symType.separator }));
+		component = component.replace(String.valueOf(symType.indexerPrefix),
+				String.valueOf(new char[] { symType.escape, symType.indexerPrefix }));
+		component = component.replace(String.valueOf(symType.indexerSuffix),
+				String.valueOf(new char[] { symType.escape, symType.indexerSuffix }));
 		
 		if (absolute) {
 			component = symType.escape + symType.root + component;
@@ -86,6 +117,9 @@ public final class PathComponent {
 		if (pc.getType().equals(this.getType())) {
 			if (this.getType().equals(PathComponentType.CHILD)) {
 				return this.getValue().contentEquals(pc.getValue());
+			}
+			if (this.getType().equals(PathComponentType.INDEX)) {
+				return this.getIndex() == pc.getIndex();
 			}
 			return true;
 		}
@@ -170,6 +204,16 @@ public final class PathComponent {
 		}
 		
 		/**
+		 * Appends a table element component to this path.
+		 * 
+		 * @param index The element index.
+		 * @return Returns `true`.
+		 */
+		public boolean appendIndex(int index) {
+			return this.appendComponent(PathComponentType.INDEX, Integer.toString(index));
+		}
+		
+		/**
 		 * Appends a root component to this path.
 		 * 
 		 * @return Returns `true`.
@@ -210,6 +254,19 @@ public final class PathComponent {
 				return last.getValue();
 			}
 			return null;
+		}
+		
+		/**
+		 * Gets the last component of the path, if it is an 'index' one.
+		 * 
+		 * @return Returns the last component or -1.
+		 */
+		public int lastIndex() {
+			PathComponent last = this.last();
+			if (last != null) {
+				return last.getIndex();
+			}
+			return -1;
 		}
 		
 		/**
@@ -261,10 +318,16 @@ public final class PathComponent {
 		 * Returns the string representation of this path.
 		 */
 		@Override
-		public String toString() {
+		public String toString() { // FIXME: Check if the path separator is added correctly.
 			StringBuilder pathBuilder = new StringBuilder();
 			for (PathComponent component : this) {
+				if (component.type == PathComponentType.INDEX) {
+					pathBuilder.append(this.symType.indexerPrefix);
+				}
 				pathBuilder.append(PathComponent.escapeComponent(component.getValue(), this.symType));
+				if (component.type == PathComponentType.INDEX) {
+					pathBuilder.append(this.symType.indexerSuffix);
+				}
 			}
 			return pathBuilder.toString();
 		}
@@ -297,6 +360,12 @@ public final class PathComponent {
 		 * 
 		 * <p>A child is always accompanied with a name.</p>
 		 */
-		CHILD;
+		CHILD,
+		/**
+		 * A table element component ('[index]').
+		 * 
+		 * <p>An index is always accompanied with an integer.</p>
+		 */
+		INDEX;
 	}
 }

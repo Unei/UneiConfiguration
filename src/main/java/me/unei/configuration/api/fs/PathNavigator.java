@@ -82,6 +82,19 @@ public final class PathNavigator<T extends NavigableFile> {
 	}
 	
 	/**
+	 * Navigate to the `index` element section.
+	 * 
+	 * @param index The index of the child section to go to.
+	 */
+	public void goToIndex(int index) {
+		if (index < 0) {
+			return;
+		}
+		this.currentPath.appendIndex(index);
+		this.currentNode = getChecked(this.currentNode.getChild(Integer.toString(index)));
+	}
+	
+	/**
 	 * Gets the current path.
 	 * 
 	 * @return Returns the path as a string.
@@ -127,6 +140,10 @@ public final class PathNavigator<T extends NavigableFile> {
 				case CHILD:
 					this.goToChild(component.getValue());
 					break;
+					
+				case INDEX:
+					this.goToIndex(component.getIndex());
+					break;
 			}
 			action.accept(this.currentNode);
 		}
@@ -155,6 +172,7 @@ public final class PathNavigator<T extends NavigableFile> {
 		}
 		
 		boolean escaped = false;
+		boolean index = false;
 		for (; i < path.length(); i++) {
 			char c = path.charAt(i);
 			
@@ -178,6 +196,18 @@ public final class PathNavigator<T extends NavigableFile> {
 					components.appendComponent(PathComponentType.CHILD, lastComponent.toString());
 					lastComponent.setLength(0);
 				}
+			} else if (PathNavigator.hasIndexerChar(path, i, type)) {
+				if (lastComponent.length() > 0) {
+					components.appendComponent(PathComponentType.CHILD, lastComponent.toString());
+					lastComponent.setLength(0);
+				}
+				index = true;
+			} else if (index && PathNavigator.hasIndexerEndChar(path, i, type)) {
+				if (lastComponent.length() > 0) {
+					components.appendComponent(PathComponentType.INDEX, lastComponent.toString());
+					lastComponent.setLength(0);
+				}
+				index = false;
 			} else {
 				lastComponent.append(c);
 			}
@@ -209,7 +239,8 @@ public final class PathNavigator<T extends NavigableFile> {
 				
 				case PARENT:
 					if (!cleanPath.isEmpty()
-							&& cleanPath.get(cleanPath.size() - 1).getType().equals(PathComponentType.CHILD)) {
+							&& (cleanPath.get(cleanPath.size() - 1).getType().equals(PathComponentType.CHILD)
+									|| cleanPath.get(cleanPath.size() - 1).getType().equals(PathComponentType.INDEX))) {
 						cleanPath.remove(cleanPath.size() - 1);
 					} else {
 						cleanPath.add(component);
@@ -217,6 +248,7 @@ public final class PathNavigator<T extends NavigableFile> {
 					break;
 				
 				case CHILD:
+				case INDEX:
 					cleanPath.add(component);
 					break;
 			}
@@ -253,6 +285,10 @@ public final class PathNavigator<T extends NavigableFile> {
 				
 				case CHILD:
 					this.goToChild(component.getValue());
+					break;
+					
+				case INDEX:
+					this.goToIndex(component.getIndex());
 					break;
 			}
 		}
@@ -326,6 +362,36 @@ public final class PathNavigator<T extends NavigableFile> {
 	}
 	
 	/**
+	 * Checks whenever the next(s) characters are an element's index prefix.
+	 * 
+	 * @param path The path to check.
+	 * @param index The index in the path string where the check should occur.
+	 * @param type The types of the symbols used in the path.
+	 * @return Returns `true` if the next(s) character(s) is/are the elements' index prefix one(s).
+	 */
+	private static boolean hasIndexerChar(String path, int index, PathSymbolsType type) {
+		if (index < 0 || index >= path.length()) {
+			return false;
+		}
+		return path.charAt(index) == type.indexerPrefix;
+	}
+	
+	/**
+	 * Checks whenever the next(s) characters are an element's index suffix.
+	 * 
+	 * @param path The path to check.
+	 * @param index The index in the path string where the check should occur.
+	 * @param type The types of the symbols used in the path.
+	 * @return Returns `true` if the next(s) character(s) is/are the elements' index suffix one(s).
+	 */
+	private static boolean hasIndexerEndChar(String path, int index, PathSymbolsType type) {
+		if (index < 0 || index >= path.length()) {
+			return false;
+		}
+		return path.charAt(index) == type.indexerSuffix;
+	}
+	
+	/**
 	 * Represents the different types of symbols used in string paths.
 	 */
 	public static enum PathSymbolsType {
@@ -337,9 +403,11 @@ public final class PathNavigator<T extends NavigableFile> {
 		 * <li>Separator char: '.'</li>
 		 * <li>Root char:      '.'</li>
 		 * <li>Parent string:  '..'</li>
+		 * <li>Index prefix:    '['</li>
+		 * <li>Index suffix:    ']'</li>
 		 * </ul>
 		 */
-		BUKKIT('\\', '.', '.', ".."),
+		BUKKIT('\\', '.', '.', "..", '[', ']'),
 		/**
 		 * The default Unix path symbols type.
 		 * 
@@ -348,20 +416,26 @@ public final class PathNavigator<T extends NavigableFile> {
 		 * <li>Separator char: '/'</li>
 		 * <li>Root char:      '/'</li>
 		 * <li>Parent string:  '..'</li>
+		 * <li>Index prefix:    '['</li>
+		 * <li>Index suffix:    ']'</li>
 		 * </ul>
 		 */
-		UNIX('\\', '/', '/', "..");
+		UNIX('\\', '/', '/', "..", '[', ']');
 		
 		public final char escape;
 		public final char separator;
 		public final char root;
 		public final String parent;
+		public final char indexerPrefix;
+		public final char indexerSuffix;
 		
-		private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent) {
+		private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent, char idxPre, char idxSuf) {
 			this.escape = p_escape;
 			this.separator = p_separator;
 			this.root = p_root;
 			this.parent = p_parent;
+			this.indexerPrefix = idxPre;
+			this.indexerSuffix = idxSuf;
 		}
 		
 		/**
