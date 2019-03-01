@@ -25,11 +25,13 @@ public final class PathComponent {
 	public PathComponent(PathComponentType type, String value) {
 		this.type = type;
 		this.value = value;
-		if (type == PathComponentType.INDEX) {
-			this.index = Integer.valueOf(value);
-		} else {
-			this.index = -1;
+		int idx;
+		try {
+			idx = Integer.valueOf(value);
+		} catch (NumberFormatException ignored) {
+			idx = -1;
 		}
+		this.index = idx;
 	}
 	
 	/**

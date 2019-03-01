@@ -16,6 +16,10 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
         super(parent, childName);
     }
 
+    protected UntypedStorage(T parent, int idx) {
+        super(parent, idx);
+    }
+
     public String getString(String path) {
     	Object get = get(path);
     	if (get instanceof String) {

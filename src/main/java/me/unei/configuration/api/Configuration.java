@@ -17,6 +17,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	protected PathComponent.PathComponentsList fullPath;
 	
 	protected String nodeName;
+	protected int nodeIndex;
 	
 	protected Configuration(SavedFile p_file, PathSymbolsType p_symType)
 	{
@@ -29,6 +30,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.fullPath = new PathComponent.PathComponentsList(p_symType);
 		this.fullPath.appendRoot();
 		this.nodeName = "";
+		this.nodeIndex = -1;
 	}
 	
 	protected Configuration(T p_parent, String childName)
@@ -42,6 +44,28 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.symType = p_parent.symType;
 		this.fullPath = Configuration.buildPath(p_parent.fullPath, childName);
 		this.nodeName = (childName != null ? childName : "");
+		try
+		{
+			this.nodeIndex = Integer.valueOf(childName);
+		}
+		catch (NumberFormatException ignored)
+		{
+			this.nodeIndex = -1;
+		}
+	}
+	
+	protected Configuration(T p_parent, int index)
+	{
+		if (p_parent == null)
+		{
+			throw new IllegalArgumentException("Configuration parent should not be null");
+		}
+		this.parent = p_parent;
+		this.file = p_parent.file;
+		this.symType = p_parent.symType;
+		this.fullPath = Configuration.buildPath(p_parent.fullPath, index);
+		this.nodeName = Integer.toString(index);
+		this.nodeIndex = index;
 	}
 	
 	protected final void init()
@@ -81,6 +105,11 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	public String getName()
 	{
 		return this.nodeName;
+	}
+	
+	public int getIndex()
+	{
+		return this.nodeIndex;
 	}
 	
 	public final String getCurrentPath()
@@ -154,6 +183,26 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 			return copy;
 		}
 		copy.appendChild(child);
+		return copy;
+	}
+
+	protected static PathComponent.PathComponentsList buildPath(PathComponent.PathComponentsList parent, int index)
+	{
+		PathComponent.PathComponentsList copy;
+		if (parent == null || parent.isEmpty())
+		{
+			copy = new PathComponent.PathComponentsList(parent.getSymbolsType());
+			copy.appendRoot();
+		}
+		else
+		{
+			copy = parent.clone();
+		}
+		if (index < 0)
+		{
+			return copy;
+		}
+		copy.appendIndex(index);
 		return copy;
 	}
 }

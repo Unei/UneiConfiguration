@@ -35,6 +35,14 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      * @return the name of this configuration section
      */
     public String getName();
+    
+    /**
+     * Returns the type of this configuration section.
+     * 
+     * @return the type of this configuration section.
+     */
+    //FIXME: Remove default implementation.
+    public default SectionType getType() { return null; }
 
     /**
      * Returns the element at the specified path, starting at
@@ -259,4 +267,10 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      * @param path the path of the element to remove
      * /
     public void remove(String path);*/
+    
+    public enum SectionType
+    {
+    	MAP,
+    	LIST
+    }
 }
