@@ -6,14 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import me.unei.configuration.SavedFile;
@@ -23,6 +17,7 @@ import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.formats.IntegerKeyMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfiguration {
@@ -34,7 +29,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 	
 	private Map<String, Object> data = new HashMap<String, Object>();
 	
-	private List<Object> dataList = new ArrayList<Object>();
+	private IntegerKeyMap<Object> dataAsList = new IntegerKeyMap<Object>();
 	
 	@Deprecated
 	final Map<String, Object> getData() {
@@ -42,8 +37,31 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 	}
 	
 	@Deprecated
-	final List<Object> getDataList() {
-		return dataList;
+	final Map<Integer, Object> getDataList() {
+		return dataAsList;
+	}
+	
+	private void reset()
+	{
+		this.data = null;
+		this.dataAsList = null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void setup(SectionType type, Map<?, Object> instance)
+	{
+		this.reset();
+		this.type = type;
+		switch (type)
+		{
+		case MAP:
+			this.data = (HashMap<String, Object>) instance;
+			break;
+			
+		case LIST:
+			this.dataAsList = (IntegerKeyMap<Object>) instance;
+			break;
+		}
 	}
 	
 	public BinaryConfig(SavedFile file, PathSymbolsType symType) {
@@ -93,13 +111,13 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		return root.getSubSection(path);
 	}
 	
-	private Object getMyData() {
+	private Map<?, Object> getMyData() {
 		switch (this.type) {
 		case MAP:
 			return this.data;
 			
 		case LIST:
-			return this.dataList;
+			return this.dataAsList;
 		}
 		return null;
 	}
@@ -114,25 +132,17 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 				{
 					Object me = this.parent.data.get(nodeName);
 					if (me != null && (me instanceof Map)) {
-						this.data = (Map<String, Object>) me;
-						this.type = SectionType.MAP;
-					} else if (me != null && (me instanceof List)) {
-						this.dataList = (List<Object>) me;
-						this.type = SectionType.LIST;
+						this.setup((me instanceof IntegerKeyMap) ? SectionType.LIST : SectionType.MAP, (Map<?, Object>) me);
 					}
 				}
 				break;
 
 			case LIST:
-				if (this.parent.dataList != null)
+				if (this.parent.dataAsList != null)
 				{
-					Object me = this.parent.dataList.get(Integer.valueOf(nodeName));
+					Object me = this.parent.dataAsList.get(nodeIndex);
 					if (me != null && (me instanceof Map)) {
-						this.data = (Map<String, Object>) me;
-						this.type = SectionType.MAP;
-					} else if (me != null && (me instanceof List)) {
-						this.dataList = (List<Object>) me;
-						this.type = SectionType.LIST;
+						this.setup((me instanceof IntegerKeyMap) ? SectionType.LIST : SectionType.MAP, (Map<?, Object>) me);
 					}
 				}
 				break;
@@ -150,8 +160,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 				break;
 				
 			case LIST:
-				ensureListSize(this.parent.dataList, this.nodeIndex + 2, null);
-				this.parent.dataList.set(this.nodeIndex, this.getMyData());
+				this.parent.dataAsList.put(this.nodeIndex, this.getMyData());
 				break;
 			}
 			this.parent.propagate();
@@ -193,15 +202,23 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
 		pathList.removeLast();
 		pn.followPath(pathList);
-		return pn.getCurrentNode().data;
+		BinaryConfig current = pn.getCurrentNode();
+		if (current.data == null) {
+			current.data = new HashMap<String, Object>();
+		}
+		return current.data;
 	}
 	
-	private List<Object> getParentList(PathComponent.PathComponentsList path) {
+	private IntegerKeyMap<Object> getParentList(PathComponent.PathComponentsList path) {
 		PathNavigator<BinaryConfig> pn = new PathNavigator<BinaryConfig>(this);
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
 		pathList.removeLast();
 		pn.followPath(pathList);
-		return pn.getCurrentNode().dataList;
+		BinaryConfig current = pn.getCurrentNode();
+		if (current.dataAsList == null) {
+			current.dataAsList = new IntegerKeyMap<Object>();
+		}
+		return current.dataAsList;
 	}
 	
 	public void save() {
@@ -237,6 +254,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void reload() throws FileFormatException
 	{
 		if (!this.canAccess()) {
@@ -249,18 +267,10 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		if (this.file.getFile() == null) {
 			return;
 		}
-		if (this.data == null) {
-			this.data = new HashMap<String, Object>();
-		}
-		if (this.dataList == null) {
-			this.dataList = new ArrayList<Object>();
-		}
 		if (!this.file.getFile().exists()) {
 			this.save();
 			return;
 		}
-		this.data.clear();
-		this.dataList.clear();
 		UneiConfiguration.getInstance().getLogger().fine("Reading Binary file " + getFileName() + "...");
 		ObjectInputStream ois = null;
 		try {
@@ -272,21 +282,11 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			Object result = ois.readObject();
 			if (result != null && (result instanceof Map)) {
 				Map<?, ?> tmpData = (Map<?, ?>) result;
-				if (!tmpData.isEmpty()) {
-					for (Entry<?, ?> entry : tmpData.entrySet()) {
-						String key = (entry.getKey() != null ? entry.getKey().toString() : null);
-						this.data.put(key, entry.getValue());
-					}
+				if (tmpData instanceof IntegerKeyMap) {
+					this.setup(SectionType.LIST, (Map<?, Object>) tmpData);
+				} else {
+					this.setup(SectionType.MAP, (Map<?, Object>) tmpData);
 				}
-				this.type = SectionType.MAP;
-			} else if (result != null && (result instanceof List)) {
-				List<?> tmpData = (List<?>) result;
-				if (!tmpData.isEmpty()) {
-					for (Object elem : tmpData) {
-						this.dataList.add(elem);
-					}
-				}
-				this.type = SectionType.LIST;
 			}
 			if (ois.readInt() != 0xfeebdaed) {
 				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
@@ -320,9 +320,8 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			return node.containsKey(list.lastChild());
 			
 		case LIST:
-			List<Object> nodeList = this.getParentList(list);
-			int li = list.lastIndex();
-			return li >= 0 && li < nodeList.size();
+			IntegerKeyMap<Object> nodeList = this.getParentList(list);
+			return nodeList.containsKey(list.lastIndex());
 		}
 		return false;
 	}
@@ -335,7 +334,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			return node.get(list.lastChild());
 			
 		case LIST:
-			List<Object> nodeList = this.getParentList(list);
+			IntegerKeyMap<Object> nodeList = this.getParentList(list);
 			return nodeList.get(list.lastIndex());
 		}
 		return null;
@@ -372,76 +371,22 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			break;
 			
 		case LIST:
-			List<Object> nodeList = this.getParentList(list);
-			if (value != null || list.lastIndex() < nodeList.size()) {
-				ensureListSize(nodeList, list.lastIndex() + 2, null);
-				nodeList.set(list.lastIndex(), value);
+			IntegerKeyMap<Object> nodeList = this.getParentList(list);
+			if (value == null) {
+				nodeList.remove(list.lastIndex());
+			} else {
+				nodeList.put(list.lastIndex(), value);
 			}
 			break;
 		}
 	}
 	
-	private static void ensureListSize(List<Object> elem, int size, Object filler)
-	{
-		int oldSize = elem.size();
-		if (oldSize >= size)
-		{
-			return;
-		}
-		final int diff = size - oldSize;
-		final Object[] content = new Object[diff];
-		Arrays.fill(content, filler);
-		elem.addAll(new Collection<Object>() {
-			@Override
-			public boolean add(Object e) { return false; }
-			@Override
-			public boolean addAll(Collection<? extends Object> c) { return false; }
-			@Override
-			public void clear() {}
-			@Override
-			public boolean contains(Object o) { return false; }
-			@Override
-			public boolean containsAll(Collection<?> c) { return false; }
-			@Override
-			public boolean isEmpty() { return false; }
-			@Override
-			public Iterator<Object> iterator() { return null; }
-			@Override
-			public boolean remove(Object o) { return false; }
-			@Override
-			public boolean removeAll(Collection<?> c) { return false; }
-			@Override
-			public boolean retainAll(Collection<?> c) { return false; }
-			@Override
-			public int size() { return diff; }
-			@Override
-			public Object[] toArray() { return content; }
-			@Override
-			@SuppressWarnings("unchecked")
-			public <T> T[] toArray(T[] a) {
-		        if (a.length < size) return (T[]) Arrays.copyOf(content, size, a.getClass());
-		        System.arraycopy(content, 0, a, 0, size);
-		        if (a.length > size) a[size] = null;
-		        return a;
-			}
-		});
-	}
-
 	public void setSubSection(String path, IConfiguration value) {
 		if (!(value instanceof BinaryConfig)) {
 			//TODO ConfigType conversion
 			return;
 		}
-		switch (((BinaryConfig) value).type)
-		{
-		case MAP:
-			set(path, ((BinaryConfig) value).data);
-			break;
-			
-		case LIST:
-			set(path, ((BinaryConfig) value).dataList);
-			break;
-		}
+		set(path, ((BinaryConfig) value).getMyData());
 	}
 	
 	public void remove(String path) {
@@ -456,7 +401,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			return "BinaryConfig{}=" + this.data.toString();
 			
 		case LIST:
-			return "BinaryConfig[]=" + this.dataList.toString();
+			return "BinaryConfig[]=" + this.dataAsList.toString();
 		}
 		return "BinaryConfig=ERROR";
 	}
