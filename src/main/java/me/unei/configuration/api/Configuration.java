@@ -5,6 +5,7 @@ import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.formats.StorageType;
 
 
 public abstract class Configuration<T extends Configuration<T>> implements IConfiguration
@@ -101,6 +102,14 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	{
 		return this.symType;
 	}
+	
+	public StorageType getType()
+	{
+		return StorageType.UNDEFINED;
+	}
+	
+	@Override
+	public void setType(StorageType type) { }
 	
 	public String getName()
 	{

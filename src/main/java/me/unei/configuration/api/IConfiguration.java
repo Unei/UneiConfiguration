@@ -1,6 +1,7 @@
 package me.unei.configuration.api;
 
 import me.unei.configuration.api.fs.NavigableFile;
+import me.unei.configuration.formats.StorageType;
 
 import java.util.List;
 
@@ -41,8 +42,14 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      * 
      * @return the type of this configuration section.
      */
-    //FIXME: Remove default implementation.
-    public default SectionType getType() { return null; }
+    public StorageType getType();
+    
+    /**
+     * Sets the type of this configuration section.
+     * 
+     * @param type the new (or expected) type of this configuration section.
+     */
+    public void setType(StorageType type);
 
     /**
      * Returns the element at the specified path, starting at
@@ -267,10 +274,4 @@ public interface IConfiguration extends IFlatConfiguration, NavigableFile {
      * @param path the path of the element to remove
      * /
     public void remove(String path);*/
-    
-    public enum SectionType
-    {
-    	MAP,
-    	LIST
-    }
 }
