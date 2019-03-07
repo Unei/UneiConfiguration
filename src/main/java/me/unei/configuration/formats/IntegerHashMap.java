@@ -1,22 +1,23 @@
 package me.unei.configuration.formats;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class StringHashMap<V> extends HashMap<String, V> implements Storage<V>
+public class IntegerHashMap<V> extends HashMap<Integer, V> implements Storage<V>
 {
 	private static final long serialVersionUID = 7697713067094562335L;
 	
 	@Override
 	public StorageType getStorageType() {
-		return StorageType.MAP;
+		return StorageType.LIST;
 	}
 	
 	@Override
 	public V get(Key key) {
 		if (key != null && key.getType() == this.getStorageType()) {
-			return super.get(key.getKeyString());
+			return super.get(key.getKeyInt());
 		}
 		return null;
 	}
@@ -24,14 +25,14 @@ public class StringHashMap<V> extends HashMap<String, V> implements Storage<V>
 	@Override
 	public void set(Key key, V value) {
 		if (key != null && key.getType() == this.getStorageType()) {
-			super.put(key.getKeyString(), value);
+			super.put(key.getKeyInt(), value);
 		}
 	}
 	
 	@Override
 	public void remove(Key key) {
 		if (key != null && key.getType() == this.getStorageType()) {
-			super.remove(key.getKeyString());
+			super.remove(key.getKeyInt());
 		}
 	}
 	
@@ -42,13 +43,19 @@ public class StringHashMap<V> extends HashMap<String, V> implements Storage<V>
 	
 	@Override
 	public Set<String> getKeys() {
-		return keySet();
+		Set<String> r = new HashSet<String>(this.size());
+		for (Integer key : super.keySet()) {
+			if (key != null && key.intValue() >= 0) {
+				r.add(key.toString());
+			}
+		}
+		return r;
 	}
 	
 	@Override
 	public boolean has(Key key) {
 		if (key != null && key.getType() == this.getStorageType()) {
-			super.containsKey(key.getKeyString());
+			super.containsKey(key.getKeyInt());
 		}
 		return false;
 	}

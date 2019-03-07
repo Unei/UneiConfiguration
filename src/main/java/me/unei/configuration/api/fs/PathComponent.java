@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.ListIterator;
 
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.formats.StorageType;
+import me.unei.configuration.formats.Storage.Key;
 
 /**
  * Represent a component of an abstract path.
@@ -71,6 +73,28 @@ public final class PathComponent {
 	 */
 	public int getIndex() {
 		return this.index;
+	}
+	
+	/**
+	 * Gets the component {@link Key} (index or value depending of the type).
+	 * 
+	 * @param indice An hint for the key to select, pass <tt>null</tt> to use the {@linkplain PathComponent} type.
+	 * @return Returns the best found, or <tt>null</tt> if type is neither Child nor Index.
+	 */
+	public Key getKey(StorageType indice) {
+		if (getType() == PathComponentType.INDEX) {
+			if (indice == StorageType.MAP) {
+				return new Key(getValue());
+			}
+			return new Key(getIndex());
+		}
+		if (getType() == PathComponentType.CHILD) {
+			if (indice == StorageType.LIST) {
+				return new Key(getIndex());
+			}
+			return new Key(getValue());
+		}
+		return null;
 	}
 	
 	/**

@@ -114,7 +114,15 @@ public final class TagCompound extends Tag implements INBTCompound {
     
     @Override
 	public Map<String, Object> getAsObject() {
-    	Map<String, Object> result = new HashMap<String, Object>();
+    	return getAsObject(new HashMap<>());
+    }
+    
+    public <M extends Map<String, Object>> M getAsObject(M startInstance) {
+    	if (startInstance == null) {
+    		return null;
+    	}
+    	startInstance.clear();
+    	M result = startInstance;
     	for (Entry<String, Tag> entry : this.tags.entrySet()) {
     		String key = entry.getKey();
     		if (key.endsWith("Most") || key.endsWith("Least")) {

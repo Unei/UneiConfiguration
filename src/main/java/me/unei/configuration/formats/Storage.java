@@ -1,6 +1,7 @@
 package me.unei.configuration.formats;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public interface Storage<V> extends Iterable<V>
 {
@@ -20,24 +21,24 @@ public interface Storage<V> extends Iterable<V>
 	
 	public boolean has(Key key);
 	
-	public Set<String> keySet();
+	public Set<String> getKeys();
 	
 	public static class Key
 	{
-		private final int keyInt;
+		private final AtomicInteger keyAtomicInt;
 		private final String keyString;
 		private final StorageType type;
 		
 		public Key(int key)
 		{
-			this.keyInt = key;
+			this.keyAtomicInt = new AtomicInteger(key);
 			this.keyString = null;
 			this.type = StorageType.LIST;
 		}
 		
 		public Key(String key)
 		{
-			this.keyInt = -1;
+			this.keyAtomicInt = null;
 			this.keyString = key;
 			this.type = StorageType.MAP;
 		}
@@ -46,13 +47,19 @@ public interface Storage<V> extends Iterable<V>
 		{
 			if (key instanceof CharSequence)
 			{
+				this.keyAtomicInt = null;
 				this.keyString = key.toString();
-				this.keyInt = -1;
 				this.type = StorageType.MAP;
+			}
+			else if (key instanceof AtomicInteger)
+			{
+				this.keyAtomicInt = (AtomicInteger) key;
+				this.keyString = null;
+				this.type = StorageType.LIST;
 			}
 			else if (key instanceof Number)
 			{
-				this.keyInt = ((Number) key).intValue();
+				this.keyAtomicInt = new AtomicInteger(((Number) key).intValue());
 				this.keyString = null;
 				this.type = StorageType.LIST;
 			}
@@ -76,9 +83,28 @@ public interface Storage<V> extends Iterable<V>
 			}
 		}
 		
+		public static Key of(StorageType type, AtomicInteger idx, String name)
+		{
+			switch (type) {
+			case MAP:
+				return new Key(name);
+				
+			case LIST:
+				return new Key(idx);
+				
+			default:
+				return null;
+			}
+		}
+		
 		public int getKeyInt()
 		{
-			return this.keyInt;
+			return (this.keyAtomicInt != null) ? this.keyAtomicInt.get() : -1;
+		}
+		
+		public AtomicInteger getKeyAtomicInt()
+		{
+			return this.keyAtomicInt;
 		}
 		
 		public String getKeyString()

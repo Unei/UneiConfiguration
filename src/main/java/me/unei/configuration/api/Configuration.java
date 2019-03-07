@@ -1,5 +1,7 @@
 package me.unei.configuration.api;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
@@ -18,6 +20,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	protected PathComponent.PathComponentsList fullPath;
 	
 	protected String nodeName;
+	protected AtomicInteger nodeAtomicIndex;
 	protected int nodeIndex;
 	
 	protected Configuration(SavedFile p_file, PathSymbolsType p_symType)
@@ -32,6 +35,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.fullPath.appendRoot();
 		this.nodeName = "";
 		this.nodeIndex = -1;
+		this.nodeAtomicIndex = null;
 	}
 	
 	protected Configuration(T p_parent, String childName)
@@ -48,6 +52,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		try
 		{
 			this.nodeIndex = Integer.valueOf(childName);
+			this.nodeAtomicIndex = new AtomicInteger(this.nodeIndex);
 		}
 		catch (NumberFormatException ignored)
 		{
@@ -67,6 +72,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.fullPath = Configuration.buildPath(p_parent.fullPath, index);
 		this.nodeName = Integer.toString(index);
 		this.nodeIndex = index;
+		this.nodeAtomicIndex = new AtomicInteger(index);
 	}
 	
 	protected final void init()
@@ -118,7 +124,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	
 	public int getIndex()
 	{
-		return this.nodeIndex;
+		return (this.nodeAtomicIndex != null) ? this.nodeAtomicIndex.get() : -1;
 	}
 	
 	public final String getCurrentPath()

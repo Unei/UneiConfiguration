@@ -76,7 +76,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	}
 
 	@Override
-	public Set<String> keySet() {
+	public Set<String> getKeys() {
 		Set<String> r = new HashSet<String>(allocated);
 		for (int i = 0; i < elementKeys.length; ++i) {
 			if (elementValues[i] != null) {

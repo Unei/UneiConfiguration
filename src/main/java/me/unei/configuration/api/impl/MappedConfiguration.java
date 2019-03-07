@@ -97,7 +97,7 @@ abstract class MappedConfiguration<A extends MappedConfiguration<A>> extends Unt
 	
 	@Override
 	public Set<String> getKeys() {
-		return (this.data != null) ? this.data.keySet() : Collections.emptySet();
+		return (this.data != null) ? this.data.getKeys() : Collections.emptySet();
 	}
 	
 	public StorageType getStorageType() {
