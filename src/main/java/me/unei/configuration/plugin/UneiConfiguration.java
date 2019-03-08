@@ -93,7 +93,8 @@ public final class UneiConfiguration implements IPlugin {
     	UneiConfiguration.getUpdater().checkVersionAsync(callback);
     }
     
-    @Deprecated
+    @SuppressWarnings("deprecation")
+	@Deprecated
     public static void checkVersionAsync(final Updater.UpdateCheckCallback callback) {
     	UneiConfiguration.getUpdater().checkVersionAsync(new Updater.Callback() {
     		@Override

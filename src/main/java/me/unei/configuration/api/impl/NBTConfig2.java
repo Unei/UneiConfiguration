@@ -68,6 +68,14 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
         return NBTConfig2.getForPath(new NBTRootConfig(folder, fileName), path);
     }
 
+    public static NBTConfig2 getForPath(SavedFile file, String path, PathSymbolsType symType) {
+        return NBTConfig2.getForPath(new NBTRootConfig(file, symType), path);
+    }
+
+    public static NBTConfig2 getForPath(SavedFile file, String path) {
+        return NBTConfig2.getForPath(new NBTRootConfig(file), path);
+    }
+
     public static NBTConfig2 getForPath(NBTConfig2 root, String path) {
         if (path == null || path.isEmpty()) {
             return root;
@@ -321,7 +329,7 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
         }
 
     	public NBTRootConfig(File folder, String fileName, PathSymbolsType symType) {
-            this(new SavedFile(folder, fileName, NBTConfig.NBT_FILE_EXT), symType);
+            this(new SavedFile(folder, fileName, NBTConfig2.NBT_FILE_EXT), symType);
         }
 
         public NBTRootConfig(File folder, String fileName) {

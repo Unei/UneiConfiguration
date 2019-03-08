@@ -24,6 +24,7 @@ import me.unei.configuration.plugin.UneiConfiguration;
  * @version 2.5.0
  * @since 0.0.1
  */
+@Deprecated
 public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTConfiguration {
 
     public static final String NBT_FILE_EXT = ".dat";
