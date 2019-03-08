@@ -3,6 +3,8 @@ package me.unei.configuration.formats.nbtlib;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import me.unei.configuration.reflection.NBTNumberReflection;
 
@@ -48,6 +50,11 @@ public final class TagByte extends Tag {
     
     @Override
     public Byte getAsObject() {
+    	return this.getAsObject(DEFAULT_CREATOR);
+    }
+    
+    @Override
+    public <M extends Map<String, Object>, L extends List<Object>> Byte getAsObject(ObjectCreator<M, L> creator) {
     	return Byte.valueOf(this.getValue());
     }
     

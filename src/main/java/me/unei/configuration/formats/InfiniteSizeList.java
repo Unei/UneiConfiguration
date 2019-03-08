@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+@Deprecated
 public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Cloneable, Serializable, Storage<E>
 {
 	private static final long serialVersionUID = 3928206292547481992L;
@@ -1003,7 +1004,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		}
 
 		public long estimateSize() {
-			return (long) (getFence() - index);
+			return getFence() - index;
 		}
 
 		public int characteristics() {

@@ -55,7 +55,7 @@ public class IntegerHashMap<V> extends HashMap<Integer, V> implements Storage<V>
 	@Override
 	public boolean has(Key key) {
 		if (key != null && key.getType() == this.getStorageType()) {
-			super.containsKey(key.getKeyInt());
+			return super.containsKey(key.getKeyInt());
 		}
 		return false;
 	}

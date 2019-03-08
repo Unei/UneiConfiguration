@@ -104,15 +104,19 @@ public final class TagList extends Tag implements INBTList{
     	}
     }
     
-    public List<Object> getAsObject()
+    public List<Object> getAsObject() {
+    	return getAsObject(DEFAULT_CREATOR);
+    }
+    
+    public <M extends Map<String, Object>, L extends List<Object>> L getAsObject(ObjectCreator<M, L> creator)
     {
-    	List<Object> result = new ArrayList<Object>();
+    	L result = creator.newList();
     	Iterator<Tag> it = this.list.iterator();
     	
     	while (it.hasNext())
     	{
     		Tag t = it.next();
-    		result.add(t.getAsObject());
+    		result.add(t.getAsObject(creator));
     	}
     	return result;
     }

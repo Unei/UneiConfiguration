@@ -3,6 +3,8 @@ package me.unei.configuration.formats.nbtlib;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 final class TagEnd extends Tag {
 
@@ -38,6 +40,11 @@ final class TagEnd extends Tag {
     
     @Override
     public Void getAsObject() {
+    	return this.getAsObject(DEFAULT_CREATOR);
+    }
+    
+    @Override
+    public <M extends Map<String, Object>, L extends List<Object>> Void getAsObject(ObjectCreator<M, L> creator) {
     	return null;
     }
 

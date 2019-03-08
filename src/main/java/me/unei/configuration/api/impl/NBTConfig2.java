@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.Configuration;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.INBTConfiguration;
 import me.unei.configuration.api.UntypedStorage;
@@ -15,11 +15,13 @@ import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.formats.AtomicIndexList;
 import me.unei.configuration.formats.Storage;
 import me.unei.configuration.formats.StorageType;
 import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.formats.Storage.Key;
 import me.unei.configuration.formats.nbtlib.NBTIO;
+import me.unei.configuration.formats.nbtlib.Tag;
 import me.unei.configuration.formats.nbtlib.TagCompound;
 import me.unei.configuration.plugin.UneiConfiguration;
 
@@ -40,6 +42,16 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
 
     public NBTConfig2(NBTConfig2 p_parent, String p_tagName) {
         super(p_parent, p_tagName);
+        
+        if (p_parent == null) {
+        	throw new IllegalArgumentException("parent must not be null");
+        }
+        
+        this.root = p_parent.root;
+    }
+
+    public NBTConfig2(NBTConfig2 p_parent, int p_index) {
+        super(p_parent, p_index);
         
         if (p_parent == null) {
         	throw new IllegalArgumentException("parent must not be null");
@@ -77,10 +89,21 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
     				return tmp;
     			} else if (o instanceof Storage) {
     				return (Storage<Object>) o;
+    			} else if (o instanceof Map) {
+    				return new StringHashMap<Object>((Map<?, ?>) o, 0);
     			}
     		}
     	}
     	return null;
+    }
+    
+	protected void setNodeData(Storage<Object> newObject) {
+    	if (this.parent != null) {
+    		Storage<Object> parentSto = this.parent.getNodeData();
+    		if (parentSto != null) {
+				parentSto.set(Key.of(parentSto.getStorageType(), nodeAtomicIndex, nodeName), newObject);
+    		}
+    	}
     }
 	
     @Override
@@ -88,6 +111,35 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
         if (this.parent != null) {
             this.parent.propagate();
         }
+    }
+    
+    public void changeType(StorageType newType)
+    {
+    	Storage<Object> cnt;
+    	if (newType != null
+    			&& newType != StorageType.UNDEFINED
+    			&& ((cnt = getNodeData()) == null
+    				|| cnt.getStorageType() != newType))
+    	{
+    		if (cnt.isEmpty())
+    		{
+    			Storage<Object> newObject;
+    			switch (newType)
+    			{
+    			case MAP:
+    				newObject = new StringHashMap<Object>();
+    				break;
+    				
+    			case LIST:
+    				newObject = new AtomicIndexList<Object>();
+    				break;
+    				
+    			default:
+    				return;
+    			}
+    			setNodeData(newObject);
+    		}
+    	}
     }
 
     @Override
@@ -106,6 +158,16 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
             return this;
         }
         return new NBTConfig2(this, name);
+    }
+
+    public NBTConfig2 getAt(int index) {
+        if (!this.canAccess()) {
+            return null;
+        }
+        if (index >= 0) {
+            return this;
+        }
+        return new NBTConfig2(this, index);
     }
     
     protected TagCompound getTagCp() {
@@ -289,7 +351,16 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
         	if (!this.canAccess() || compound == null) {
         		return;
         	}
-        	this.data = compound.getAsObject(new StringHashMap<Object>());
+        	this.data = compound.getAsObject(new Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>>() {
+				@Override
+				public StringHashMap<Object> newMap() {
+					return new StringHashMap<Object>();
+				}
+				@Override
+				public AtomicIndexList<Object> newList() {
+					return new AtomicIndexList<Object>();
+				}
+			});
         	this.propagate();
         }
 
@@ -313,7 +384,16 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
     			return;
     		}
     		if (compound != null) {
-    			this.data = compound.getAsObject(new StringHashMap<Object>());
+    			this.data = compound.getAsObject(new Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>>() {
+    				@Override
+    				public StringHashMap<Object> newMap() {
+    					return new StringHashMap<Object>();
+    				}
+    				@Override
+    				public AtomicIndexList<Object> newList() {
+    					return new AtomicIndexList<Object>();
+    				}
+				});
     		} else {
     			this.data = new StringHashMap<Object>();
     		}

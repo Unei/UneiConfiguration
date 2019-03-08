@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -114,15 +115,14 @@ public final class TagCompound extends Tag implements INBTCompound {
     
     @Override
 	public Map<String, Object> getAsObject() {
-    	return getAsObject(new HashMap<>());
+    	return getAsObject(DEFAULT_CREATOR);
     }
     
-    public <M extends Map<String, Object>> M getAsObject(M startInstance) {
-    	if (startInstance == null) {
+    public <M extends Map<String, Object>, L extends List<Object>> M getAsObject(ObjectCreator<M, L> creator) {
+    	if (creator == null) {
     		return null;
     	}
-    	startInstance.clear();
-    	M result = startInstance;
+    	M result = creator.newMap();
     	for (Entry<String, Tag> entry : this.tags.entrySet()) {
     		String key = entry.getKey();
     		if (key.endsWith("Most") || key.endsWith("Least")) {
@@ -136,7 +136,7 @@ public final class TagCompound extends Tag implements INBTCompound {
     					result.put(key, this.getUUID(key));
     				}
     			} else {
-    				result.put(entry.getKey(), entry.getValue().getAsObject());
+    				result.put(entry.getKey(), entry.getValue().getAsObject(creator));
     			}
     		} else if (key.endsWith("Object") && this.hasKeyOfType(key, Tag.TAG_Byte_Array)) {
     			key = key.substring(0, key.length() - "Object".length());
@@ -147,7 +147,7 @@ public final class TagCompound extends Tag implements INBTCompound {
     				result.put(entry.getKey(), entry.getValue());
     			}
     		} else {
-    			result.put(entry.getKey(), entry.getValue().getAsObject());
+    			result.put(entry.getKey(), entry.getValue().getAsObject(creator));
     		}
     	}
     	return result;

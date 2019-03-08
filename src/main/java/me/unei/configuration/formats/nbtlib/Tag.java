@@ -3,6 +3,10 @@ package me.unei.configuration.formats.nbtlib;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import me.unei.configuration.api.format.INBTTag;
 
@@ -35,7 +39,11 @@ public abstract class Tag implements INBTTag, Cloneable {
     protected Tag() {
     }
     
-    abstract Object getAsObject();
+    Object getAsObject() {
+    	return getAsObject(DEFAULT_CREATOR);
+    }
+    
+    abstract <M extends Map<String, Object>, L extends List<Object>> Object getAsObject(ObjectCreator<M, L> creator);
     
     abstract Object getAsNMS();
     
@@ -132,4 +140,22 @@ public abstract class Tag implements INBTTag, Cloneable {
 
     @Override
     public abstract Tag clone();
+    
+    public static interface ObjectCreator<M extends Map<String, Object>, L extends List<Object>> {
+    	public M newMap();
+    	public L newList();
+    }
+    
+    public static class DefaultObjectCreator implements ObjectCreator<Map<String,Object>, List<Object>> {
+    	@Override
+    	public Map<String, Object> newMap() {
+    		return new HashMap<>();
+    	}
+    	@Override
+    	public List<Object> newList() {
+    		return new ArrayList<>();
+    	}
+    }
+    
+    protected static final DefaultObjectCreator DEFAULT_CREATOR = new DefaultObjectCreator();
 }

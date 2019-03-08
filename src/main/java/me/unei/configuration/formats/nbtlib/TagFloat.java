@@ -3,6 +3,8 @@ package me.unei.configuration.formats.nbtlib;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import me.unei.configuration.reflection.NBTNumberReflection;
 
@@ -58,6 +60,11 @@ public final class TagFloat extends Tag {
     
     @Override
     public Float getAsObject() {
+    	return this.getAsObject(DEFAULT_CREATOR);
+    }
+    
+    @Override
+    public <M extends Map<String, Object>, L extends List<Object>> Float getAsObject(ObjectCreator<M, L> creator) {
     	return Float.valueOf(this.getValue());
     }
 

@@ -112,6 +112,11 @@ public interface Storage<V> extends Iterable<V>
 			return this.keyString;
 		}
 		
+		@Override
+		public String toString() {
+			return "Key=" + ((StorageType.LIST == this.type) ? this.keyAtomicInt.toString() : this.keyString) + ";";
+		}
+		
 		public StorageType getType()
 		{
 			return this.type;

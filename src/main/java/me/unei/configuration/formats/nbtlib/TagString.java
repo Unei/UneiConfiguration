@@ -3,6 +3,8 @@ package me.unei.configuration.formats.nbtlib;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import me.unei.configuration.api.format.INBTString;
 import me.unei.configuration.reflection.NBTStringReflection;
@@ -93,6 +95,11 @@ public final class TagString extends Tag implements INBTString {
     
     @Override
     public String getAsObject() {
+    	return this.getAsObject(DEFAULT_CREATOR);
+    }
+    
+    @Override
+    public <M extends Map<String, Object>, L extends List<Object>> String getAsObject(ObjectCreator<M, L> creator) {
     	return this.getString();
     }
 }
