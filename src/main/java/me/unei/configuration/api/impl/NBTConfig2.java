@@ -295,6 +295,17 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
     
     protected static final class NBTRootConfig extends NBTConfig2
     {
+    	private static final Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>> NBTDEF_CREATOR = new Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>>() {
+			@Override
+			public StringHashMap<Object> newMap() {
+				return new StringHashMap<Object>();
+			}
+			@Override
+			public AtomicIndexList<Object> newList() {
+				return new AtomicIndexList<Object>();
+			}
+		};
+    	
     	private StringHashMap<Object> data = new StringHashMap<Object>();
     	
     	public NBTRootConfig(SavedFile file, PathSymbolsType symType)
@@ -351,16 +362,7 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
         	if (!this.canAccess() || compound == null) {
         		return;
         	}
-        	this.data = compound.getAsObject(new Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>>() {
-				@Override
-				public StringHashMap<Object> newMap() {
-					return new StringHashMap<Object>();
-				}
-				@Override
-				public AtomicIndexList<Object> newList() {
-					return new AtomicIndexList<Object>();
-				}
-			});
+        	this.data = compound.getAsObject(NBTDEF_CREATOR);
         	this.propagate();
         }
 
@@ -384,16 +386,7 @@ public class NBTConfig2 extends UntypedStorage<NBTConfig2> implements INBTConfig
     			return;
     		}
     		if (compound != null) {
-    			this.data = compound.getAsObject(new Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>>() {
-    				@Override
-    				public StringHashMap<Object> newMap() {
-    					return new StringHashMap<Object>();
-    				}
-    				@Override
-    				public AtomicIndexList<Object> newList() {
-    					return new AtomicIndexList<Object>();
-    				}
-				});
+    			this.data = compound.getAsObject(NBTDEF_CREATOR);
     		} else {
     			this.data = new StringHashMap<Object>();
     		}
