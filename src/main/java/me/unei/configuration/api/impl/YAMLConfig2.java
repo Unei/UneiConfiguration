@@ -39,6 +39,7 @@ import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.formats.Storage.Key;
 import me.unei.configuration.plugin.UneiConfiguration;
 
+@Deprecated
 public class YAMLConfig2 extends UntypedStorage<YAMLConfig2> implements IYAMLConfiguration {
 
     public static final String YAML_FILE_EXT = ".yml";
@@ -103,6 +104,10 @@ public class YAMLConfig2 extends UntypedStorage<YAMLConfig2> implements IYAMLCon
 
     public static YAMLConfig2 getForPath(SavedFile file, String path, PathSymbolsType symType) {
         return YAMLConfig2.getForPath(new YAMLRootConfig(file, symType), path);
+    }
+
+    public static YAMLConfig2 getForPath(String data, PathSymbolsType symType) {
+        return new YAMLRootConfig(data, symType);
     }
 
     public static YAMLConfig2 getForPath(SavedFile file, String path) {
@@ -381,6 +386,12 @@ public class YAMLConfig2 extends UntypedStorage<YAMLConfig2> implements IYAMLCon
 
         public YAMLRootConfig(File folder, String fileName) {
             this(folder, fileName, PathSymbolsType.BUKKIT);
+        }
+
+        public YAMLRootConfig(String data, PathSymbolsType symType) {
+            this(new SavedFile(), symType);
+            
+            this.loadFromString(data);
         }
     	
     	@Override

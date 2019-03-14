@@ -3,6 +3,7 @@ package me.unei.configuration.api.fs;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import me.unei.configuration.api.exceptions.NoExcept;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.StorageType;
 import me.unei.configuration.formats.Storage.Key;
@@ -24,6 +25,7 @@ public final class PathComponent {
 	 * @param type The type of the component.
 	 * @param value The name of the component.
 	 */
+	@NoExcept
 	public PathComponent(PathComponentType type, String value) {
 		this.type = type;
 		this.value = value;
@@ -42,6 +44,7 @@ public final class PathComponent {
 	 * @param type The type of the component.
 	 * @param index The index of the component.
 	 */
+	@NoExcept
 	public PathComponent(PathComponentType type, int index) {
 		this.type = type;
 		this.value = Integer.toString(index);
