@@ -8,9 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,6 +30,7 @@ import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.AtomicIndexList;
+import me.unei.configuration.formats.IntegerHashMap;
 import me.unei.configuration.formats.Storage;
 import me.unei.configuration.formats.StorageType;
 import me.unei.configuration.formats.StringHashMap;
@@ -64,9 +63,6 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     	MINIFIED_YAML = new Yaml(dumperOpts);
     }
 
-    @Deprecated
-    private Map<String, Object> data = new HashMap<String, Object>();
-    
     private Storage<Object> nodeData;
 
     public YAMLConfig(SavedFile file) {
@@ -179,7 +175,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
-            YAMLConfig.BEAUTIFIED_YAML.dump(data, w);
+            YAMLConfig.BEAUTIFIED_YAML.dump(nodeData, w);
             w.close();
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
@@ -222,7 +218,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;
-                    this.data.put(key, entry.getValue());
+                    this.nodeData.set(new Key(key), entry.getValue());
                 }
             }
             r.close();
@@ -279,6 +275,10 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     			case MAP:
     				newObject = new StringHashMap<Object>();
     				break;
+
+    			case DISCONTINUED_LIST:
+    				newObject = new IntegerHashMap<Object>();
+    				break;
     				
     			case LIST:
     				newObject = new AtomicIndexList<Object>();
@@ -312,15 +312,15 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     @Override
 	public boolean contains(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.containsKey(list.lastChild());
+        Storage<Object> node = this.getParentMap(list);
+        return node.has(list.last().getKey(node.getStorageType()));
     }
 
     @Override
 	public Object get(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.get(list.lastChild());
+        Storage<Object> node = this.getParentMap(list);
+        return node.get(list.last().getKey(node.getStorageType()));
     }
 
     @Override
@@ -343,9 +343,9 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
     	YAMLConfig node = this.getForPath(list);
     	if (value == null) {
-    		node.nodeData.remove(list.lastChild());
+    		node.nodeData.remove(list.last().getKey(node.getType()));
     	} else {
-    		node.put(list.lastChild(), value);
+    		node.nodeData.set(list.last().getKey(node.getType()), value);
     	}
     }
 
@@ -376,12 +376,12 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     
     @Override
 	public String toFormattedString() {
-    	return YAMLConfig.BEAUTIFIED_YAML.dumpAsMap(data);
+    	return YAMLConfig.BEAUTIFIED_YAML.dumpAsMap(nodeData);
     }
     
     @Override
 	public String toMinimizedString() {
-    	return YAMLConfig.MINIFIED_YAML.dumpAsMap(data);
+    	return YAMLConfig.MINIFIED_YAML.dumpAsMap(nodeData);
     }
 
     @Override
@@ -391,17 +391,17 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 
     @Override
 	public void loadFromString(String p_data) {
-        this.data.clear();
+        this.nodeData.clear();
         Map<?, ?> tmpMap = YAMLConfig.MINIFIED_YAML.loadAs(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {
             if (e.getKey() instanceof String) {
-                this.data.put((String) e.getKey(), e.getValue());
+                this.nodeData.set(new Key((String) e.getKey()), e.getValue());
             }
         }
     }
 
     @Override
     public String toString() {
-        return "YAMLConfig=" + this.data.toString();
+        return "YAMLConfig=" + this.nodeData.toString();
     }
 }

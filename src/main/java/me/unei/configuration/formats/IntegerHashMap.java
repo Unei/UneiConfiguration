@@ -11,7 +11,7 @@ public class IntegerHashMap<V> extends HashMap<Integer, V> implements Storage<V>
 	
 	@Override
 	public StorageType getStorageType() {
-		return StorageType.LIST;
+		return StorageType.DISCONTINUED_LIST;
 	}
 	
 	@Override

@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.lang.model.element.NestingKind;
-
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.InvalidNodeException;
@@ -31,8 +29,6 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	
 	protected String nodeName;
 	protected AtomicInteger nodeAtomicIndex;
-	@Deprecated
-	protected int nodeIndex;
 	
 	protected Configuration(SavedFile p_file, PathSymbolsType p_symType)
 	{
@@ -47,7 +43,6 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.fullPath = new PathComponent.PathComponentsList(p_symType);
 		this.fullPath.appendRoot();
 		this.nodeName = "";
-		this.nodeIndex = -1;
 		this.nodeAtomicIndex = null;
 	}
 	
@@ -65,13 +60,11 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.nodeName = (childName != null ? childName : "");
 		try
 		{
-			this.nodeIndex = Integer.valueOf(childName);
-			this.nodeAtomicIndex = new AtomicInteger(this.nodeIndex);
+			int nodeIndex = Integer.valueOf(childName);
+			this.nodeAtomicIndex = new AtomicInteger(nodeIndex);
 		}
 		catch (NumberFormatException ignored)
-		{
-			this.nodeIndex = -1;
-		}
+		{}
 	}
 	
 	protected Configuration(T p_parent, int index)
@@ -86,7 +79,6 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.symType = p_parent.symType;
 		this.fullPath = Configuration.buildPath(p_parent.fullPath, index);
 		this.nodeName = Integer.toString(index);
-		this.nodeIndex = index;
 		this.nodeAtomicIndex = new AtomicInteger(index);
 	}
 	

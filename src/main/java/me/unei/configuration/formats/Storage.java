@@ -1,7 +1,11 @@
 package me.unei.configuration.formats;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface Storage<V> extends Iterable<V>
 {
@@ -22,6 +26,30 @@ public interface Storage<V> extends Iterable<V>
 	public boolean has(Key key);
 	
 	public Set<String> getKeys();
+	
+	public static final class Converter
+	{
+		@SuppressWarnings("unchecked")
+		public static <T> Storage<T> allocateBest(Object origin, Supplier<Storage<T>> defaultVal)
+		{
+			if (origin == null)
+			{
+				return (defaultVal != null) ? defaultVal.get() : null;
+			}
+			if (origin instanceof Storage)
+			{
+				Storage<?> sto = (Storage<?>) origin;
+				return ((Storage<T>) sto);
+			}
+			else if (origin instanceof Map)
+			{
+				Map<?, ?> map = (Map<?, ?>) origin;
+			}
+		} 
+		
+		private Converter()
+		{}
+	}
 	
 	public static class Key
 	{

@@ -14,7 +14,6 @@ import me.unei.configuration.api.impl.NBTConfig2;
 import me.unei.configuration.api.impl.PropertiesConfig;
 import me.unei.configuration.api.impl.SQLiteConfig;
 import me.unei.configuration.api.impl.YAMLConfig;
-import me.unei.configuration.api.impl.YAMLConfig2;
 
 /**
  * All the configuration constructors grouped in one single class.
@@ -260,36 +259,36 @@ public final class Configurations
 
 	public static IYAMLConfiguration newYAMLConfig(SavedFile file)
 	{
-		return YAMLConfig2.getForPath(file, null, DefaultPathSymbolsType);
+		return new YAMLConfig(file, DefaultPathSymbolsType);
 	}
 	
 	public static IYAMLConfiguration newYAMLConfig(File folder, String fileName)
 	{
-		return YAMLConfig2.getForPath(folder, fileName, null, DefaultPathSymbolsType);
+		return YAMLConfig.getForPath(folder, fileName, null, DefaultPathSymbolsType);
 	}
 	
 	public static IYAMLConfiguration newYAMLConfigFromRawData(String data)
 	{
-		return YAMLConfig2.getForPath(data, DefaultPathSymbolsType);
+		return new YAMLConfig(data, DefaultPathSymbolsType);
 	}
 	
 	public static IYAMLConfiguration newYAMLConfig(File folder, String fileName, String path)
 	{
-		return YAMLConfig2.getForPath(folder, fileName, path, DefaultPathSymbolsType);
+		return YAMLConfig.getForPath(folder, fileName, path, DefaultPathSymbolsType);
 	}
 	
 	public static IYAMLConfiguration newYAMLConfig(SavedFile file, String path)
 	{
-		return YAMLConfig2.getForPath(file, path, DefaultPathSymbolsType);
+		return YAMLConfig.getForPath(new YAMLConfig(file, DefaultPathSymbolsType), path);
 	}
 	
 	public static IYAMLConfiguration newYAMLConfig(IConfiguration root, String path)
 	{
-		if (!(root instanceof YAMLConfig2))
+		if (!(root instanceof YAMLConfig))
 		{
 			throw new IllegalArgumentException("root must be an instance of YAMLConfig");
 		}
-		return YAMLConfig2.getForPath((YAMLConfig2) root, path);
+		return YAMLConfig.getForPath((YAMLConfig) root, path);
 	}
 
 	public static IConfiguration newBinaryConfig(SavedFile file)
