@@ -64,6 +64,15 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     }
 
     private Storage<Object> nodeData;
+    
+    final Storage<Object> getData()
+    {
+    	if (nodeData == null)
+    	{
+    		nodeData = new StringHashMap<>();
+    	}
+    	return nodeData;
+    }
 
     public YAMLConfig(SavedFile file) {
     	this(file, PathSymbolsType.BUKKIT);
@@ -114,6 +123,11 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         }
         return root.getSubSection(path);
     }
+	
+	@Override
+	public StorageType getType() {
+		return (this.nodeData != null) ? this.nodeData.getStorageType() : StorageType.UNDEFINED;
+	}
 
     @Override
     public YAMLConfig getRoot() {
@@ -175,7 +189,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
-            YAMLConfig.BEAUTIFIED_YAML.dump(nodeData, w);
+            YAMLConfig.BEAUTIFIED_YAML.dump(getData(), w);
             w.close();
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
@@ -204,7 +218,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
             this.save();
             return;
         }
-        this.nodeData.clear();
+        this.getData().clear();
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);

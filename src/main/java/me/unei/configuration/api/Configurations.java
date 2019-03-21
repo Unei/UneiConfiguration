@@ -10,7 +10,7 @@ import me.unei.configuration.api.impl.FlatMySQLConfig;
 import me.unei.configuration.api.impl.FlatSQLiteConfig;
 import me.unei.configuration.api.impl.JSONConfig;
 import me.unei.configuration.api.impl.MySQLConfig;
-import me.unei.configuration.api.impl.NBTConfig2;
+import me.unei.configuration.api.impl.NBTConfig;
 import me.unei.configuration.api.impl.PropertiesConfig;
 import me.unei.configuration.api.impl.SQLiteConfig;
 import me.unei.configuration.api.impl.YAMLConfig;
@@ -230,31 +230,31 @@ public final class Configurations
 
 	public static INBTConfiguration newNBTConfig(SavedFile file)
 	{
-		return NBTConfig2.getForPath(file, null, DefaultPathSymbolsType);
+		return new NBTConfig(file, DefaultPathSymbolsType);
 	}
 	
 	public static INBTConfiguration newNBTConfig(File folder, String fileName)
 	{
-		return NBTConfig2.getForPath(folder, fileName, null, DefaultPathSymbolsType);
+		return NBTConfig.getForPath(folder, fileName, null, DefaultPathSymbolsType);
 	}
 	
 	public static INBTConfiguration newNBTConfig(File folder, String fileName, String path)
 	{
-		return NBTConfig2.getForPath(folder, fileName, path, DefaultPathSymbolsType);
+		return NBTConfig.getForPath(folder, fileName, path, DefaultPathSymbolsType);
 	}
 	
 	public static INBTConfiguration newNBTConfig(SavedFile file, String path)
 	{
-		return NBTConfig2.getForPath(file, path, DefaultPathSymbolsType);
+		return NBTConfig.getForPath(new NBTConfig(file, DefaultPathSymbolsType), path);
 	}
 	
 	public static INBTConfiguration newNBTConfig(IConfiguration root, String path)
 	{
-		if (!(root instanceof NBTConfig2))
+		if (!(root instanceof NBTConfig))
 		{
 			throw new IllegalArgumentException("root must be an instance of NBTConfig");
 		}
-		return NBTConfig2.getForPath((NBTConfig2) root, path);
+		return NBTConfig.getForPath((NBTConfig) root, path);
 	}
 
 	public static IYAMLConfiguration newYAMLConfig(SavedFile file)

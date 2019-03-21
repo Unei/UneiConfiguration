@@ -4,8 +4,13 @@ import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Serializable, Cloneable, Storage<E>
 {
@@ -96,6 +101,11 @@ public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Seri
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean hasValue(E value) {
+		return content.contains(value);
+	}
 
 	@Override
 	public Set<String> getKeys() {
@@ -109,5 +119,71 @@ public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Seri
 	@Override
 	public E get(int index) {
 		return content.get(index).element;
+	}
+	
+	@Override
+	public Iterator<Entry<Key, E>> entryIterator() {
+		return new EntryIterator<E>(super.listIterator());
+	}
+	
+	private static class EntryIterator<V> implements Iterator<Map.Entry<Key, V>>
+	{
+		private final ListIterator<V> originalIt;
+		
+		public EntryIterator(ListIterator<V> orig) {
+			this.originalIt = orig;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return originalIt.hasNext();
+		}
+
+		@Override
+		public Entry<Key, V> next() {
+			return new KeyEntry<>(originalIt.nextIndex(), originalIt.next(), originalIt::add);
+		}
+		
+		@Override
+		public void remove() {
+			originalIt.remove();
+		}
+		
+		@Override
+		public void forEachRemaining(Consumer<? super Entry<Key, V>> action) {
+			originalIt.forEachRemaining((entry) -> action.accept(new KeyEntry<V>(originalIt.previousIndex(), entry, originalIt::set)));
+		}
+		
+		private static class KeyEntry<V> implements Map.Entry<Key, V>
+		{
+			private final Key key;
+			private V value;
+			private final Consumer<V> setter;
+			
+			public KeyEntry(int key, V value, Consumer<V> setter)
+			{
+				this.key = new Key(key);
+				this.value = value;
+				this.setter = setter;
+			}
+			
+			@Override
+			public Key getKey() {
+				return key;
+			}
+
+			@Override
+			public V getValue() {
+				return value;
+			}
+
+			@Override
+			public V setValue(V value) {
+				this.setter.accept(value);
+				V old = this.value;
+				this.value = value;
+				return old;
+			}
+		}
 	}
 }

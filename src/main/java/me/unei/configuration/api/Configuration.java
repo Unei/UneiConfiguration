@@ -164,6 +164,10 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 			validate(newParent, childKey.getKeyAtomicInt());
 			break;
 			
+		case DISCONTINUED_LIST:
+			validate(newParent, childKey.getKeyInt());
+			break;
+			
 		case MAP:
 			validate(newParent, childKey.getKeyString());
 			break;
@@ -187,6 +191,15 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	}
 	
 	// v2 IMPL
+	
+	protected final void runTreeUpdate()
+	{
+		if (this.parent != null) {
+			this.parent.runTreeUpdate();
+		} else {
+			this.updateNode();
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	protected final void updateNode()
@@ -239,10 +252,7 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		return this.symType;
 	}
 	
-	public StorageType getType()
-	{
-		return StorageType.UNDEFINED;
-	}
+	public abstract StorageType getType();
 	
 	public String getName()
 	{
