@@ -11,6 +11,10 @@
 # Maven files
 target/
 
+# Gradle files
+build/
+.gradle/
+
 ### macOS.gitignore ###
 
 # General
@@ -203,3 +207,4 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 /jars/
+/.gradle/
