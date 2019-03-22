@@ -347,16 +347,35 @@ public final class PathComponent {
 		 * Returns the string representation of this path.
 		 */
 		@Override
-		public String toString() { // FIXME: Check if the path separator is added correctly.
+		public String toString() {
 			StringBuilder pathBuilder = new StringBuilder();
+			PathComponent.PathComponentType lastType = null;
 			for (PathComponent component : this) {
+				
+				if (lastType != null && lastType != PathComponent.PathComponentType.ROOT) {
+					if (lastType == PathComponent.PathComponentType.PARENT || component.getType() == PathComponent.PathComponentType.PARENT) {
+						if (this.symType.wrapParent) {
+							pathBuilder.append(this.symType.separator);
+						}
+					} else if (component.getType().valuable) {
+						pathBuilder.append(this.symType.separator);
+					}
+				}
+				
 				if (component.type == PathComponentType.INDEX) {
 					pathBuilder.append(this.symType.indexerPrefix);
 				}
-				pathBuilder.append(PathComponent.escapeComponent(component.getValue(), this.symType));
+				
+				if (component.getType().valuable) {
+					pathBuilder.append(PathComponent.escapeComponent(component.getValue(), this.symType));
+				} else {
+					pathBuilder.append(component.getValue());
+				}
+				
 				if (component.type == PathComponentType.INDEX) {
 					pathBuilder.append(this.symType.indexerSuffix);
 				}
+				lastType = component.getType();
 			}
 			return pathBuilder.toString();
 		}
@@ -379,22 +398,29 @@ public final class PathComponent {
 		/**
 		 * A root component (the first '/' with Unix).
 		 */
-		ROOT,
+		ROOT(false),
 		/**
 		 * A parent component ('..' with Unix).
 		 */
-		PARENT,
+		PARENT(false),
 		/**
 		 * A child component ('/name/' with Unix).
 		 * 
 		 * <p>A child is always accompanied with a name.</p>
 		 */
-		CHILD,
+		CHILD(true),
 		/**
 		 * A table element component ('[index]').
 		 * 
 		 * <p>An index is always accompanied with an integer.</p>
 		 */
-		INDEX;
+		INDEX(false);
+		
+		public final boolean valuable;
+		
+		private PathComponentType(boolean val)
+		{
+			this.valuable = val;
+		}
 	}
 }

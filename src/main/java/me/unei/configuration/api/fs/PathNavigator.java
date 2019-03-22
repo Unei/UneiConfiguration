@@ -399,28 +399,28 @@ public final class PathNavigator<T extends NavigableFile> {
 		 * The default Bukkit path symbols type.
 		 * 
 		 * <ul>
-		 * <li>Escape char:    '\'</li>
-		 * <li>Separator char: '.'</li>
-		 * <li>Root char:      '.'</li>
-		 * <li>Parent string:  '..'</li>
-		 * <li>Index prefix:    '['</li>
-		 * <li>Index suffix:    ']'</li>
+		 * <li>Escape char: &nbsp; &nbsp; &nbsp; 			<tt>'\'</tt></li>
+		 * <li>Separator char:&nbsp;						<tt>'.'</tt></li>
+		 * <li>Root char: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<tt>'.'</tt></li>
+		 * <li>Parent string: &nbsp; &nbsp; 				<tt>'..'</tt></li>
+		 * <li>Index prefix: &nbsp; &nbsp; &nbsp; 			<tt>'['</tt></li>
+		 * <li>Index suffix: &nbsp; &nbsp; &nbsp;&nbsp; 	<tt>']'</tt></li>
 		 * </ul>
 		 */
-		BUKKIT('\\', '.', '.', "..", '[', ']'),
+		BUKKIT('\\', '.', '.', "..", '[', ']', false),
 		/**
 		 * The default Unix path symbols type.
 		 * 
 		 * <ul>
-		 * <li>Escape char:    '\'</li>
-		 * <li>Separator char: '/'</li>
-		 * <li>Root char:      '/'</li>
-		 * <li>Parent string:  '..'</li>
-		 * <li>Index prefix:    '['</li>
-		 * <li>Index suffix:    ']'</li>
+		 * <li>Escape char: &nbsp; &nbsp; &nbsp; 			<tt>'\'</tt></li>
+		 * <li>Separator char:&nbsp;						<tt>'/'</tt></li>
+		 * <li>Root char: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<tt>'/'</tt></li>
+		 * <li>Parent string: &nbsp; &nbsp; 				<tt>'..'</tt></li>
+		 * <li>Index prefix: &nbsp; &nbsp; &nbsp; 			<tt>'['</tt></li>
+		 * <li>Index suffix: &nbsp; &nbsp; &nbsp;&nbsp; 	<tt>']'</tt></li>
 		 * </ul>
 		 */
-		UNIX('\\', '/', '/', "..", '[', ']');
+		UNIX('\\', '/', '/', "..", '[', ']', true);
 		
 		public final char escape;
 		public final char separator;
@@ -429,13 +429,16 @@ public final class PathNavigator<T extends NavigableFile> {
 		public final char indexerPrefix;
 		public final char indexerSuffix;
 		
-		private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent, char idxPre, char idxSuf) {
+		public final boolean wrapParent;
+		
+		private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent, char idxPre, char idxSuf, boolean wParent) {
 			this.escape = p_escape;
 			this.separator = p_separator;
 			this.root = p_root;
 			this.parent = p_parent;
 			this.indexerPrefix = idxPre;
 			this.indexerSuffix = idxSuf;
+			this.wrapParent = wParent;
 		}
 		
 		/**
