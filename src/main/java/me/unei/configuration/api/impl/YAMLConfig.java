@@ -9,7 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -29,6 +29,12 @@ import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.formats.AtomicIndexList;
+import me.unei.configuration.formats.IntegerHashMap;
+import me.unei.configuration.formats.Storage;
+import me.unei.configuration.formats.StorageType;
+import me.unei.configuration.formats.StringHashMap;
+import me.unei.configuration.formats.Storage.Key;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfiguration {
@@ -57,7 +63,16 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     	MINIFIED_YAML = new Yaml(dumperOpts);
     }
 
-    private Map<String, Object> data = new HashMap<String, Object>();
+    private Storage<Object> nodeData;
+    
+    final Storage<Object> getData()
+    {
+    	if (nodeData == null)
+    	{
+    		nodeData = new StringHashMap<>();
+    	}
+    	return nodeData;
+    }
 
     public YAMLConfig(SavedFile file) {
     	this(file, PathSymbolsType.BUKKIT);
@@ -91,8 +106,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     private YAMLConfig(YAMLConfig p_parent, String p_nodeName) {
         super(p_parent, p_nodeName);
 
-        this.updateFromParent();
-        this.propagate();
+        this.updateNode();
     }
 
     public static YAMLConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
@@ -109,6 +123,11 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         }
         return root.getSubSection(path);
     }
+	
+	@Override
+	public StorageType getType() {
+		return (this.nodeData != null) ? this.nodeData.getStorageType() : StorageType.UNDEFINED;
+	}
 
     @Override
     public YAMLConfig getRoot() {
@@ -126,7 +145,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         return new YAMLConfig(this, name);
     }
 
-    private Map<String, Object> getParentMap(PathComponent.PathComponentsList path)
+    private Storage<Object> getParentMap(PathComponent.PathComponentsList path)
     {
     	YAMLConfig dir;
     	PathNavigator<YAMLConfig> pn = new PathNavigator<YAMLConfig>(this);
@@ -134,10 +153,24 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     	pathList.removeLast();
     	if (!pn.followPath(pathList))
     	{
-    		return data;
+    		return nodeData;
     	}
     	dir = pn.getCurrentNode();
-		return dir.data;
+		return dir.nodeData;
+    }
+    
+    private YAMLConfig getForPath(PathComponent.PathComponentsList path)
+    {
+    	YAMLConfig dir;
+    	PathNavigator<YAMLConfig> pn = new PathNavigator<YAMLConfig>(this);
+    	PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+    	pathList.removeLast();
+    	if (!pn.followPath(pathList))
+    	{
+    		return this;
+    	}
+    	dir = pn.getCurrentNode();
+		return dir;
     }
 
     @Override
@@ -156,7 +189,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
-            YAMLConfig.BEAUTIFIED_YAML.dump(data, w);
+            YAMLConfig.BEAUTIFIED_YAML.dump(getData(), w);
             w.close();
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
@@ -185,7 +218,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
             this.save();
             return;
         }
-        this.data.clear();
+        this.getData().clear();
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
@@ -199,7 +232,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
             if (tmpData != null && !tmpData.isEmpty()) {
                 for (Entry<?, ?> entry : tmpData.entrySet()) {
                     String key = entry.getKey() != null? entry.getKey().toString() : null;
-                    this.data.put(key, entry.getValue());
+                    this.nodeData.set(new Key(key), entry.getValue());
                 }
             }
             r.close();
@@ -212,40 +245,96 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     }
     
 	@SuppressWarnings("unchecked")
-	private void updateFromParent() {
-		if (this.parent != null && this.parent.data != null) {
-			Object me = this.parent.data.get(nodeName);
-			if (me != null && (me instanceof Map)) {
-				this.data = (Map<String, Object>) me;
+	protected void updateFromParent() {
+		if (this.parent != null) {
+			Storage<Object> sto = this.parent.nodeData;
+			if (sto != null && sto.getStorageType() != StorageType.UNDEFINED) {
+				Object me = sto.get(Key.of(sto.getStorageType(), nodeAtomicIndex, nodeName));
+				if (me != null && me instanceof Storage) {
+					this.nodeData = (Storage<Object>) me;
+				} else if (me != null && me instanceof Map) {
+					StringHashMap<Object> r = new StringHashMap<Object>();
+					r.putAll((Map<String, Object>) me);
+					this.nodeData = r;
+				} else if (me != null && me instanceof List) {
+					AtomicIndexList<Object> r = new AtomicIndexList<Object>();
+					r.addAll((List<Object>) me);
+					this.nodeData = r;
+				} else {
+					this.nodeData = new StringHashMap<Object>();
+					sto.set(Key.of(sto.getStorageType(), nodeAtomicIndex, nodeName), this.nodeData);
+				}
 			}
 		}
 	}
-
+    
     @Override
-    protected void propagate() {
-        if (this.parent != null) {
-            this.parent.data.put(this.nodeName, this.data);
-            this.parent.propagate();
-        }
+    public void setType(StorageType newType)
+    {
+    	if (!this.canAccess())
+    	{
+    		return;
+    	}
+    	Storage<Object> cnt;
+    	if (newType != null
+    			&& newType != StorageType.UNDEFINED
+    			&& ((cnt = this.nodeData) == null
+    				|| cnt.getStorageType() != newType))
+    	{
+    		if (cnt.isEmpty())
+    		{
+    			Storage<Object> newObject;
+    			switch (newType)
+    			{
+    			case MAP:
+    				newObject = new StringHashMap<Object>();
+    				break;
+
+    			case DISCONTINUED_LIST:
+    				newObject = new IntegerHashMap<Object>();
+    				break;
+    				
+    			case LIST:
+    				newObject = new AtomicIndexList<Object>();
+    				break;
+    				
+    			default:
+    				return;
+    			}
+    			this.childrens.forEach(weakPtr -> {
+    				if (weakPtr.get() != null) {
+    					weakPtr.get().invalidate();
+    					weakPtr.clear();
+    				}
+    			});
+    			this.childrens.clear();
+    			this.nodeData = newObject;
+    			if (this.parent != null)
+    			{
+    				Storage<Object> sto = this.parent.nodeData;
+					sto.set(Key.of(sto.getStorageType(), nodeAtomicIndex, nodeName), this.nodeData);
+    			}
+    		}
+    	}
     }
 
     @Override
 	public Set<String> getKeys() {
-        return this.data.keySet();
+        return this.nodeData.getKeys();
     }
 
     @Override
 	public boolean contains(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.containsKey(list.lastChild());
+        Storage<Object> node = this.getParentMap(list);
+        return node.has(list.last().getKey(node.getStorageType()));
     }
 
     @Override
 	public Object get(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.get(list.lastChild());
+        Storage<Object> node = this.getParentMap(list);
+        return node.get(list.last().getKey(node.getStorageType()));
     }
 
     @Override
@@ -266,21 +355,32 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     @Override
 	public void set(String path, Object value) {
     	PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-    	Map<String, Object> node = this.getParentMap(list);
+    	YAMLConfig node = this.getForPath(list);
     	if (value == null) {
-    		node.remove(list.lastChild());
+    		node.nodeData.remove(list.last().getKey(node.getType()));
     	} else {
-    		node.put(list.lastChild(), value);
+    		node.nodeData.set(list.last().getKey(node.getType()), value);
     	}
     }
 
     @Override
 	public void setSubSection(String path, IConfiguration value) {
+        if (!this.canAccess()) {
+            return;
+        }
+        if (value == null) {
+            remove(path);
+            return;
+        }
         if (!(value instanceof YAMLConfig)) {
             //TODO ConfigType conversion
             return;
         }
-        set(path, ((YAMLConfig) value).data);
+        PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+        YAMLConfig node = this.getForPath(list);
+        Key key = list.last().getKey(node.nodeData.getStorageType());
+        ((YAMLConfig) value).validate(node, key);
+        node.nodeData.set(key, ((YAMLConfig) value).nodeData);
     }
 
     @Override
@@ -290,12 +390,12 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     
     @Override
 	public String toFormattedString() {
-    	return YAMLConfig.BEAUTIFIED_YAML.dumpAsMap(data);
+    	return YAMLConfig.BEAUTIFIED_YAML.dumpAsMap(nodeData);
     }
     
     @Override
 	public String toMinimizedString() {
-    	return YAMLConfig.MINIFIED_YAML.dumpAsMap(data);
+    	return YAMLConfig.MINIFIED_YAML.dumpAsMap(nodeData);
     }
 
     @Override
@@ -305,17 +405,17 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 
     @Override
 	public void loadFromString(String p_data) {
-        this.data.clear();
+        this.nodeData.clear();
         Map<?, ?> tmpMap = YAMLConfig.MINIFIED_YAML.loadAs(p_data, Map.class);
         for (Entry<?, ?> e : tmpMap.entrySet()) {
             if (e.getKey() instanceof String) {
-                this.data.put((String) e.getKey(), e.getValue());
+                this.nodeData.set(new Key((String) e.getKey()), e.getValue());
             }
         }
     }
 
     @Override
     public String toString() {
-        return "YAMLConfig=" + this.data.toString();
+        return "YAMLConfig=" + this.nodeData.toString();
     }
 }

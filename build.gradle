@@ -1,0 +1,101 @@
+buildscript {
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2' }
+    }
+}
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'me.unei'
+version = '1.2.7-RELEASE'
+archivesBaseName = 'UneiConfiguration'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+jar {
+	destinationDir = new File(projectDir, "/jars")
+	from 'LICENSE.txt'
+	manifest {
+       attributes 'Built-By': 'UneiTeam'
+   }
+}
+
+javadoc {
+	options.encoding = 'UTF-8'
+	options.charSet = 'UTF-8'
+	options.links(
+		'https://google.github.io/guava/releases/21.0/api/docs/',
+		'https://docs.oracle.com/javase/8/docs/api/'
+	)
+	options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	destinationDir = new File(projectDir, "/jars")
+	classifier 'javadoc'
+	from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+	destinationDir = new File(projectDir, "/jars")
+	classifier 'sources'
+	from sourceSets.main.allSource
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+}
+
+dependencies {
+	compile 'com.google.code.gson:gson:2.8.5'
+	compile 'org.yaml:snakeyaml:1.21'
+	
+	compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT', {
+        exclude(group: 'junit')
+    }
+	compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT', {
+        exclude(group: 'junit')
+    }
+	compileOnly 'net.md-5:bungeecord-api:1.12-SNAPSHOT'
+	
+	
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.1'
+}
+
+clean.doLast {
+    file(new File(projectDir, "/jars")).deleteDir()
+}
+
+shadowJar {
+	destinationDir = new File(projectDir, "/jars")
+    baseName = "UneiConfiguration"
+    classifier = "jar-with-dependencies"
+    version = "${project.version}"
+    
+    from 'LICENSE.txt'
+
+    configurations = [project.configurations.compile]
+}
+
+artifacts {
+	archives javadocJar
+	archives sourcesJar
+    archives shadowJar
+}

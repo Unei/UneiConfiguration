@@ -6,20 +6,37 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Set;
+
+import org.apache.commons.lang.NotImplementedException;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.UntypedStorage;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.formats.Storage;
+import me.unei.configuration.formats.StorageType;
+import me.unei.configuration.formats.Storage.Key;
+import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implements IConfiguration {
+public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfiguration {
 	
 	public static final String BINARY_FILE_EXT = ".bin";
 	public static final String BINARY_TMP_EXT = ".tmp";
+	
+	private Storage<Object> data = null;
+	
+	final Storage<Object> getData() {
+		if (data == null)
+		{
+			data = new StringHashMap<Object>();
+		}
+		return data;
+	}
 	
 	public BinaryConfig(SavedFile file, PathSymbolsType symType) {
 		super(file, symType);
@@ -41,10 +58,8 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 	
 	public BinaryConfig(BinaryConfig parent, String tagName) {
 		super(parent, tagName);
-	}
-	
-	public BinaryConfig(BinaryConfig parent, int idx) {
-		super(parent, idx);
+		
+		this.updateNode();
 	}
 
 	public static BinaryConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
@@ -63,8 +78,32 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 	}
 	
 	@Override
-	protected BinaryConfig getThis() {
-		return this;
+	public StorageType getType() {
+		return (this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED;
+	}
+	
+	@Override
+	protected void updateFromParent() {
+		if (this.parent != null && this.parent.data != null) {
+			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
+				Storage<Object> tmp = Storage.Converter.allocateBest(me, null, null);
+				if (tmp != null) {
+					this.data = tmp;
+				} else {
+					this.data = new StringHashMap<Object>();
+				}
+				this.parent.data.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.data);
+			}
+		}
+	}
+	
+	@Override
+	public void setType(StorageType type) {
+    	if (!this.canAccess()) {
+    		return;
+    	}
+    	throw new NotImplementedException();
 	}
 	
 	@Override
@@ -82,14 +121,20 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 		return new BinaryConfig(this, name);
 	}
 	
-	public BinaryConfig getAt(int idx) {
-		if (!this.canAccess()) {
-			return null;
-		}
-		if (idx < 0) {
-			return this;
-		}
-		return new BinaryConfig(this, idx);
+	private BinaryConfig getParentObj(PathComponent.PathComponentsList path) {
+		PathNavigator<BinaryConfig> pn = new PathNavigator<BinaryConfig>(this);
+		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+		pathList.removeLast();
+		pn.followPath(pathList);
+		return pn.getCurrentNode();
+	}
+	
+	private Storage<Object> getParentMap(PathComponent.PathComponentsList path) {
+		PathNavigator<BinaryConfig> pn = new PathNavigator<BinaryConfig>(this);
+		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+		pathList.removeLast();
+		pn.followPath(pathList);
+		return pn.getCurrentNode().data;
 	}
 	
 	public void save() {
@@ -108,7 +153,7 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tmp));
 			oos.writeInt(0xdeadbeef);
-			oos.writeObject(this.data);
+			oos.writeObject(getData());
 			oos.writeInt(0xfeebdaed);
 			oos.flush();
 			oos.close();
@@ -125,7 +170,6 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void reload() throws FileFormatException
 	{
 		if (!this.canAccess()) {
@@ -151,9 +195,7 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
 			}
 			Object result = ois.readObject();
-			if (result != null && (result instanceof Storage<?>)) {
-				this.data = (Storage<Object>) result;
-			}
+			this.data = Storage.Converter.allocateBest(result, null, () -> new StringHashMap<>());
 			if (ois.readInt() != 0xfeebdaed) {
 				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
 				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
@@ -174,6 +216,22 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 		}
 	}
 	
+	public Set<String> getKeys() {
+		return this.getData().getKeys();
+	}
+	
+	public boolean contains(String path) {
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		return node.has(list.last().getKey(node.getStorageType()));
+	}
+
+	public Object get(String path) {
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		return node.get(list.last().getKey(node.getStorageType()));
+	}
+	
 	@Override
 	public BinaryConfig getSubSection(PathComponent.PathComponentsList path) {
 		if (!this.canAccess()) {
@@ -189,12 +247,41 @@ public final class BinaryConfig extends MappedConfiguration<BinaryConfig> implem
 		return null;
 	}
 	
+	public void set(String path, Object value) {
+		if (!this.canAccess()) {
+			return;
+		}
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		if (value == null) {
+			node.remove(list.last().getKey(node.getStorageType()));
+		} else {
+			node.set(list.last().getKey(node.getStorageType()), value);
+		}
+	}
+
 	public void setSubSection(String path, IConfiguration value) {
+		if (!this.canAccess()) {
+			return;
+		}
+		if (value == null) {
+			this.remove(path);
+			return;
+		}
 		if (!(value instanceof BinaryConfig)) {
 			//TODO ConfigType conversion
 			return;
 		}
-		set(path, ((BinaryConfig) value).data);
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		BinaryConfig node = this.getParentObj(list);
+		BinaryConfig bc = (BinaryConfig) value;
+		Key key = list.last().getKey(node.data.getStorageType());
+		bc.validate(node, key);
+		node.data.set(key, bc.data);
+	}
+	
+	public void remove(String path) {
+		set(path, null);
 	}
 	
 	@Override

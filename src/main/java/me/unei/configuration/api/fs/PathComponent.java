@@ -3,6 +3,7 @@ package me.unei.configuration.api.fs;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import me.unei.configuration.api.exceptions.NoExcept;
 import me.unei.configuration.formats.StorageType;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.Storage.Key;
@@ -24,6 +25,7 @@ public final class PathComponent implements IPathComponent {
 	 * @param type The type of the component.
 	 * @param value The name of the component.
 	 */
+	@NoExcept
 	public PathComponent(PathComponentType type, String value) {
 		this.type = type;
 		this.value = value;
@@ -42,6 +44,7 @@ public final class PathComponent implements IPathComponent {
 	 * @param type The type of the component.
 	 * @param index The index of the component.
 	 */
+	@NoExcept
 	public PathComponent(PathComponentType type, int index) {
 		this.type = type;
 		this.value = Integer.toString(index);
@@ -344,16 +347,35 @@ public final class PathComponent implements IPathComponent {
 		 * Returns the string representation of this path.
 		 */
 		@Override
-		public String toString() { // FIXME: Check if the path separator is added correctly.
+		public String toString() {
 			StringBuilder pathBuilder = new StringBuilder();
+			PathComponentType lastType = null;
 			for (IPathComponent component : this) {
+				
+				if (lastType != null && lastType != PathComponentType.ROOT) {
+					if (lastType == PathComponentType.PARENT || component.getType() == PathComponentType.PARENT) {
+						if (this.symType.wrapParent) {
+							pathBuilder.append(this.symType.separator);
+						}
+					} else if (component.getType().valuable) {
+						pathBuilder.append(this.symType.separator);
+					}
+				}
+				
 				if (component.getType() == PathComponentType.INDEX) {
 					pathBuilder.append(this.symType.indexerPrefix);
 				}
-				pathBuilder.append(PathComponent.escapeComponent(component.getValue(), this.symType));
+				
+				if (component.getType().valuable) {
+					pathBuilder.append(PathComponent.escapeComponent(component.getValue(), this.symType));
+				} else {
+					pathBuilder.append(component.getValue());
+				}
+				
 				if (component.getType() == PathComponentType.INDEX) {
 					pathBuilder.append(this.symType.indexerSuffix);
 				}
+				lastType = component.getType();
 			}
 			return pathBuilder.toString();
 		}

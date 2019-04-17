@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import me.unei.configuration.SavedFile;
@@ -16,21 +14,35 @@ import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.formats.AtomicIndexList;
+import me.unei.configuration.formats.Storage;
+import me.unei.configuration.formats.StorageType;
+import me.unei.configuration.formats.StringHashMap;
+import me.unei.configuration.formats.Storage.Key;
 import me.unei.configuration.formats.nbtlib.NBTIO;
+import me.unei.configuration.formats.nbtlib.Tag;
 import me.unei.configuration.formats.nbtlib.TagCompound;
+import me.unei.configuration.formats.nbtlib.TagList;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 /**
  * @version 2.5.0
  * @since 0.0.1
  */
-@Deprecated
 public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTConfiguration {
 
     public static final String NBT_FILE_EXT = ".dat";
     public static final String NBT_TMP_EXT = ".tmp";
 
-    private Map<String, Object> data = new HashMap<String, Object>();
+    private Storage<Object> data = null;
+    
+    final Storage<Object> getData() {
+    	if (data == null)
+    	{
+    		data = new StringHashMap<Object>();
+    	}
+    	return data;
+    }
     
     public NBTConfig(SavedFile file, PathSymbolsType symType) {
     	super(file, symType);
@@ -53,16 +65,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
     private NBTConfig(NBTConfig p_parent, String p_tagName) {
         super(p_parent, p_tagName);
         
-        this.updateFromParent();
-        this.propagate();
-    }
-
-    @Override
-    protected void propagate() {
-        if (this.parent != null) {
-            this.parent.data.put(this.nodeName, this.data);
-            this.parent.propagate();
-        }
+        this.updateNode();
     }
 
     public static NBTConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
@@ -96,24 +99,68 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         }
         return new NBTConfig(this, name);
     }
+	
+	@Override
+	public StorageType getType() {
+		return (this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED;
+	}
     
-    @SuppressWarnings("unchecked")
-	private void updateFromParent() {
+    @Override
+	protected void updateFromParent() {
 		if (this.parent != null && this.parent.data != null) {
-			Object me = this.parent.data.get(nodeName);
-			if (me != null && (me instanceof Map)) {
-				this.data = (Map<String, Object>) me;
+			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
+				Storage<Object> tmp = Storage.Converter.allocateBest(me, null, null);
+				if (tmp != null) {
+					this.data = tmp;
+				} else {
+					this.data = new StringHashMap<Object>();
+				}
+				this.parent.data.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.data);
 			}
+		} else if (this.parent == null) {
+			this.data = new StringHashMap<Object>(); // Root must be a string-key map.
 		}
 	}
-
-    private TagCompound getTagCp() {
-    	TagCompound result = new TagCompound();
-    	result.loadMap(data);
-    	return result;
+    
+    @Override
+    public void setType(StorageType type) {
+		if (this.parent == null && type != this.getType()) {
+			throw new UnsupportedOperationException("Cannot change the type of a NBT root Tag to anything but " + this.getType().name());
+		}
+		if (type == StorageType.DISCONTINUED_LIST) {
+			throw new UnsupportedOperationException("Cannot set the type of any NBT Tag to " + type.name());
+		}
     }
 
-    private Map<String, Object> getParentMap(PathComponent.PathComponentsList path) {
+    private Tag getTagCp() {
+    	switch (this.getType()) {
+    	case MAP:
+        	TagCompound resultMap = new TagCompound();
+        	resultMap.loadMap((StringHashMap<Object>) data);
+        	return resultMap;
+        	
+    	case LIST:
+    		TagList resultList = new TagList();
+    		resultList.loadList(data);
+    		return resultList;
+
+    	default:
+    		return new TagCompound();
+    	}
+    }
+    
+    private NBTConfig getParentObj(PathComponent.PathComponentsList path) {
+        PathNavigator<NBTConfig> pn = new PathNavigator<NBTConfig>(this);
+        PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+        pathList.removeLast();
+        if (!pn.followPath(pathList)) {
+            return this;
+        }
+        return pn.getCurrentNode();
+    }
+
+    private Storage<Object> getParentMap(PathComponent.PathComponentsList path) {
         NBTConfig dir;
         PathNavigator<NBTConfig> pn = new PathNavigator<NBTConfig>(this);
         PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
@@ -126,19 +173,45 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
     }
 
     public INBTCompound getTagCopy() {
-        return this.getTagCp();
+        return (INBTCompound) this.getTagCp();
     }
     
-    private void setTagCp(TagCompound compound) {
-    	if (!this.canAccess() || compound == null) {
+    private void setTagCp(Tag tag) {
+    	if (!this.canAccess() || tag == null) {
     		return;
     	}
-    	this.data = compound.getAsObject();
-    	this.propagate();
+    	if (tag instanceof TagCompound)
+    	{
+    		TagCompound compound = (TagCompound) tag;
+    		this.data = compound.getAsObject(new Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>>() {
+    			@Override
+    			public StringHashMap<Object> newMap() {
+    				return new StringHashMap<Object>();
+    			}
+    			@Override
+    			public AtomicIndexList<Object> newList() {
+    				return new AtomicIndexList<Object>();
+    			}
+    		});
+    	}
+    	else if (tag instanceof TagList)
+    	{
+    		TagList list = (TagList) tag;
+    		this.data = list.getAsObject(new Tag.ObjectCreator<StringHashMap<Object>, AtomicIndexList<Object>>() {
+    			@Override
+    			public StringHashMap<Object> newMap() {
+    				return new StringHashMap<Object>();
+    			}
+    			@Override
+    			public AtomicIndexList<Object> newList() {
+    				return new AtomicIndexList<Object>();
+    			}
+    		});
+    	}
     }
 
     public void setTagCopy(INBTCompound compound) {
-        this.setTagCp((TagCompound) compound);
+        this.setTagCp((Tag) compound);
     }
 
 	public void reload() {
@@ -152,6 +225,9 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
                 this.save();
                 return;
             }
+    		if (this.getType() != StorageType.MAP) {
+    			this.data = new StringHashMap<Object>();
+    		}
             TagCompound compound = null;
             try {
                 UneiConfiguration.getInstance().getLogger().fine("Reading NBT Compound from file " + getFileName() + "...");
@@ -163,9 +239,9 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
                 return;
             }
             if (compound != null) {
-            	this.data = compound.getAsObject();
+            	this.setTagCp(compound);
             } else {
-            	this.data = new HashMap<String, Object>();
+            	this.data = new StringHashMap<Object>();
             }
         }
     }
@@ -180,7 +256,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         }
         File tmp = new File(this.file.getFolder(), this.file.getFullName() + NBTConfig.NBT_TMP_EXT);
         TagCompound compound = new TagCompound();
-        compound.loadMap(data);
+        compound.loadMap((StringHashMap<Object>) getData());
         try {
             UneiConfiguration.getInstance().getLogger().fine("Writing NBT Compound to file " + getFileName() + "...");
             NBTIO.writeCompressed(compound, new FileOutputStream(tmp));
@@ -198,19 +274,19 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
     }
 
     public Set<String> getKeys() {
-    	return this.data.keySet();
+    	return this.data.getKeys();
     }
 
     public boolean contains(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.containsKey(list.lastChild());
+        Storage<Object> node = this.getParentMap(list);
+        return node.has(list.last().getKey(node.getStorageType()));
     }
 
     public Object get(String path) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.get(list.lastChild());
+        Storage<Object> node = this.getParentMap(list);
+        return node.get(list.last().getKey(node.getStorageType()));
     }
 
     public void setSubSection(String path, IConfiguration value) {
@@ -225,7 +301,11 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
             //TODO ConfigType conversion
             return;
         }
-        set(path, ((NBTConfig) value).data);
+        PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+        NBTConfig node = this.getParentObj(list);
+        Key key = list.last().getKey(node.getType());
+        ((NBTConfig) value).validate(node, key);
+        node.data.set(key, ((NBTConfig) value).data);
     }
 
 	public void remove(String key) {
@@ -233,8 +313,8 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
             return;
         }
         PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        node.remove(list.lastChild());
+        Storage<Object> node = this.getParentMap(list);
+        node.remove(list.last().getKey(node.getStorageType()));
     }
 
     @Override
@@ -267,8 +347,8 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
     		return;
     	}
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        node.put(list.lastChild(), value);
+        Storage<Object> node = this.getParentMap(list);
+        node.set(list.last().getKey(node.getStorageType()), value);
     }
 
     @Override

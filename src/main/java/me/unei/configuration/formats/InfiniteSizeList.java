@@ -10,10 +10,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Spliterator;
+import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -74,6 +77,11 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 			return (this.getIndexForKey(key.getKeyInt()) >= 0);
 		}
 		return false;
+	}
+	
+	@Override
+	public boolean hasValue(E value) {
+		return this.contains(value);
 	}
 
 	@Override
@@ -795,6 +803,22 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 			checkForComodification();
 		}
 
+		public void specialForEachRemaining(BiConsumer<Integer, ? super E> consumer) {
+			Objects.requireNonNull(consumer);
+			final int size = InfiniteSizeList.this.size;
+			int i = cursor;
+			if (i >= size) {
+				return;
+			}
+			while (i != size && modCount == expectedModCount) {
+				consumer.accept(i++, InfiniteSizeList.this.elementData1(i));
+			}
+			// update once at end of iteration to reduce heap write traffic
+			cursor = i;
+			lastRet = i - 1;
+			checkForComodification();
+		}
+
 		final void checkForComodification() {
 			if (modCount != expectedModCount)
 				throw new ConcurrentModificationException();
@@ -1095,5 +1119,71 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 			}
 		}
 		return sb.append(']').toString();
+	}
+
+	@Override
+	public Iterator<Entry<Key, E>> entryIterator() {
+		return new EntryIterator((ListItr) listIterator());
+	}
+
+	private class EntryIterator implements Iterator<Map.Entry<Key, E>>
+	{
+		private final ListItr originalIt;
+
+		public EntryIterator(ListItr orig) {
+			this.originalIt = orig;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return originalIt.hasNext();
+		}
+
+		@Override
+		public Entry<Key, E> next() {
+			return new KeyEntry(originalIt.nextIndex(), originalIt.next(), originalIt::add);
+		}
+
+		@Override
+		public void remove() {
+			originalIt.remove();
+		}
+
+		@Override
+		public void forEachRemaining(Consumer<? super Entry<Key, E>> action) {
+			originalIt.specialForEachRemaining((idx, entry) -> action.accept(new KeyEntry(idx, entry, originalIt::set)));
+		}
+
+		private class KeyEntry implements Map.Entry<Key, E>
+		{
+			private final Key key;
+			private E value;
+			private final Consumer<E> setter;
+
+			public KeyEntry(int key, E value, Consumer<E> setter)
+			{
+				this.key = new Key(key);
+				this.value = value;
+				this.setter = setter;
+			}
+
+			@Override
+			public Key getKey() {
+				return key;
+			}
+
+			@Override
+			public E getValue() {
+				return value;
+			}
+
+			@Override
+			public E setValue(E value) {
+				this.setter.accept(value);
+				E old = this.value;
+				this.value = value;
+				return old;
+			}
+		}
 	}
 }

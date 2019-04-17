@@ -14,12 +14,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.lang.NotImplementedException;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
@@ -31,13 +32,25 @@ import me.unei.configuration.api.fs.IPathComponent;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
+import me.unei.configuration.formats.Storage;
+import me.unei.configuration.formats.StorageType;
+import me.unei.configuration.formats.Storage.Key;
+import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IMySQLConfiguration {
 
     public static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
 
-    private Map<String, Object> data = new HashMap<String, Object>();
+    private Storage<Object> data = null;
+
+	final Storage<Object> getData() {
+		if (data == null)
+		{
+			data = new StringHashMap<Object>();
+		}
+		return data;
+	}
 
     private String host;
     private int port;
@@ -69,13 +82,12 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         this.tableName = this.parent.tableName;
         // this.connection = this.parent.connection;
 
-        this.synchronize();
+        this.updateNode();
     }
 
     private void subinit() {
         if (this.parent != null) {
             this.parent.init();
-            this.synchronize();
             return;
         }
         try {
@@ -141,33 +153,26 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         return new MySQLConfig(this, name);
     }
 
-    private Map<String, Object> getParentMap(PathComponent.PathComponentsList path) {
-        MySQLConfig dir;
-        PathNavigator<MySQLConfig> pn = new PathNavigator<MySQLConfig>(this);
-        PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
-        pathList.removeLast();
-        if (!pn.followPath(pathList)) {
-            return new HashMap<String, Object>(data);
-        }
-        dir = pn.getCurrentNode();
-        return new HashMap<String, Object>(dir.data);
-    }
+	private MySQLConfig getParentObj(PathComponent.PathComponentsList path) {
+		PathNavigator<MySQLConfig> pn = new PathNavigator<MySQLConfig>(this);
+		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
+		pathList.removeLast();
+		if (!pn.followPath(pathList)) {
+			return this;
+		}
+		return pn.getCurrentNode();
+	}
 
-    private void setParentMap(PathComponent.PathComponentsList path, Map<String, Object> map) {
+    private Storage<Object> getParentMap(PathComponent.PathComponentsList path) {
         MySQLConfig dir;
         PathNavigator<MySQLConfig> pn = new PathNavigator<MySQLConfig>(this);
         PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
         pathList.removeLast();
         if (!pn.followPath(pathList)) {
-            this.data = map;
-            this.propagate();
-            return;
+            return data;
         }
         dir = pn.getCurrentNode();
-        if (dir != null) {
-            dir.data = map;
-            dir.propagate();
-        }
+        return dir.data;
     }
 
     public boolean execute(String query, Map<Integer, Object> parameters) throws SQLException {
@@ -302,7 +307,7 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
             String table = this.tableName; // TODO: Escape table name
             statement = this.connection.prepareStatement("INSERT INTO " + table + " (id, k, v) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE v = ?");
 
-            for (Entry<String, Object> entry : this.data.entrySet()) {
+            for (Entry<Key, Object> entry : this.getData().entryIterable()) {
                 if (entry.getValue() == null) {
                     continue;
                 }
@@ -315,8 +320,8 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
                 objout.close();
                 bitout.close();
 
-                statement.setString(1, MySQLConfig.getHash(entry.getKey()));
-                statement.setString(2, entry.getKey());
+                statement.setString(1, MySQLConfig.getHash(entry.getKey().getKeyString()));
+                statement.setString(2, entry.getKey().getKeyString());
                 statement.setBytes(3, bytes);
                 statement.setBytes(4, bytes);
                 statement.addBatch();
@@ -326,9 +331,9 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
             statement.close();
             statement = this.connection.prepareStatement("DELETE FROM " + table + " WHERE id = ?");
 
-            for (Entry<String, Object> entry : this.data.entrySet()) {
+            for (Entry<Key, Object> entry : this.data.entryIterable()) {
                 if (entry.getValue() == null) {
-                    statement.setString(1, MySQLConfig.getHash(entry.getKey()));
+                    statement.setString(1, MySQLConfig.getHash(entry.getKey().getKeyString()));
                     statement.addBatch();
                     this.data.remove(entry.getKey());
                 }
@@ -366,9 +371,11 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         }
         if (this.parent != null) {
             this.parent.reload();
-            this.synchronize();
             return;
         }
+		if (this.getType() != StorageType.MAP) {
+			this.data = new StringHashMap<Object>();
+		}
         try {
             this.reconnect();
             this.data.clear();
@@ -387,7 +394,7 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
                     objin.close();
                     bitin.close();
 
-                    this.data.put(key, value);
+                    this.data.set(new Key(key), value);
                 } catch (IOException e) {
                     UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
                     e.printStackTrace();
@@ -399,6 +406,7 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
             Statement statement = result.getStatement();
             result.close();
             statement.close();
+            this.runTreeUpdate();
             UneiConfiguration.getInstance().getLogger().fine("Successfully retreived.");
         } catch (SQLException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + this.host + ":" + this.port + "->" + tableName + ":");
@@ -456,72 +464,65 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         this.connection = null;
     }
 
-    //@Override
-	@SuppressWarnings("unchecked")
-    protected void synchronize() {
-        MySQLConfig currentNode = this.getRoot();
-        Map<String, Object> currentData = currentNode.data;
-
-        PathComponent.PathComponentsList path = fullPath.clone();
-        path = PathNavigator.cleanPath(path);
-        for (IPathComponent component : path) {
-            switch(component.getType()) {
-                case ROOT:
-                    currentNode = currentNode.getRoot();
-                    currentData = currentNode.data;
-                    break;
-
-                case PARENT:
-                    currentNode = currentNode.getParent();
-                    currentData = currentNode.data;
-                    break;
-
-                case CHILD:
-                    currentNode = null;
-                    Object childData = currentData.get(component.getValue());
-                    if (childData != null && childData instanceof Map) {
-                        currentData = (Map<String, Object>) childData;
-                    } else {
-                        return;
-                    }
-                    break;
-            }
-        }
-        this.data = currentData;
-    }
-
+	@Override
+	public StorageType getType() {
+		return (this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED;
+	}
+    
     @Override
-	protected void propagate() {
-        if (this.parent != null) {
-            this.parent.data.put(this.nodeName, this.data);
-            this.parent.propagate();
-        }
-    }
+	protected void updateFromParent() {
+		if (this.parent != null && this.parent.data != null) {
+			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
+				Storage<Object> tmp = Storage.Converter.allocateBest(me, null, null);
+				if (tmp != null) {
+					this.data = tmp;
+				} else {
+					this.data = new StringHashMap<Object>();
+				}
+				this.parent.data.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.data);
+			}
+		} else if (this.parent == null) {
+			this.data = new StringHashMap<Object>(); // Root must be a string-key map.
+		}
+	}
 
-    public Set<String> getKeys() {
-        if (this.parent == null || !this.data.containsValue(null)) {
-            return this.data.keySet();
-        }
-        Set<String> keys = this.data.keySet();
-        for (Entry<String, Object> entry : this.data.entrySet()) {
-            if (entry.getValue() == null) {
-                keys.remove(entry.getKey());
-            }
-        }
-        return keys;
-    }
+	@Override
+	public void setType(StorageType type) {
+		if (!this.canAccess()) {
+			return;
+		}
+		if (this.parent == null && type != this.getType()) {
+			throw new UnsupportedOperationException("Cannot change the type of a NBT root Tag to anything but " + this.getType().name());
+		}
+		throw new NotImplementedException();
+	}
 
-    public boolean contains(String path) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.containsKey(list.lastChild()) && node.get(list.lastChild()) != null;
-    }
+	public Set<String> getKeys() {
+		if (this.parent == null || !this.data.hasValue(null)) {
+			return this.data.getKeys();
+		}
+		Set<String> keys = this.data.getKeys();
+		for (Entry<Key, Object> entry : this.data.entryIterable()) {
+			if (entry.getValue() == null) {
+				keys.remove(entry.getKey().getKeyString());
+			}
+		}
+		return keys;
+	}
 
-    public Object get(String path) {
-        PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
-        return node.get(list.lastChild());
-    }
+	public boolean contains(String path) {
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		Key key = list.last().getKey(node.getStorageType());
+		return node.has(key) && node.get(key) != null;
+	}
+
+	public Object get(String path) {
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		return node.get(list.last().getKey(node.getStorageType()));
+	}
 
     @Override
 	public MySQLConfig getSubSection(PathComponent.PathComponentsList path) {
@@ -537,22 +538,31 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
 
     public void set(String path, Object value) {
         PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
-        Map<String, Object> node = this.getParentMap(list);
+        Storage<Object> node = this.getParentMap(list);
         if (this.parent != null && value == null) {
-             node.remove(list.lastChild());
+			node.remove(list.last().getKey(node.getStorageType()));
         } else {
             // When a root value is removed, keep a null value in the map so that the save knows it has to delete it from the database
-            node.put(list.lastChild(), value);
+            node.set(list.last().getKey(node.getStorageType()), value);
         }
-        this.setParentMap(list, node);
     }
 
     public void setSubSection(String path, IConfiguration value) {
+		if (!this.canAccess()) {
+			return;
+		}
+		if (value == null) {
+			this.remove(path);
+		}
         if (!(value instanceof MySQLConfig)) {
             //TODO ConfigType conversion
             return;
         }
-        set(path, ((MySQLConfig) value).data);
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		MySQLConfig node = this.getParentObj(list);
+		Key key = list.last().getKey(node.getType());
+		((MySQLConfig) value).validate(node, key);
+		node.data.set(key, value);
     }
 
     public void remove(String path) {
