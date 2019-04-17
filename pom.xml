@@ -15,6 +15,8 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.version.minecraft>1.13.2-R0.1-SNAPSHOT</project.version.minecraft>
     <project.version.bungeecord>1.13-SNAPSHOT</project.version.bungeecord>
+    
+    <project.version.unei.configurationAPI>1.2</project.version.unei.configurationAPI>
 
     <manifest.built-by>UneiTeam</manifest.built-by>
     
@@ -278,7 +280,7 @@
   	<dependency>
   	  <groupId>me.unei</groupId>
   	  <artifactId>uneiconfiguration-api</artifactId>
-  	  <version>1.0.0-SNAPSHOT</version>
+  	  <version>${project.version.unei.configurationAPI}</version>
   	  <scope>compile</scope>
   	</dependency>
     <dependency>
