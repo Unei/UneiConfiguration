@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark a method that it will never throw an exception (even runtime).
+ * Mark a method that it will never throw an exception (even at runtime).
  * <p>
  * <b>JVM or reflection exception does not applies here</b>
  */

@@ -20,6 +20,7 @@ import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.formats.Storage;
 import me.unei.configuration.formats.StorageType;
 import me.unei.configuration.formats.Storage.Key;
+import me.unei.configuration.formats.StorageConverter;
 import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
@@ -87,7 +88,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		if (this.parent != null && this.parent.data != null) {
 			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
 				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
-				Storage<Object> tmp = Storage.Converter.allocateBest(me, null, null);
+				Storage<Object> tmp = StorageConverter.allocateBest(me, null, null);
 				if (tmp != null) {
 					this.data = tmp;
 				} else {
@@ -195,7 +196,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
 			}
 			Object result = ois.readObject();
-			this.data = Storage.Converter.allocateBest(result, null, () -> new StringHashMap<>());
+			this.data = StorageConverter.allocateBest(result, null, () -> new StringHashMap<>());
 			if (ois.readInt() != 0xfeebdaed) {
 				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
 				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");

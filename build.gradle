@@ -12,7 +12,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'me.unei'
-version = '1.2.7-RELEASE'
+version = '1.2.8-RELEASE'
 archivesBaseName = 'UneiConfiguration'
 
 sourceCompatibility = 1.8
@@ -63,16 +63,17 @@ repositories {
 }
 
 dependencies {
+	compile 'me.unei:uneiconfiguration-api:1.0.0-SNAPSHOT'
 	compile 'com.google.code.gson:gson:2.8.5'
 	compile 'org.yaml:snakeyaml:1.21'
 	
-	compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT', {
+	compileOnly 'org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT', {
         exclude(group: 'junit')
     }
-	compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT', {
+	compileOnly 'org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT', {
         exclude(group: 'junit')
     }
-	compileOnly 'net.md-5:bungeecord-api:1.12-SNAPSHOT'
+	compileOnly 'net.md-5:bungeecord-api:1.13-SNAPSHOT'
 	
 	
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.1'

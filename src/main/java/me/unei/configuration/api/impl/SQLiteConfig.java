@@ -33,6 +33,7 @@ import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.formats.Storage;
 import me.unei.configuration.formats.Storage.Key;
+import me.unei.configuration.formats.StorageConverter;
 import me.unei.configuration.formats.StorageType;
 import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
@@ -470,7 +471,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (this.parent != null && this.parent.data != null) {
 			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
 				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
-				Storage<Object> tmp = Storage.Converter.allocateBest(me, null, null);
+				Storage<Object> tmp = StorageConverter.allocateBest(me, null, null);
 				if (tmp != null) {
 					this.data = tmp;
 				} else {
