@@ -1,5 +1,6 @@
 package me.unei.configuration.bungee;
 
+import me.unei.configuration.plugin.IBasicPlugin;
 import me.unei.configuration.plugin.IPlugin;
 import me.unei.configuration.plugin.UneiConfiguration;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -33,7 +34,7 @@ public final class BungeePlugin extends Plugin implements IPlugin {
         return this.getResourceAsStream(path);
     }
 
-    public IPlugin.Type getType() {
-        return IPlugin.Type.BUNGEECORD;
+    public IBasicPlugin.Type getType() {
+        return IBasicPlugin.Type.BUNGEECORD;
     }
 }

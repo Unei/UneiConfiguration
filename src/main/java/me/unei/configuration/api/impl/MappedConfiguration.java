@@ -7,10 +7,11 @@ import java.util.Set;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.fs.IPathComponent;
+import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
+import me.unei.configuration.api.fs.PathComponentType;
 import me.unei.configuration.api.fs.PathNavigator;
-import me.unei.configuration.api.fs.PathComponent.PathComponentType;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.InfiniteSizeList;
 import me.unei.configuration.formats.Storage;
 import me.unei.configuration.formats.Storage.Key;
@@ -104,7 +105,7 @@ abstract class MappedConfiguration<A extends MappedConfiguration<A>> extends Unt
 		return ((this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED);
 	}
 	
-	public static Key getFor(StorageType indice, PathComponent comp) {
+	public static Key getFor(StorageType indice, IPathComponent comp) {
 		if (comp.getType() == PathComponentType.INDEX) {
 			if (indice == StorageType.MAP) {
 				return new Key(comp.getValue());

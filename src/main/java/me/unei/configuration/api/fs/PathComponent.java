@@ -3,8 +3,8 @@ package me.unei.configuration.api.fs;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.StorageType;
+import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.Storage.Key;
 
 /**
@@ -12,7 +12,7 @@ import me.unei.configuration.formats.Storage.Key;
  * 
  * <p>could be Root, Parent, Child (named) or Index (indexed).</p>
  */
-public final class PathComponent {
+public final class PathComponent implements IPathComponent {
 	
 	private final PathComponentType type;
 	private final String value;
@@ -155,7 +155,7 @@ public final class PathComponent {
 	/**
 	 * Array of {@link PathComponent} used to construct a full path.
 	 */
-	public static class PathComponentsList extends ArrayList<PathComponent> {
+	public static class PathComponentsList extends ArrayList<IPathComponent> implements IPathComponentsList {
 		
 		private static final long serialVersionUID = 7055238860386957873L;
 		
@@ -190,11 +190,11 @@ public final class PathComponent {
 		 * @throws NullPointerException If element is null.
 		 */
 		@Override
-		public boolean add(PathComponent element) {
+		public boolean add(IPathComponent element) {
 			if (element == null) {
 				throw new NullPointerException("element must not be null.");
 			}
-			return super.add(element);
+			return super.add((PathComponent) element);
 		}
 		
 		/**
@@ -262,7 +262,7 @@ public final class PathComponent {
 		 * 
 		 * @return Returns the last component.
 		 */
-		public PathComponent last() {
+		public IPathComponent last() {
 			if (this.isEmpty()) {
 				return null;
 			}
@@ -275,7 +275,7 @@ public final class PathComponent {
 		 * @return Returns the last component or null.
 		 */
 		public String lastChild() {
-			PathComponent last = this.last();
+			IPathComponent last = this.last();
 			if (last != null) {
 				return last.getValue();
 			}
@@ -288,7 +288,7 @@ public final class PathComponent {
 		 * @return Returns the last component or -1.
 		 */
 		public int lastIndex() {
-			PathComponent last = this.last();
+			IPathComponent last = this.last();
 			if (last != null) {
 				return last.getIndex();
 			}
@@ -300,7 +300,7 @@ public final class PathComponent {
 		 * 
 		 * @return Returns the removed component.
 		 */
-		public PathComponent removeLast() {
+		public IPathComponent removeLast() {
 			if (this.isEmpty()) {
 				return null;
 			}
@@ -318,7 +318,7 @@ public final class PathComponent {
 		 */
 		@Deprecated
 		public void cleanPath() {
-			ListIterator<PathComponent> it = this.listIterator();
+			ListIterator<IPathComponent> it = this.listIterator();
 			int lr = this.lastIndexOf(new PathComponent(PathComponentType.ROOT, ""));
 			for (int i = 0; i < lr && it.hasNext(); i++) {
 				it.next();
@@ -326,10 +326,10 @@ public final class PathComponent {
 			}
 			it = this.listIterator();
 			while (it.hasNext()) {
-				PathComponent curr = it.next();
+				IPathComponent curr = it.next();
 				if (curr.getType().equals(PathComponentType.PARENT)) {
 					if (it.hasPrevious()) {
-						PathComponent prev = it.previous();
+						IPathComponent prev = it.previous();
 						if (prev.getType().equals(PathComponentType.CHILD)) {
 							it.remove();
 							it.next();
@@ -346,12 +346,12 @@ public final class PathComponent {
 		@Override
 		public String toString() { // FIXME: Check if the path separator is added correctly.
 			StringBuilder pathBuilder = new StringBuilder();
-			for (PathComponent component : this) {
-				if (component.type == PathComponentType.INDEX) {
+			for (IPathComponent component : this) {
+				if (component.getType() == PathComponentType.INDEX) {
 					pathBuilder.append(this.symType.indexerPrefix);
 				}
 				pathBuilder.append(PathComponent.escapeComponent(component.getValue(), this.symType));
-				if (component.type == PathComponentType.INDEX) {
+				if (component.getType() == PathComponentType.INDEX) {
 					pathBuilder.append(this.symType.indexerSuffix);
 				}
 			}
@@ -367,31 +367,5 @@ public final class PathComponent {
 			copy.symType = this.symType;
 			return copy;
 		}
-	}
-	
-	/**
-	 * Types of path component.
-	 */
-	public static enum PathComponentType {
-		/**
-		 * A root component (the first '/' with Unix).
-		 */
-		ROOT,
-		/**
-		 * A parent component ('..' with Unix).
-		 */
-		PARENT,
-		/**
-		 * A child component ('/name/' with Unix).
-		 * 
-		 * <p>A child is always accompanied with a name.</p>
-		 */
-		CHILD,
-		/**
-		 * A table element component ('[index]').
-		 * 
-		 * <p>An index is always accompanied with an integer.</p>
-		 */
-		INDEX;
 	}
 }

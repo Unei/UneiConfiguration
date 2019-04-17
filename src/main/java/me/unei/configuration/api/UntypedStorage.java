@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.unei.configuration.SavedFile;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 
 public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Configuration<T> {
 

@@ -2,6 +2,7 @@ package me.unei.configuration.bukkit;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.unei.configuration.plugin.IBasicPlugin;
 import me.unei.configuration.plugin.IPlugin;
 import me.unei.configuration.plugin.UneiConfiguration;
 
@@ -28,7 +29,7 @@ public final class BukkitPlugin extends JavaPlugin implements IPlugin {
         plugin.onDisable();
     }
     
-    public IPlugin.Type getType() {
-        return IPlugin.Type.BUKKIT;
+    public IBasicPlugin.Type getType() {
+        return IBasicPlugin.Type.BUKKIT;
     }
 }

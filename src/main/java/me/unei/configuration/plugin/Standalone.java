@@ -87,16 +87,16 @@ public final class Standalone implements IPlugin
 	}
 	
 	@Override
-	public IPlugin.Type getType()
+	public IBasicPlugin.Type getType()
 	{
-		return IPlugin.Type.STANDALONE;
+		return IBasicPlugin.Type.STANDALONE;
 	}
 	
 	private static final class MyLogger extends Logger
 	{
 		private String myName;
 		
-		public MyLogger(Class<? extends IPlugin> plugin)
+		public MyLogger(Class<? extends IBasicPlugin> plugin)
 		{
 			super(plugin.getCanonicalName(), null);
 			this.myName = "[UneiConfiguration] ";

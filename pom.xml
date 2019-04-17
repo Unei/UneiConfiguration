@@ -217,6 +217,12 @@
   </repositories>
 
   <dependencies>
+  	<dependency>
+  	  <groupId>me.unei</groupId>
+  	  <artifactId>uneiconfiguration-api</artifactId>
+  	  <version>1.0.0-SNAPSHOT</version>
+  	  <scope>compile</scope>
+  	</dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>

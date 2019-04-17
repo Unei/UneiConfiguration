@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
-public interface IPlugin {
+public interface IPlugin extends IBasicPlugin {
 
     /**
      * Called when the plugin has just been loaded, after the plugin is loaded but before it has been enabled.
@@ -69,7 +69,7 @@ public interface IPlugin {
      *
      * @return the type of plugin this is
      */
-    public IPlugin.Type getType();
+    public IBasicPlugin.Type getType();
 
     /**
      * Plugin types.

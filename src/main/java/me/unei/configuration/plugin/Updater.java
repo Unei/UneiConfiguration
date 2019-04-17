@@ -21,7 +21,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-public class Updater {
+public class Updater implements IUpdater {
 
 	public static final String MAVEN_GROUPID = "me.unei";
 	public static final String POM_RESOURCE_PATH = "META-INF/maven/<groupId>/<artifactId>/pom.properties";
@@ -69,10 +69,10 @@ public class Updater {
 		return cachedUpdaters.get(plugin);
 	}
 	
-	public void checkVersionAsync(final Updater.Callback callback) {
+	public void checkVersionAsync(final IUpdater.ICallback callback) {
 		Thread thread = new Thread("Version Checker Thread") {
 			public void run() {
-				Updater.Result result = Updater.this.checkVersion();
+				IUpdater.Result result = Updater.this.checkVersion();
 
 				if (callback != null) callback.run(Updater.this, result);
 				else new Callback() {}.run(Updater.this, result);
@@ -81,7 +81,7 @@ public class Updater {
 		thread.start();
 	}
 	
-	public Updater.Result checkVersion() {
+	public IUpdater.Result checkVersion() {
 		this.plugin.getLogger().fine("Checking plugin version...");
 
         String latestVersion = this.getLatestVersion();
@@ -90,9 +90,9 @@ public class Updater {
         this.plugin.getLogger().fine("Finished checking latest version for " + this.getClassName() + ":");
 		this.plugin.getLogger().fine("Current version is " + currentVersion + ". Latest version is " + latestVersion + ".");
 
-        if (latestVersion == null || currentVersion == null) return Updater.Result.FAILED;
-		if (latestVersion.equalsIgnoreCase(currentVersion)) return Updater.Result.NO_UPDATE;
-		return Updater.Result.UPDATE_AVAILABLE;
+        if (latestVersion == null || currentVersion == null) return IUpdater.Result.FAILED;
+		if (latestVersion.equalsIgnoreCase(currentVersion)) return IUpdater.Result.NO_UPDATE;
+		return IUpdater.Result.UPDATE_AVAILABLE;
 	}
 	
 	public String getCurrentVersion() {
@@ -181,9 +181,10 @@ public class Updater {
 		public abstract void run(boolean res);
 	}
 	
-	public static abstract class Callback {
+	public static abstract class Callback implements IUpdater.ICallback {
 
-		public void run(Updater updater, Updater.Result result) {
+		public void run(IUpdater iUpdater, IUpdater.Result result) {
+			Updater updater = (Updater) iUpdater;
 			switch (result) {
 				case NO_UPDATE:
 					updater.plugin.getLogger().fine("You are using the latest version of " + updater.getClassName() + ": v" + updater.getCurrentVersion() + "!");

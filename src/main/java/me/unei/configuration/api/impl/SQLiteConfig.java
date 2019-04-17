@@ -26,9 +26,10 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.ISQLiteConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.fs.IPathComponent;
+import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLiteConfiguration {
@@ -457,7 +458,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 
         PathComponent.PathComponentsList path = fullPath.clone();
         path = PathNavigator.cleanPath(path);
-        for (PathComponent component : path) {
+        for (IPathComponent component : path) {
             switch(component.getType()) {
                 case ROOT:
                     currentNode = currentNode.getRoot();

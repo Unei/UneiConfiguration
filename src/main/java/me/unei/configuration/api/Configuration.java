@@ -6,7 +6,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
-import me.unei.configuration.api.fs.PathNavigator.PathSymbolsType;
+import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.StorageType;
 
 

@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
+import me.unei.configuration.api.ConfigurationsImpl;
+import me.unei.configuration.api.fs.FSUtilsImpl;
 import me.unei.configuration.reflection.NMSReflection;
 
-public final class UneiConfiguration implements IPlugin {
+public final class UneiConfiguration extends me.unei.configuration.UneiConfiguration implements IPlugin {
 
 	/**
 	 * NEVER USE THIS.
@@ -21,6 +23,9 @@ public final class UneiConfiguration implements IPlugin {
      * @param plugin The real plugin instance.
      */
     public UneiConfiguration(IPlugin plugin) {
+    	setInstance();
+    	ConfigurationsImpl.init();
+    	FSUtilsImpl.init();
         this.source = plugin;
         NMSReflection.doNothing();
         UneiConfiguration.Instance = this;
@@ -69,7 +74,7 @@ public final class UneiConfiguration implements IPlugin {
     }
 
     @Override
-	public IPlugin.Type getType() {
+	public IBasicPlugin.Type getType() {
         return source.getType();
     }
     
@@ -85,27 +90,38 @@ public final class UneiConfiguration implements IPlugin {
         return UneiConfiguration.Instance;
     }
     
-    public static Updater getUpdater() {
+    public Updater getUpdater() {
+    	return Updater.getUpdater(this);
+    }
+    
+    public void checkVerionAsync(IUpdater.ICallback callback) {
+    	getUpdater().checkVersionAsync(callback);
+    }
+    
+    public IUpdater.Result checkVersion() {
+    	return getUpdater().checkVersion();
+    }
+    
+    public static Updater getTheUpdater() {
     	return Updater.getUpdater(UneiConfiguration.getInstance());
     }
     
-    public static void checkVersionAsync(Updater.Callback callback) {
-    	UneiConfiguration.getUpdater().checkVersionAsync(callback);
+    public static void checkMyVersionAsync(Updater.Callback callback) {
+    	UneiConfiguration.getTheUpdater().checkVersionAsync(callback);
     }
     
-    @SuppressWarnings("deprecation")
-	@Deprecated
-    public static void checkVersionAsync(final Updater.UpdateCheckCallback callback) {
-    	UneiConfiguration.getUpdater().checkVersionAsync(new Updater.Callback() {
+    @Deprecated
+    public static void checkMyVersionAsync(final Updater.UpdateCheckCallback callback) {
+    	UneiConfiguration.getTheUpdater().checkVersionAsync(new Updater.Callback() {
     		@Override
-			public void run(Updater up, Updater.Result res)
+			public void run(IUpdater up, IUpdater.Result res)
     		{
-    			callback.run(res == Updater.Result.UPDATE_AVAILABLE);
+    			callback.run(res == IUpdater.Result.UPDATE_AVAILABLE);
 			}
 		});
     }
     
-    public static Updater.Result checkVersion() {
-    	return UneiConfiguration.getUpdater().checkVersion();
+    public static IUpdater.Result checkMyVersion() {
+    	return UneiConfiguration.getTheUpdater().checkVersion();
     }
 }

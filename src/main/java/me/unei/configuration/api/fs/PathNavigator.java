@@ -2,7 +2,6 @@ package me.unei.configuration.api.fs;
 
 import java.util.function.Consumer;
 
-import me.unei.configuration.api.fs.PathComponent.PathComponentType;
 import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
 
 /**
@@ -10,9 +9,9 @@ import me.unei.configuration.api.fs.PathComponent.PathComponentsList;
  *
  * @param <T> The section type.
  */
-public final class PathNavigator<T extends NavigableFile> {
+public final class PathNavigator<T extends NavigableFile> implements IPathNavigator<T> {
 	
-	private PathComponentsList currentPath;
+	private IPathComponent.IPathComponentsList currentPath;
 	private T currentNode;
 	
 	/**
@@ -120,14 +119,14 @@ public final class PathNavigator<T extends NavigableFile> {
 	 * 
 	 * @throws NullPointerException If the `action` parameter is null.
 	 */
-	public void followAndApply(PathComponentsList path, Consumer<T> action) {
+	public void followAndApply(IPathComponent.IPathComponentsList path, Consumer<T> action) {
 		if (action == null) {
 			throw new NullPointerException("action must not be null.");
 		}
 		
 		action.accept(this.currentNode);
 		
-		for (PathComponent component : path) {
+		for (IPathComponent component : path) {
 			switch (component.getType()) {
 				case ROOT:
 					this.goToRoot();
@@ -228,9 +227,9 @@ public final class PathNavigator<T extends NavigableFile> {
 	 * @param path The path to clean.
 	 * @return Returns the new {@link PathComponentsList} after the cleaning.
 	 */
-	public static PathComponentsList cleanPath(PathComponentsList path) {
+	public static PathComponentsList cleanPath(IPathComponent.IPathComponentsList path) {
 		PathComponentsList cleanPath = new PathComponentsList(path.getSymbolsType());
-		for (PathComponent component : path) {
+		for (IPathComponent component : path) {
 			switch (component.getType()) {
 				case ROOT:
 					cleanPath.clear();
@@ -264,12 +263,12 @@ public final class PathNavigator<T extends NavigableFile> {
 	 * 
 	 * @see #navigate(String, PathSymbolsType)
 	 */
-	public boolean followPath(PathComponentsList path) {
+	public boolean followPath(IPathComponent.IPathComponentsList path) {
 		if (path == null) {
 			return false;
 		}
 		
-		for (PathComponent component : path) {
+		for (IPathComponent component : path) {
 			if (component == null) {
 				return false;
 			}
@@ -389,74 +388,5 @@ public final class PathNavigator<T extends NavigableFile> {
 			return false;
 		}
 		return path.charAt(index) == type.indexerSuffix;
-	}
-	
-	/**
-	 * Represents the different types of symbols used in string paths.
-	 */
-	public static enum PathSymbolsType {
-		/**
-		 * The default Bukkit path symbols type.
-		 * 
-		 * <ul>
-		 * <li>Escape char:    '\'</li>
-		 * <li>Separator char: '.'</li>
-		 * <li>Root char:      '.'</li>
-		 * <li>Parent string:  '..'</li>
-		 * <li>Index prefix:    '['</li>
-		 * <li>Index suffix:    ']'</li>
-		 * </ul>
-		 */
-		BUKKIT('\\', '.', '.', "..", '[', ']'),
-		/**
-		 * The default Unix path symbols type.
-		 * 
-		 * <ul>
-		 * <li>Escape char:    '\'</li>
-		 * <li>Separator char: '/'</li>
-		 * <li>Root char:      '/'</li>
-		 * <li>Parent string:  '..'</li>
-		 * <li>Index prefix:    '['</li>
-		 * <li>Index suffix:    ']'</li>
-		 * </ul>
-		 */
-		UNIX('\\', '/', '/', "..", '[', ']');
-		
-		public final char escape;
-		public final char separator;
-		public final char root;
-		public final String parent;
-		public final char indexerPrefix;
-		public final char indexerSuffix;
-		
-		private PathSymbolsType(char p_escape, char p_separator, char p_root, String p_parent, char idxPre, char idxSuf) {
-			this.escape = p_escape;
-			this.separator = p_separator;
-			this.root = p_root;
-			this.parent = p_parent;
-			this.indexerPrefix = idxPre;
-			this.indexerSuffix = idxSuf;
-		}
-		
-		/**
-		 * Try to detect the type of symbols used in the given 'apath'.
-		 * 
-		 * @param apath A path to test.
-		 * @return Returns a PathSymbolsType detected in the path.
-		 * 
-		 * @deprecated This won't detect the type for sure and can lead to data-reading errors.
-		 */
-		@Deprecated
-		public static PathSymbolsType tryDetectType(String apath) {
-			int li = apath.lastIndexOf(UNIX.parent);
-			if (li >= 0) {
-				if (li > 0 && apath.charAt(li - 1) == UNIX.separator) {
-					return PathSymbolsType.UNIX;
-				} else if ((li + 2) < apath.length() && apath.charAt(li + 2) == UNIX.separator) {
-					return PathSymbolsType.UNIX;
-				}
-			}
-			return PathSymbolsType.BUKKIT;
-		}
 	}
 }
