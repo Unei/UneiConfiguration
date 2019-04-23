@@ -45,6 +45,16 @@
     <system>BukkitDev</system>
     <url>https://dev.bukkit.org/projects/uneiconfiguration/issues</url>
   </issueManagement>
+  
+  <reporting>
+  	<plugins>
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-jxr-plugin</artifactId>
+         <version>2.3</version>
+      </plugin>
+  	</plugins>
+  </reporting>
 
   <build>
     <finalName>${project.name}-${project.version}</finalName>
@@ -165,10 +175,25 @@
   		<plugin>
   			<groupId>org.apache.maven.plugins</groupId>
   			<artifactId>maven-surefire-plugin</artifactId>
-  			<version>2.22.1</version>
+  			<version>3.0.0-M3</version>
   			<configuration>
   				<testFailureIgnore>true</testFailureIgnore>
+  				<reportFormat>plain</reportFormat>
   			</configuration>
+  		</plugin>
+  		<plugin>
+  			<groupId>org.apache.maven.plugins</groupId>
+  			<artifactId>maven-surefire-report-plugin</artifactId>
+  			<version>3.0.0-M3</version>
+  			<executions>
+  				<execution>
+  					<id>generate-report</id>
+  					<phase>test</phase>
+				    <goals>
+				      <goal>report-only</goal>
+				    </goals>
+  				</execution>
+  			</executions>
   		</plugin>
 
       <plugin>
@@ -188,8 +213,18 @@
       	      <artifactSet>
       	      	<includes>
       	          <include>me.unei:uneiconfiguration-api:*</include>
+      	          <include>org.bstats:*</include>
       	      	</includes>
       	      </artifactSet>
+      	      <relocations>
+      	      	<relocation>
+      	      	  <excludes>
+      	      	    <exclude>org.bstats.sponge.*</exclude>
+      	      	  </excludes>
+      	      	  <pattern>org.bstats</pattern>
+      	      	  <shadedPattern>me.unei.metrics</shadedPattern>
+      	      	</relocation>
+      	      </relocations>
       	    </configuration>
       	  </execution>
       	  <execution>
@@ -206,6 +241,7 @@
       	      <artifactSet>
       	        <excludes>
       	          <exclude>me.unei:uneiconfiguration-api:*</exclude>
+      	          <exclude>org.bstats:*</exclude>
       	        </excludes>
       	      </artifactSet>
       	    </configuration>
@@ -273,7 +309,11 @@
 	<repository>
 	  <id>spongepowered-repo</id>
 	  <url>https://repo.spongepowered.org/maven</url>
-	</repository>
+    </repository>
+    <repository>
+      <id>CodeMC</id>
+      <url>https://repo.codemc.org/repository/maven-public</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -293,6 +333,24 @@
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>1.21</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bstats</groupId>
+      <artifactId>bstats-bukkit-lite</artifactId>
+      <version>1.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bstats</groupId>
+      <artifactId>bstats-bungeecord-lite</artifactId>
+      <version>1.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bstats</groupId>
+      <artifactId>bstats-sponge-lite</artifactId>
+      <version>1.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -85,6 +85,15 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		this.updateNode();
 	}
 
+	private SQLiteConfig(SQLiteConfig p_parent, int p_nodeIndex) {
+		super(p_parent, p_nodeIndex);
+
+		this.tableName = this.parent.tableName;
+		// this.connection = this.parent.connection;
+
+		this.updateNode();
+	}
+
 	private void subinit() {
 		if (this.parent != null) {
 			this.parent.init();
@@ -145,6 +154,11 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		}
 		if (name == null || name.isEmpty()) {
 			return this;
+		}
+		SQLiteConfig child = super.findInChildrens(new Key(name));
+		if (child != null) {
+			child.parent = this;
+			return child;
 		}
 		return new SQLiteConfig(this, name);
 	}
@@ -419,6 +433,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			this.parent.reconnect();
 			return;
 		}
+		
+		if (this.file.getFile() == null) {
+			this.data = new StringHashMap<>();
+			return;
+		}
+		
 		UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
 		try {
 			if (this.connection != null) {

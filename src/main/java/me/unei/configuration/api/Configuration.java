@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.unei.configuration.SavedFile;
@@ -13,6 +14,7 @@ import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.formats.Storage.Key;
+import me.unei.configuration.formats.Storage;
 import me.unei.configuration.formats.StorageType;
 
 public abstract class Configuration<T extends Configuration<T>> implements IConfiguration
@@ -82,6 +84,12 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.nodeAtomicIndex = new AtomicInteger(index);
 	}
 	
+	@Override
+	public IConfiguration getAt(int index)
+	{
+		return getChild(Integer.toString(index));
+	}
+	
 	protected final void init()
 	{
 		throwInvalid();
@@ -113,6 +121,25 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.nodeAtomicIndex = null;
 		this.symType = null;
 		this.file = null;
+	}
+	
+	protected final T findInChildrens(final Storage.Key key)
+	{
+		Optional<WeakReference<T>> res = this.childrens.parallelStream().filter(elem -> {
+			if (elem.get() != null) {
+				if (key.getType() == StorageType.MAP) {
+					return elem.get().getName().equalsIgnoreCase(key.getKeyString());
+				} else {
+					return elem.get().getIndex() == key.getKeyInt();
+				}
+			}
+			return false;
+		}).findAny();
+		if (res.isPresent())
+		{
+			return res.get().get();
+		}
+		return null;
 	}
 	
 	protected final void validate(T newParent, int index)
@@ -232,12 +259,14 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	
 	protected abstract void updateFromParent();
 	//
-	
+
+	@Override
 	public final SavedFile getFile()
 	{
 		return this.file;
 	}
-	
+
+	@Override
 	public final String getFileName()
 	{
 		if (this.parent != null)
@@ -251,9 +280,8 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	{
 		return this.symType;
 	}
-	
-	public abstract StorageType getType();
-	
+
+	@Override
 	public String getName()
 	{
 		return this.nodeName;
@@ -263,18 +291,20 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 	{
 		return (this.nodeAtomicIndex != null) ? this.nodeAtomicIndex.get() : -1;
 	}
-	
+
+	@Override
 	public final String getCurrentPath()
 	{
 		return this.fullPath.toString();
 	}
-	
+
+	@Override
 	public final PathComponent.PathComponentsList getRealListPath()
 	{
 		return fullPath.clone();
 	}
 	
-	
+	@Override
 	public final boolean canAccess()
 	{
 		if (!this.isValid())
@@ -287,7 +317,8 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		}
 		return this.file.canAccess();
 	}
-	
+
+	@Override
 	public final void lock()
 	{
 		if (this.isValid())
@@ -302,8 +333,8 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 			}
 		}
 	}
-	
-	
+
+	@Override
 	public Configuration<T> getRoot()
 	{
 		if (this.parent != null)
@@ -312,13 +343,14 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		}
 		return this;
 	}
-	
+
+	@Override
 	public T getParent()
 	{
 		return this.parent;
 	}
 	
-	
+	@Override
 	public T getSubSection(String path)
 	{
 		return this.getSubSection(PathNavigator.parsePath(path, symType));

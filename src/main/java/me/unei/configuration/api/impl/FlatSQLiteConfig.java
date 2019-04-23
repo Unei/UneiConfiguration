@@ -254,6 +254,9 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
         if (!this.canAccess()) {
             return;
         }
+		if (this.file.getFile() == null) {
+			return;
+		}
         UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
         try {
             if (this.connection != null) {

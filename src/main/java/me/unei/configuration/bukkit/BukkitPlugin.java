@@ -21,6 +21,9 @@ public final class BukkitPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public void onEnable() {
+    	@SuppressWarnings("unused")
+    	org.bstats.bukkit.MetricsLite metrics = new org.bstats.bukkit.MetricsLite(this);
+    	
         plugin.onEnable();
     }
 

@@ -109,6 +109,12 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         this.updateNode();
     }
 
+    private YAMLConfig(YAMLConfig p_parent, int p_nodeIndex) {
+        super(p_parent, p_nodeIndex);
+
+        this.updateNode();
+    }
+
     public static YAMLConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
         return YAMLConfig.getForPath(new YAMLConfig(folder, fileName, symType), path);
     }
@@ -142,6 +148,11 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         if (name == null || name.isEmpty()) {
             return this;
         }
+        YAMLConfig child = super.findInChildrens(new Key(name));
+		if (child != null) {
+			child.parent = this;
+			return child;
+		}
         return new YAMLConfig(this, name);
     }
 
@@ -214,6 +225,10 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
             //this.synchronize();
             return;
         }
+		if (this.file.getFile() == null) {
+			this.nodeData = new StringHashMap<>();
+			return;
+		}
         if (!this.file.getFile().exists()) {
             this.save();
             return;

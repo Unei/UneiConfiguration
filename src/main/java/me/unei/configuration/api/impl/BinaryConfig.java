@@ -62,6 +62,12 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		
 		this.updateNode();
 	}
+	
+	public BinaryConfig(BinaryConfig parent, int index) {
+		super(parent, index);
+		
+		this.updateNode();
+	}
 
 	public static BinaryConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
 		return BinaryConfig.getForPath(new BinaryConfig(folder, fileName, symType), path);
@@ -112,6 +118,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		return (BinaryConfig) super.getRoot();
 	}
 	
+	@Override
 	public BinaryConfig getChild(String name) {
 		if (!this.canAccess()) {
 			return null;
@@ -119,7 +126,28 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		if (name == null || name.isEmpty()) {
 			return this;
 		}
+		BinaryConfig child = super.findInChildrens(new Key(name));
+		if (child != null) {
+			child.parent = this;
+			return child;
+		}
 		return new BinaryConfig(this, name);
+	}
+	
+	@Override
+	public BinaryConfig getAt(int index) {
+		if (!this.canAccess()) {
+			return null;
+		}
+		if (index < 0) {
+			return this;
+		}
+		BinaryConfig child = super.findInChildrens(new Key(index));
+		if (child != null) {
+			child.parent = this;
+			return child;
+		}
+		return new BinaryConfig(this, index);
 	}
 	
 	private BinaryConfig getParentObj(PathComponent.PathComponentsList path) {
@@ -181,6 +209,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			return;
 		}
 		if (this.file.getFile() == null) {
+			this.data = new StringHashMap<>();
 			return;
 		}
 		if (!this.file.getFile().exists()) {

@@ -78,6 +78,9 @@ public class PropertiesConfig extends UntypedFlatStorage<PropertiesConfig> imple
 		if (!this.canAccess()) {
 			return;
 		}
+		if (this.file.getFile() == null) {
+			return;
+		}
 		if (!this.file.getFile().exists()) {
 			this.save();
 			return;

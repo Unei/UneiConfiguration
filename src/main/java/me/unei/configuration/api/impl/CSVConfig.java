@@ -82,6 +82,9 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 		if (!this.canAccess()) {
 			return;
 		}
+		if (this.file.getFile() == null) {
+			return;
+		}
 		if (!this.file.getFile().exists()) {
 			this.save();
 			return;

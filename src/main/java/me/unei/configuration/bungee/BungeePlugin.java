@@ -22,6 +22,9 @@ public final class BungeePlugin extends Plugin implements IPlugin {
 
     @Override
     public void onEnable() {
+    	@SuppressWarnings("unused")
+		org.bstats.bungeecord.MetricsLite metrics = new org.bstats.bungeecord.MetricsLite(this);
+    	
         plugin.onEnable();
     }
 

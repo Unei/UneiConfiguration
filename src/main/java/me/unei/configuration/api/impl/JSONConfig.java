@@ -97,6 +97,12 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		this.updateNode();
 	}
 
+	private JSONConfig(JSONConfig p_parent, int p_nodeIndex) {
+		super(p_parent, p_nodeIndex);
+
+		this.updateNode();
+	}
+
 	public static JSONConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
 		return JSONConfig.getForPath(new JSONConfig(folder, fileName, symType), path);
 	}
@@ -124,6 +130,11 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		}
 		if (name == null || name.isEmpty()) {
 			return this;
+		}
+		JSONConfig child = super.findInChildrens(new Key(name));
+		if (child != null) {
+			child.parent = this;
+			return child;
 		}
 		return new JSONConfig(this, name);
 	}
@@ -221,6 +232,10 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		if (this.parent != null) {
 			this.parent.reload();
 			//this.synchronize();
+			return;
+		}
+		if (this.file.getFile() == null) {
+			this.data = new StringHashMap<>();
 			return;
 		}
 		if (!this.file.getFile().exists()) {

@@ -5,16 +5,12 @@ import java.io.InputStream;
 import java.util.logging.Logger;
 
 import me.unei.configuration.api.ConfigurationsImpl;
+import me.unei.configuration.api.ConfigurationsImpl.FlatConfigurationsImpl;
 import me.unei.configuration.api.fs.FSUtilsImpl;
 import me.unei.configuration.reflection.NMSReflection;
 
 public final class UneiConfiguration extends me.unei.configuration.UneiConfiguration implements IPlugin {
 
-	/**
-	 * NEVER USE THIS.
-	 */
-    private static UneiConfiguration Instance = null;
-    
     private final IPlugin source;
 
     /**
@@ -28,10 +24,10 @@ public final class UneiConfiguration extends me.unei.configuration.UneiConfigura
     	FSUtilsImpl.init();
         this.source = plugin;
         NMSReflection.doNothing();
-        UneiConfiguration.Instance = this;
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
 	public void onLoad() {
         this.getLogger().fine("Loading UNEI Configuration API...");
 
@@ -39,6 +35,12 @@ public final class UneiConfiguration extends me.unei.configuration.UneiConfigura
             this.getLogger().fine("NMS classes detected !");
             this.getLogger().fine("NMS Version = " + NMSReflection.getVersion());
         }
+        
+        getStaticHolder().setDropListener(cfg -> {
+        	ConfigurationsImpl.INSTANCE.clear();
+        	FlatConfigurationsImpl.INSTANCE.clear();
+        	FSUtilsImpl.INSTANCE.clear();
+        });
     }
 
     @Override
@@ -50,7 +52,7 @@ public final class UneiConfiguration extends me.unei.configuration.UneiConfigura
 	public void onDisable() {
         this.getLogger().fine("Disabling UNEI Configuration API...");
     }
-
+    
     @Override
 	public File getDataFolder() {
         return source.getDataFolder();
@@ -84,10 +86,10 @@ public final class UneiConfiguration extends me.unei.configuration.UneiConfigura
      * @return A not null instance of {@link UneiConfiguration}.
      */
     public static UneiConfiguration getInstance() {
-    	if (UneiConfiguration.Instance == null) {
+    	if (getStaticHolder().isEmpty()) {
     		new Standalone();
     	}
-        return UneiConfiguration.Instance;
+        return (UneiConfiguration) getStaticHolder().get();
     }
     
     public Updater getUpdater() {

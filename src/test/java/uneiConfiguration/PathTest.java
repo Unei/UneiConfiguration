@@ -21,11 +21,20 @@ import me.unei.configuration.api.fs.PathComponentType;
 @DisplayName("File system tests")
 public class PathTest
 {
+	@SuppressWarnings("deprecation")
 	@DisplayName("FileSystem tests Initialization")
 	@BeforeAll
 	public static void initAll()
 	{
+		if (System.getProperty("unei.test.patheval") == null)
+		{
+			System.setProperty("unei.test.patheval", Boolean.FALSE.toString());
+		}
+		
 		UneiConfiguration.tryInstanciate();
+		FSUtils.INSTANCE.backup();
+		
+		FSUtils.INSTANCE.callBuilder();
 	}
 	
 	@Test
@@ -249,7 +258,7 @@ public class PathTest
 	
 	@Test
 	@SuppressWarnings("deprecation")
-	@EnabledIfSystemProperty(named = "unei.test.patheval", matches = "([Tt]rue|[Yy]es)")
+	@EnabledIfSystemProperty(named = "unei.test.patheval", matches = "([Tt]rue|[Yy]es|1)")
 	public void testPathEval()
 	{
 		PathSymbolsType type = PathSymbolsType.tryDetectType(".te\\.st.na/me..in\\\\dex[12]..[56].hello..");
@@ -262,11 +271,13 @@ public class PathTest
 		
 		fail("Path type detection is not predictable and will most likely fail in production environment");
 	}
-	
+
 	@DisplayName("FileSystem tests clearing")
 	@AfterAll
+	@SuppressWarnings("deprecation")
 	public static void tearDownAll()
 	{
-		//
+		UneiConfiguration.INSTANCE.clear();
+		FSUtils.INSTANCE.clear();
 	}
 }

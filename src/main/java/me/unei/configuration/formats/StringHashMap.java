@@ -27,7 +27,7 @@ public class StringHashMap<V> extends HashMap<String, V> implements Storage<V>
     	super(m);
     }
 
-    @SuppressWarnings({ "unchecked", "unused" })
+    @SuppressWarnings({ "unchecked" })
 	public StringHashMap(Map<?, ?> m, int ignored) {
     	super((Map<String, V>) m);
     }

@@ -150,6 +150,11 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
         if (name == null || name.isEmpty()) {
             return this;
         }
+        MySQLConfig child = super.findInChildrens(new Key(name));
+		if (child != null) {
+			child.parent = this;
+			return child;
+		}
         return new MySQLConfig(this, name);
     }
 

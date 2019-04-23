@@ -90,7 +90,7 @@ public final class PathNavigator<T extends NavigableFile> implements IPathNaviga
 			return;
 		}
 		this.currentPath.appendIndex(index);
-		this.currentNode = getChecked(this.currentNode.getChild(Integer.toString(index)));
+		this.currentNode = getChecked(this.currentNode.getAt(index));
 	}
 	
 	/**

@@ -69,6 +69,12 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         this.updateNode();
     }
 
+    private NBTConfig(NBTConfig p_parent, int p_tagIndex) {
+        super(p_parent, p_tagIndex);
+        
+        this.updateNode();
+    }
+
     public static NBTConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
         return NBTConfig.getForPath(new NBTConfig(folder, fileName, symType), path);
     }
@@ -98,6 +104,11 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         if (name == null || name.isEmpty()) {
             return this;
         }
+        NBTConfig child = super.findInChildrens(new Key(name));
+		if (child != null) {
+			child.parent = this;
+			return child;
+		}
         return new NBTConfig(this, name);
     }
 	
@@ -222,6 +233,10 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
         if (this.parent != null) {
             this.parent.reload();
         } else {
+    		if (this.file.getFile() == null) {
+    			this.data = new StringHashMap<>();
+    			return;
+    		}
             if (!this.file.getFile().exists()) {
                 this.save();
                 return;
