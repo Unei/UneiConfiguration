@@ -6,10 +6,15 @@ import me.unei.configuration.plugin.UneiConfiguration;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class BungeePlugin extends Plugin implements IPlugin {
 
     private final UneiConfiguration plugin;
+    
+    private final Map<String, Integer> dependers = new HashMap<>();
+    private static final Integer ONE = Integer.valueOf(1);
 
     public BungeePlugin() {
         plugin = new UneiConfiguration(this);
@@ -22,8 +27,12 @@ public final class BungeePlugin extends Plugin implements IPlugin {
 
     @Override
     public void onEnable() {
-    	@SuppressWarnings("unused")
-		org.bstats.bungeecord.MetricsLite metrics = new org.bstats.bungeecord.MetricsLite(this);
+		org.bstats.bungeecord.Metrics metrics = new org.bstats.bungeecord.Metrics(this);
+		
+		metrics.addCustomChart(new org.bstats.bungeecord.Metrics.AdvancedPie("usingPlugins", () -> {
+			Map<String, Integer> result = BungeePlugin.this.dependers;
+			return result;
+		}));
     	
         plugin.onEnable();
     }
@@ -31,6 +40,11 @@ public final class BungeePlugin extends Plugin implements IPlugin {
     @Override
     public void onDisable() {
         plugin.onDisable();
+    }
+    
+    @Override
+    public void registerStatsPlName(String name) {
+    	this.dependers.put(name, BungeePlugin.ONE);
     }
 
     public InputStream getResource(String path) {

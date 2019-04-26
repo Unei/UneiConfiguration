@@ -337,19 +337,19 @@
     </dependency>
     <dependency>
       <groupId>org.bstats</groupId>
-      <artifactId>bstats-bukkit-lite</artifactId>
+      <artifactId>bstats-bukkit</artifactId>
       <version>1.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.bstats</groupId>
-      <artifactId>bstats-bungeecord-lite</artifactId>
+      <artifactId>bstats-bungeecord</artifactId>
       <version>1.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.bstats</groupId>
-      <artifactId>bstats-sponge-lite</artifactId>
+      <artifactId>bstats-sponge</artifactId>
       <version>1.4</version>
       <scope>compile</scope>
     </dependency>
