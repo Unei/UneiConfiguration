@@ -4,7 +4,7 @@
 
   <groupId>me.unei</groupId>
   <artifactId>uneiconfiguration</artifactId>
-  <version>1.2.8-RELEASE</version>
+  <version>1.2.9-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>UneiConfiguration</name>
@@ -13,10 +13,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <project.version.minecraft>1.13.2-R0.1-SNAPSHOT</project.version.minecraft>
-    <project.version.bungeecord>1.13-SNAPSHOT</project.version.bungeecord>
+    <project.version.minecraft>1.14-R0.1-SNAPSHOT</project.version.minecraft>
+    <project.version.bungeecord>1.14-SNAPSHOT</project.version.bungeecord>
     
-    <project.version.unei.configurationAPI>1.2</project.version.unei.configurationAPI>
+    <project.version.unei.configurationAPI>1.2.1-SNAPSHOT</project.version.unei.configurationAPI>
 
     <manifest.built-by>UneiTeam</manifest.built-by>
     
@@ -337,19 +337,19 @@
     </dependency>
     <dependency>
       <groupId>org.bstats</groupId>
-      <artifactId>bstats-bukkit-lite</artifactId>
+      <artifactId>bstats-bukkit</artifactId>
       <version>1.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.bstats</groupId>
-      <artifactId>bstats-bungeecord-lite</artifactId>
+      <artifactId>bstats-bungeecord</artifactId>
       <version>1.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.bstats</groupId>
-      <artifactId>bstats-sponge-lite</artifactId>
+      <artifactId>bstats-sponge</artifactId>
       <version>1.4</version>
       <scope>compile</scope>
     </dependency>

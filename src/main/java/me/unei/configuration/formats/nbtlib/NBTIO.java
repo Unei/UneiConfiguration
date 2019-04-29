@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import me.unei.configuration.api.format.TagType;
+
 public final class NBTIO {
 
     public static TagCompound readCompressed(InputStream input) throws IOException {
@@ -45,7 +47,7 @@ public final class NBTIO {
 
     private static void writeTag(Tag tag, DataOutput output) throws IOException {
         output.writeByte(tag.getTypeId());
-        if (tag.getTypeId() != Tag.TAG_End) {
+        if (tag.getType() != TagType.TAG_End) {
             output.writeUTF("");
             tag.write(output);
         }
@@ -54,7 +56,7 @@ public final class NBTIO {
     private static Tag readNBT(DataInput input) throws IOException {
         byte type = input.readByte();
 
-        if (type == Tag.TAG_End) {
+        if (type == TagType.TAG_End.getId()) {
             return new TagEnd();
         } else {
             input.readUTF();
@@ -64,7 +66,7 @@ public final class NBTIO {
                 base.read(input);
                 return base;
             } catch (IOException exception) {
-                throw new RuntimeException("Unable to load NBT data [UNNAMED TAG] (" + Byte.valueOf(type) + ")", exception);
+                throw new RuntimeException("Unable to load NBT data [UNNAMED TAG] (" + Byte.toString(type) + ")", exception);
             }
         }
     }

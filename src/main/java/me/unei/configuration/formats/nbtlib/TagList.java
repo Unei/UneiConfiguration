@@ -12,12 +12,13 @@ import org.apache.commons.lang.ArrayUtils;
 
 import me.unei.configuration.api.format.INBTList;
 import me.unei.configuration.api.format.INBTTag;
+import me.unei.configuration.api.format.TagType;
 import me.unei.configuration.reflection.NBTListReflection;
 
 public final class TagList extends Tag implements INBTList {
 
     private List<Tag> list = new ArrayList<Tag>();
-    private byte type = 0;
+    private TagType type = TagType.TAG_End;
 
     public TagList() {
     }
@@ -25,12 +26,12 @@ public final class TagList extends Tag implements INBTList {
     @Override
     void write(DataOutput output) throws IOException {
         if (this.list.isEmpty()) {
-            this.type = 0;
+            this.type = TagType.TAG_End;
         } else {
-            this.type = this.list.get(0).getTypeId();
+            this.type = this.list.get(0).getType();
         }
 
-        output.writeByte(this.type);
+        output.writeByte(this.type.getId());
         output.writeInt(this.list.size());
         for (int i = 0; i < this.list.size(); i++) {
             this.list.get(i).write(output);
@@ -39,10 +40,10 @@ public final class TagList extends Tag implements INBTList {
 
     @Override
     void read(DataInput input) throws IOException {
-        this.type = input.readByte();
+        this.type = TagType.getByTypeId(input.readByte());
         int size = input.readInt();
 
-        if (this.type == 0 && size > 0) {
+        if (this.type == TagType.TAG_End && size > 0) {
             throw new RuntimeException("Missing type on ListTag");
         }
         this.list = new ArrayList<Tag>(size);
@@ -66,13 +67,13 @@ public final class TagList extends Tag implements INBTList {
     			this.add(new TagString(value.toString()));
     		} else if (value instanceof Tag) {
     			this.add((Tag)value);
-    		} else if (value instanceof Iterable) {
-    			TagList subTag = new TagList();
-    			subTag.loadList((Iterable<?>)value);
-    			this.add(subTag);
     		} else if (value instanceof Map) {
     			TagCompound subTag = new TagCompound();
     			subTag.loadMap((Map<?, ?>)value);
+    			this.add(subTag);
+    		} else if (value instanceof Iterable) {
+    			TagList subTag = new TagList();
+    			subTag.loadList((Iterable<?>)value);
     			this.add(subTag);
     		} else if (value instanceof Void) {
     			this.add(new TagEnd());
@@ -149,7 +150,12 @@ public final class TagList extends Tag implements INBTList {
 
     @Override
     public byte getTypeId() {
-        return Tag.TAG_List;
+        return getType().getId();
+    }
+
+    @Override
+    public TagType getType() {
+        return TagType.TAG_List;
     }
 
     @Override
@@ -228,10 +234,10 @@ public final class TagList extends Tag implements INBTList {
     }
 
     public void add(Tag elem) {
-        if (elem.getTypeId() != Tag.TAG_End) {
-            if (this.type == 0) {
-                this.type = elem.getTypeId();
-            } else if (this.type != elem.getTypeId()) {
+        if (elem.getType() != TagType.TAG_End) {
+            if (this.type == TagType.TAG_End) {
+                this.type = elem.getType();
+            } else if (this.type != elem.getType()) {
                 return;
             }
 
@@ -245,11 +251,11 @@ public final class TagList extends Tag implements INBTList {
     }
 
     public void set(int idx, Tag elem) {
-        if (elem.getTypeId() != Tag.TAG_End) {
+        if (elem.getType() != TagType.TAG_End) {
             if (idx >= 0 && idx < this.list.size()) {
-                if (this.type == 0) {
-                    this.type = elem.getTypeId();
-                } else if (this.type != elem.getTypeId()) {
+                if (this.type == TagType.TAG_End) {
+                    this.type = elem.getType();
+                } else if (this.type != elem.getType()) {
                     return;
                 }
 
@@ -275,17 +281,34 @@ public final class TagList extends Tag implements INBTList {
 
     @Override
     public byte getTypeOf(int index) {
+        return getTypeOfTag(index).getId();
+    }
+
+    public TagType getTypeOfTag(int index) {
         Tag t = this.list.get(index);
-        return (t != null? t.getTypeId() : Tag.TAG_End);
+        return (t != null? t.getType() : TagType.TAG_End);
     }
 
     public boolean hasKeyOfType(int index, byte type) {
-        byte other = this.getTypeOf(index);
+    	TagType other = this.getTypeOfTag(index);
+        if (other.getId() == type) {
+            return true;
+        }
+        if (type == TagType.Number_TAG.getId()) {
+            if (other.isNumberTag()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasKeyOfType(int index, TagType type) {
+    	TagType other = this.getTypeOfTag(index);
         if (other == type) {
             return true;
         }
-        if (type == Tag.Number_TAG) {
-            if (other >= Tag.TAG_Byte && other <= Tag.TAG_Double) {
+        if (type == TagType.Number_TAG) {
+            if (other.isNumberTag()) {
                 return true;
             }
         }
@@ -295,7 +318,7 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public byte getByte(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Byte) ? 0 : ((TagByte) this.list.get(index)).getValue();
+            return !this.hasKeyOfType(index, TagType.TAG_Byte) ? 0 : ((TagByte) this.list.get(index)).getValue();
         } catch (ClassCastException exception) {
             return 0;
         }
@@ -304,7 +327,7 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public short getShort(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Short)? 0 : ((TagShort) this.list.get(index)).getValue();
+            return !this.hasKeyOfType(index, TagType.TAG_Short)? 0 : ((TagShort) this.list.get(index)).getValue();
         } catch (ClassCastException exception) {
             return 0;
         }
@@ -313,7 +336,7 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public int getInt(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Int)? 0 : ((TagInt) this.list.get(index)).getValue();
+            return !this.hasKeyOfType(index, TagType.TAG_Int)? 0 : ((TagInt) this.list.get(index)).getValue();
         } catch (ClassCastException exception) {
             return 0;
         }
@@ -322,7 +345,7 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public long getLong(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Long)? 0L : ((TagLong) this.list.get(index)).getValue();
+            return !this.hasKeyOfType(index, TagType.TAG_Long)? 0L : ((TagLong) this.list.get(index)).getValue();
         } catch (ClassCastException exception) {
             return 0L;
         }
@@ -331,7 +354,7 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public float getFloat(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Float)? 0.0F : ((TagFloat) this.list.get(index)).getValue();
+            return !this.hasKeyOfType(index, TagType.TAG_Float)? 0.0F : ((TagFloat) this.list.get(index)).getValue();
         } catch (ClassCastException exception) {
             return 0.0F;
         }
@@ -340,7 +363,7 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public double getDouble(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Double)? 0.0D : ((TagDouble) this.list.get(index)).getValue();
+            return !this.hasKeyOfType(index, TagType.TAG_Double)? 0.0D : ((TagDouble) this.list.get(index)).getValue();
         } catch (ClassCastException exception) {
             return 0.0D;
         }
@@ -349,7 +372,7 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public String getString(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_String)? "" : this.list.get(index).getString();
+            return !this.hasKeyOfType(index, TagType.TAG_String)? "" : this.list.get(index).getString();
         } catch (ClassCastException exception) {
             return "";
         }
@@ -358,43 +381,58 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public byte[] getByteArray(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Byte_Array)? new byte[0] : ((TagByteArray) this.list.get(index)).getByteArray();
+            return !this.hasKeyOfType(index, TagType.TAG_Byte_Array)? new byte[0] : ((TagByteArray) this.list.get(index)).getByteArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Byte_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Byte_Array) + ")", exception);
         }
     }
 
     @Override
     public int[] getIntArray(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Int_Array)? new int[0] : ((TagIntArray) this.list.get(index)).getIntArray();
+            return !this.hasKeyOfType(index, TagType.TAG_Int_Array)? new int[0] : ((TagIntArray) this.list.get(index)).getIntArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Int_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Int_Array) + ")", exception);
         }
     }
 
     @Override
     public long[] getLongArray(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Long_Array)? new long[0] : ((TagLongArray) this.list.get(index)).getLongArray();
+            return !this.hasKeyOfType(index, TagType.TAG_Long_Array)? new long[0] : ((TagLongArray) this.list.get(index)).getLongArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Long_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Long_Array) + ")", exception);
         }
     }
 
     @Override
     public TagCompound getCompound(int index) {
         try {
-            return !this.hasKeyOfType(index, Tag.TAG_Compound)? new TagCompound() : (TagCompound) this.list.get(index);
+            return !this.hasKeyOfType(index, TagType.TAG_Compound)? new TagCompound() : (TagCompound) this.list.get(index);
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Compound) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Compound) + ")", exception);
         }
     }
 
     @Override
     public TagList getList(int index, byte type) {
         try {
-            if (!this.hasKeyOfType(index, Tag.TAG_List)) {
+            if (!this.hasKeyOfType(index, TagType.TAG_List)) {
+                return new TagList();
+            } else {
+                TagList taglist = (TagList) this.list.get(index);
+
+                return taglist.size() > 0 && taglist.getTagType().getId() != type? new TagList() : taglist;
+            }
+        } catch (ClassCastException exception) {
+            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getType()) + ") diffenrent as expected (" + Tag.getTagName(TagType.TAG_List) + ")", exception);
+        }
+    }
+    
+    @Override
+    public INBTList getList(int index, TagType type) {
+        try {
+            if (!this.hasKeyOfType(index, TagType.TAG_List)) {
                 return new TagList();
             } else {
                 TagList taglist = (TagList) this.list.get(index);
@@ -402,7 +440,7 @@ public final class TagList extends Tag implements INBTList {
                 return taglist.size() > 0 && taglist.getTagType() != type? new TagList() : taglist;
             }
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getTypeId()) + ") diffenrent as expected (" + Tag.getTagName(Tag.TAG_List) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.list.get(index).getType()) + ") diffenrent as expected (" + Tag.getTagName(TagType.TAG_List) + ")", exception);
         }
     }
 
@@ -414,6 +452,10 @@ public final class TagList extends Tag implements INBTList {
     @Override
     public int size() {
         return this.list.size();
+    }
+    
+    public void clear() {
+    	this.list.clear();
     }
 
     @Override
@@ -447,9 +489,14 @@ public final class TagList extends Tag implements INBTList {
     public int hashCode() {
         return super.hashCode() ^ this.list.hashCode();
     }
+    
+    @Override
+    public byte getTagTypeId() {
+    	return getTagType().getId();
+    }
 
     @Override
-    public byte getTagType() {
+    public TagType getTagType() {
         return this.type;
     }
 }

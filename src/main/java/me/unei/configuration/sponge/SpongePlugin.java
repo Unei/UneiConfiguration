@@ -3,11 +3,13 @@ package me.unei.configuration.sponge;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.bstats.sponge.MetricsLite2;
+import org.bstats.sponge.Metrics2;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
@@ -27,13 +29,15 @@ public class SpongePlugin implements IPlugin
 
     private final Logger logger;
     
-    @SuppressWarnings("unused")
 	@Inject
-    private MetricsLite2 metrics;
+    private Metrics2 metrics;
     
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path configDirectory;
+    
+    private final Map<String, Integer> dependers = new HashMap<>();
+    private static final Integer ONE = Integer.valueOf(1);
     
     @Inject
     public SpongePlugin(org.slf4j.Logger logger)
@@ -150,6 +154,11 @@ public class SpongePlugin implements IPlugin
 
     @Override
     public void onEnable() {
+		metrics.addCustomChart(new Metrics2.AdvancedPie("usingPlugins", () -> {
+			Map<String, Integer> result = SpongePlugin.this.dependers;
+			return result;
+		}));
+		
         plugin.onEnable();
     }
 
@@ -161,6 +170,11 @@ public class SpongePlugin implements IPlugin
 	@Override
 	public File getDataFolder() {
 		return this.configDirectory.toFile();
+	}
+	
+	@Override
+	public void registerStatsPlName(String name) {
+		this.dependers.put(name, SpongePlugin.ONE);
 	}
 
 	@Override

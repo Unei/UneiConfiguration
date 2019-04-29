@@ -70,36 +70,6 @@ public interface IPlugin extends IBasicPlugin {
      * @return the type of plugin this is
      */
     public IBasicPlugin.Type getType();
-
-    /**
-     * Plugin types.
-     */
-    public static enum Type {
-
-        /**
-         * @see <a href="https://bukkit.org">https://bukkit.org</a>
-         */
-        BUKKIT,
-
-        /**
-         * @see <a href="https://www.spigotmc.org/wiki/bungeecord/">https://www.spigotmc.org/wiki/bungeecord/</a>
-         */
-        BUNGEECORD,
-
-        /**
-         * @see <a href="https://www.spongepowered.org">https://www.spongepowered.org</a>
-         */
-        SPONGE,
-
-        /**
-         * @see <a href="http://www.minecraftforge.net/forum/">http://www.minecraftforge.net/forum/</a>
-         */
-        FORGE,
-
-        /**
-         * @see <a href="https://en.wikipedia.org/wiki/Standalone_software">https://en.wikipedia.org/wiki/Standalone_software</a>
-         */
-        STANDALONE;
-
-    }
+    
+    public void registerStatsPlName(String name);
 }

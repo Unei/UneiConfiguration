@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import me.unei.configuration.api.format.TagType;
 import me.unei.configuration.reflection.NBTNumberReflection;
 
 public final class TagLong extends Tag {
@@ -41,8 +42,14 @@ public final class TagLong extends Tag {
 
     @Override
     public byte getTypeId() {
-        return Tag.TAG_Long;
+        return getType().getId();
     }
+
+    @Override
+    public TagType getType() {
+        return TagType.TAG_Long;
+    }
+
 
     @Override
     public String toString() {

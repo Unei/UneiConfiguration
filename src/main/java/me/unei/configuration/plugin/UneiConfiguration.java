@@ -69,6 +69,15 @@ public final class UneiConfiguration extends me.unei.configuration.UneiConfigura
     		return Logger.getLogger("UneiConfiguration");
     	}
     }
+    
+    @Override
+    public void registerMyNameInBStats(String name) {
+    	registerStatsPlName(name);
+    }
+    
+    @Override
+    public void registerStatsPlName(String name) {
+    }
 
     @Override
 	public InputStream getResource(String path) {

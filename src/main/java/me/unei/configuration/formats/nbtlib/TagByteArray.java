@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import me.unei.configuration.api.format.TagType;
 import me.unei.configuration.reflection.NBTArrayReflection;
 
 public final class TagByteArray extends Tag {
@@ -45,7 +46,12 @@ public final class TagByteArray extends Tag {
 
     @Override
     public byte getTypeId() {
-        return Tag.TAG_Byte_Array;
+        return getType().getId();
+    }
+    
+    @Override
+    public TagType getType() {
+    	return TagType.TAG_Byte_Array;
     }
 
     @Override

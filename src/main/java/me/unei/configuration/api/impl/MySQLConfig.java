@@ -500,6 +500,9 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
 		if (this.parent == null && type != this.getType()) {
 			throw new UnsupportedOperationException("Cannot change the type of a NBT root Tag to anything but " + this.getType().name());
 		}
+		if (type == this.getType()) {
+			return;
+		}
 		throw new NotImplementedException();
 	}
 

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.unei.configuration.api.format.INBTString;
+import me.unei.configuration.api.format.TagType;
 import me.unei.configuration.reflection.NBTStringReflection;
 
 @SuppressWarnings("deprecation")
@@ -47,7 +48,12 @@ public final class TagString extends Tag implements INBTString {
 
     @Override
     public byte getTypeId() {
-        return Tag.TAG_String;
+        return getType().getId();
+    }
+
+    @Override
+    public TagType getType() {
+        return TagType.TAG_String;
     }
 
     @Override

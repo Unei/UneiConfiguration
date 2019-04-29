@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import me.unei.configuration.api.format.TagType;
+
 final class TagEnd extends Tag {
 
     public TagEnd() {
@@ -22,7 +24,12 @@ final class TagEnd extends Tag {
 
     @Override
     public byte getTypeId() {
-        return Tag.TAG_End;
+        return getType().getId();
+    }
+
+    @Override
+    public TagType getType() {
+        return TagType.TAG_End;
     }
 
     @Override

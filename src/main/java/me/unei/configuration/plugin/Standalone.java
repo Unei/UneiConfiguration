@@ -69,6 +69,12 @@ public final class Standalone implements IPlugin
 	}
 	
 	@Override
+	public void registerStatsPlName(String name)
+	{
+		/* Doing nothing, no statistics analysis here... */
+	}
+	
+	@Override
 	public File getDataFolder()
 	{
 		return this.dataFolder;
