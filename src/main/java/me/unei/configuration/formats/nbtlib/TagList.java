@@ -67,13 +67,13 @@ public final class TagList extends Tag implements INBTList {
     			this.add(new TagString(value.toString()));
     		} else if (value instanceof Tag) {
     			this.add((Tag)value);
-    		} else if (value instanceof Iterable) {
-    			TagList subTag = new TagList();
-    			subTag.loadList((Iterable<?>)value);
-    			this.add(subTag);
     		} else if (value instanceof Map) {
     			TagCompound subTag = new TagCompound();
     			subTag.loadMap((Map<?, ?>)value);
+    			this.add(subTag);
+    		} else if (value instanceof Iterable) {
+    			TagList subTag = new TagList();
+    			subTag.loadList((Iterable<?>)value);
     			this.add(subTag);
     		} else if (value instanceof Void) {
     			this.add(new TagEnd());
