@@ -230,7 +230,8 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
 				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
 			}
-			UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
+			this.runTreeUpdate();
+			UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
 		} catch (ClassNotFoundException e) {
 			UneiConfiguration.getInstance().getLogger().warning("The object contained in the binary file " + getFileName() + " is not a Map :");
 			e.printStackTrace();

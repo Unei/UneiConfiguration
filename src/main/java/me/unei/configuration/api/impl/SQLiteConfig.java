@@ -436,6 +436,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		
 		if (this.file.getFile() == null) {
 			this.data = new StringHashMap<>();
+			this.runTreeUpdate();
 			return;
 		}
 		
@@ -511,6 +512,9 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		}
 		if (this.parent == null && type != this.getType()) {
 			throw new UnsupportedOperationException("Cannot change the type of a NBT root Tag to anything but " + this.getType().name());
+		}
+		if (type == this.getType()) {
+			return;
 		}
 		throw new NotImplementedException();
 	}

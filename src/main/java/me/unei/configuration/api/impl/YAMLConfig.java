@@ -227,6 +227,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         }
 		if (this.file.getFile() == null) {
 			this.nodeData = new StringHashMap<>();
+			this.runTreeUpdate();
 			return;
 		}
         if (!this.file.getFile().exists()) {
@@ -255,8 +256,8 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         } catch (IOException e) {
             UneiConfiguration.getInstance().getLogger().warning("An error occured while loading YAML file " + getFileName() + ":");
             e.printStackTrace();
-            return;
         }
+		this.runTreeUpdate();
     }
     
 	@SuppressWarnings("unchecked")
@@ -279,6 +280,14 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 					this.nodeData = new StringHashMap<Object>();
 					sto.set(Key.of(sto.getStorageType(), nodeAtomicIndex, nodeName), this.nodeData);
 				}
+			}
+		}
+	}
+	
+	protected void propagate() {
+		if (this.parent != null && this.parent.nodeData != null) {
+			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+				this.parent.nodeData.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.nodeData);
 			}
 		}
 	}
@@ -324,11 +333,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
     			});
     			this.childrens.clear();
     			this.nodeData = newObject;
-    			if (this.parent != null)
-    			{
-    				Storage<Object> sto = this.parent.nodeData;
-					sto.set(Key.of(sto.getStorageType(), nodeAtomicIndex, nodeName), this.nodeData);
-    			}
+    			propagate();
     		}
     	}
     }

@@ -255,6 +255,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 				this.data = (Storage<Object>) tmpData;
 			}
 			r.close();
+			this.runTreeUpdate();
 			UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
 		} catch (IOException e) {
 			UneiConfiguration.getInstance().getLogger().warning("An error occured while loading JSON file " + getFileName() + ":");
