@@ -111,7 +111,23 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		}
         return new NBTConfig(this, name);
     }
-	
+
+    @Override
+    public NBTConfig getAt(int index) {
+        if (!this.canAccess()) {
+            return null;
+        }
+        if (index < 0) {
+            return this;
+        }
+        NBTConfig child = super.findInChildrens(new Key(index));
+		if (child != null) {
+			child.parent = this;
+			return child;
+		}
+        return new NBTConfig(this, index);
+    }
+
 	@Override
 	public StorageType getType() {
 		return (this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED;
@@ -142,6 +158,24 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		}
 		if (type == StorageType.DISCONTINUED_LIST) {
 			throw new UnsupportedOperationException("Cannot set the type of any NBT Tag to " + type.name());
+		}
+		if (type == this.getType()) {
+			return;
+		}
+		this.data.clear();
+		this.data = null;
+		switch (type) {
+		case MAP:
+			this.data = new StringHashMap<Object>();
+			break;
+			
+		case LIST:
+			this.data = new AtomicIndexList<Object>();
+			break;
+
+		default:
+			this.data = new StringHashMap<Object>();
+			throw new IllegalArgumentException("Error while setting new NBT node type");
 		}
     }
 

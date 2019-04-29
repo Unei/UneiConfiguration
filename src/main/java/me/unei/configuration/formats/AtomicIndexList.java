@@ -35,6 +35,9 @@ public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Seri
 	@Override
 	public E get(Key key) {
 		if (key != null && key.getType() == this.getStorageType()) {
+			if (key.getKeyInt() < 0 || key.getKeyInt() >= content.size()) {
+				return null;
+			}
 			return content.get(key.getKeyInt()).element;
 		}
 		return null;
@@ -42,7 +45,7 @@ public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Seri
 
 	@Override
 	public void set(Key key, E value) {
-		if (key != null && key.getType() == this.getStorageType()) {
+		if (key != null && key.getType() == this.getStorageType() && key.getKeyInt() >= 0) {
 			AtomicWrapper<E> old;
 			if (key.getKeyInt() < this.size()) {
 				old = content.set(key.getKeyInt(), new AtomicWrapper<E>(key.getKeyAtomicInt(), value));
@@ -69,6 +72,9 @@ public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Seri
 	@Override
 	public void remove(Key key) {
 		if (key != null && key.getType() == this.getStorageType()) {
+			if (key.getKeyInt() < 0 || key.getKeyInt() >= content.size()) {
+				return;
+			}
 			AtomicWrapper<E> old = content.remove(key.getKeyInt());
 			old.index.set(-1);
 			for (int i = key.getKeyInt(); i < content.size(); ++i) {
@@ -79,6 +85,9 @@ public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Seri
 	
 	@Override
 	public E remove(int index) {
+		if (index < 0 || index >= content.size()) {
+			return null;
+		}
 		AtomicWrapper<E> old = content.remove(index);
 		for (int i = index; i < content.size(); ++i) {
 			content.get(i).index.set(i);
@@ -118,6 +127,9 @@ public class AtomicIndexList<E> extends AbstractList<E> implements List<E>, Seri
 
 	@Override
 	public E get(int index) {
+		if (index < 0 || index >= content.size()) {
+			return null;
+		}
 		return content.get(index).element;
 	}
 	
