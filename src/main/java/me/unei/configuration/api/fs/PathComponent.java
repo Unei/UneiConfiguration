@@ -50,40 +50,19 @@ public final class PathComponent implements IPathComponent {
 		this.value = Integer.toString(index);
 		this.index = index;
 	}
-	
-	/**
-	 * Gets the component type.
-	 * 
-	 * @return Returns the type of this component.
-	 */
+
 	public PathComponentType getType() {
 		return this.type;
 	}
 	
-	/**
-	 * Gets the component name.
-	 * 
-	 * @return Returns the component name.
-	 */
 	public String getValue() {
 		return this.value;
 	}
 	
-	/**
-	 * Gets the component index (if type of {@link PathComponentType#INDEX}).
-	 * 
-	 * @return Returns the component index.
-	 */
 	public int getIndex() {
 		return this.index;
 	}
 	
-	/**
-	 * Gets the component {@link Key} (index or value depending of the type).
-	 * 
-	 * @param indice An hint for the key to select, pass <tt>null</tt> to use the {@linkplain PathComponent} type.
-	 * @return Returns the best found, or <tt>null</tt> if type is neither Child nor Index.
-	 */
 	public Key getKey(StorageType indice) {
 		if (getType() == PathComponentType.INDEX) {
 			if (indice == StorageType.MAP) {
@@ -187,11 +166,6 @@ public final class PathComponent implements IPathComponent {
 			this.symType = orig.symType;
 		}
 		
-		/**
-		 * Appends the path component at the end of the existing path.
-		 * 
-		 * @throws NullPointerException If element is null.
-		 */
 		@Override
 		public boolean add(IPathComponent element) {
 			if (element == null) {
@@ -200,71 +174,30 @@ public final class PathComponent implements IPathComponent {
 			return super.add((PathComponent) element);
 		}
 		
-		/**
-		 * Gets the type of the symbols used in string paths.
-		 * 
-		 * @return Returns the string path symbols type.
-		 */
 		public PathSymbolsType getSymbolsType() {
 			return this.symType;
 		}
 		
-		/**
-		 * Appends a component of the specified type and with the given name.
-		 * 
-		 * @see PathComponent#PathComponent(PathComponentType, String)
-		 * 
-		 * @param type The type of the component.
-		 * @param value The name of the component.
-		 * @return Returns `true`.
-		 */
 		public boolean appendComponent(PathComponentType type, String value) {
 			return this.add(new PathComponent(type, value));
 		}
 		
-		/**
-		 * Appends a child component to this path.
-		 * 
-		 * @param name The child name.
-		 * @return Returns `true`.
-		 */
 		public boolean appendChild(String name) {
 			return this.appendComponent(PathComponentType.CHILD, name);
 		}
 		
-		/**
-		 * Appends a table element component to this path.
-		 * 
-		 * @param index The element index.
-		 * @return Returns `true`.
-		 */
 		public boolean appendIndex(int index) {
 			return this.appendComponent(PathComponentType.INDEX, Integer.toString(index));
 		}
 		
-		/**
-		 * Appends a root component to this path.
-		 * 
-		 * @return Returns `true`.
-		 */
 		public boolean appendRoot() {
 			return this.appendComponent(PathComponentType.ROOT, String.valueOf(symType.root));
 		}
 
-		/**
-		 * Appends a parent component to this path.
-		 * 
-		 * @return Returns `true`.
-		 */
 		public boolean appendParent() {
 			return this.appendComponent(PathComponentType.PARENT, symType.parent);
 		}
 		
-		/**
-		 * Gets the last component of the path.
-		 * 
-		 * @return Returns the last component.
-		 */
 		public IPathComponent last() {
 			if (this.isEmpty()) {
 				return null;
@@ -272,11 +205,6 @@ public final class PathComponent implements IPathComponent {
 			return this.get(this.size() - 1);
 		}
 		
-		/**
-		 * Gets the last component of the path, if it is a 'child' one.
-		 * 
-		 * @return Returns the last component or null.
-		 */
 		public String lastChild() {
 			IPathComponent last = this.last();
 			if (last != null) {
@@ -285,11 +213,6 @@ public final class PathComponent implements IPathComponent {
 			return null;
 		}
 		
-		/**
-		 * Gets the last component of the path, if it is an 'index' one.
-		 * 
-		 * @return Returns the last component or -1.
-		 */
 		public int lastIndex() {
 			IPathComponent last = this.last();
 			if (last != null) {
@@ -298,11 +221,6 @@ public final class PathComponent implements IPathComponent {
 			return -1;
 		}
 		
-		/**
-		 * Removes the last component of the path.
-		 * 
-		 * @return Returns the removed component.
-		 */
 		public IPathComponent removeLast() {
 			if (this.isEmpty()) {
 				return null;
@@ -343,9 +261,6 @@ public final class PathComponent implements IPathComponent {
 			}
 		}
 		
-		/**
-		 * Returns the string representation of this path.
-		 */
 		@Override
 		public String toString() {
 			StringBuilder pathBuilder = new StringBuilder();
@@ -380,9 +295,6 @@ public final class PathComponent implements IPathComponent {
 			return pathBuilder.toString();
 		}
 		
-		/**
-		 * Clone this path components to another list.
-		 */
 		@Override
 		public PathComponentsList clone() {
 			PathComponentsList copy = (PathComponentsList) super.clone();

@@ -10,7 +10,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.INBTConfiguration;
 import me.unei.configuration.api.UntypedStorage;
-import me.unei.configuration.api.format.INBTCompound;
+import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
@@ -231,8 +231,8 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		return dir.data;
 	}
 
-	public INBTCompound getTagCopy() {
-		return (INBTCompound) this.getTagCp();
+	public INBTTag getTagCopy() {
+		return this.getTagCp();
 	}
 
 	private void setTagCp(Tag tag) {
@@ -270,7 +270,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		propagate();
 	}
 
-	public void setTagCopy(INBTCompound compound) {
+	public void setTagCopy(INBTTag compound) {
 		this.setTagCp((Tag) compound);
 	}
 

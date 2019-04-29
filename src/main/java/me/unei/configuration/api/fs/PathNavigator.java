@@ -49,17 +49,11 @@ public final class PathNavigator<T extends NavigableFile> implements IPathNaviga
 		}
 	}
 	
-	/**
-	 * Navigate to the root section.
-	 */
 	public void goToRoot() {
 		this.currentPath.clear();
 		this.currentNode = getChecked(this.currentNode.getRoot());
 	}
 	
-	/**
-	 * Navigate to the parent section.
-	 */
 	public void goToParent() {
 		if (!this.currentPath.isEmpty()) {
 			this.currentPath.remove(this.currentPath.size() - 1);
@@ -67,11 +61,6 @@ public final class PathNavigator<T extends NavigableFile> implements IPathNaviga
 		}
 	}
 	
-	/**
-	 * Navigate to the `name` child section.
-	 * 
-	 * @param name The name of the child section to go to.
-	 */
 	public void goToChild(String name) {
 		if (name == null || name.isEmpty()) {
 			return;
@@ -80,11 +69,6 @@ public final class PathNavigator<T extends NavigableFile> implements IPathNaviga
 		this.currentNode = getChecked(this.currentNode.getChild(name));
 	}
 	
-	/**
-	 * Navigate to the `index` element section.
-	 * 
-	 * @param index The index of the child section to go to.
-	 */
 	public void goToIndex(int index) {
 		if (index < 0) {
 			return;
@@ -93,32 +77,14 @@ public final class PathNavigator<T extends NavigableFile> implements IPathNaviga
 		this.currentNode = getChecked(this.currentNode.getAt(index));
 	}
 	
-	/**
-	 * Gets the current path.
-	 * 
-	 * @return Returns the path as a string.
-	 */
 	public String getCurrentPath() {
 		return currentPath.toString();
 	}
 	
-	/**
-	 * Gets the current section.
-	 * 
-	 * @return Returns the actual node.
-	 */
 	public T getCurrentNode() {
 		return this.currentNode;
 	}
 	
-	/**
-	 * Navigate following the given path and execute an action on each nodes.
-	 * 
-	 * @param path The path of the destination.
-	 * @param action An action to execute on each node of the path.
-	 * 
-	 * @throws NullPointerException If the `action` parameter is null.
-	 */
 	public void followAndApply(IPathComponent.IPathComponentsList path, Consumer<T> action) {
 		if (action == null) {
 			throw new NullPointerException("action must not be null.");
@@ -255,14 +221,6 @@ public final class PathNavigator<T extends NavigableFile> implements IPathNaviga
 		return cleanPath;
 	}
 	
-	/**
-	 * Navigate following the given `path`.
-	 * 
-	 * @param path The path of the destination.
-	 * @return Returns `true` if navigation was successful, `false` otherwise.
-	 * 
-	 * @see #navigate(String, PathSymbolsType)
-	 */
 	public boolean followPath(IPathComponent.IPathComponentsList path) {
 		if (path == null) {
 			return false;
@@ -294,15 +252,6 @@ public final class PathNavigator<T extends NavigableFile> implements IPathNaviga
 		return true;
 	}
 	
-	/**
-	 * Navigate following the given `path`.
-	 * 
-	 * @param path The path of the destination.
-	 * @param type The types of the symbols used in the path.
-	 * @return Returns `true` if navigation was successful, `false` otherwise.
-	 * 
-	 * @see #followPath(PathComponentsList)
-	 */
 	public boolean navigate(String path, PathSymbolsType type) {
 		return followPath(PathNavigator.parsePath(path, type));
 	}
