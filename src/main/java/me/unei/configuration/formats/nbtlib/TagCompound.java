@@ -18,7 +18,9 @@ import org.apache.commons.lang.ArrayUtils;
 import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.exceptions.UnexpectedClassException;
 import me.unei.configuration.api.format.INBTCompound;
+import me.unei.configuration.api.format.INBTList;
 import me.unei.configuration.api.format.INBTTag;
+import me.unei.configuration.api.format.TagType;
 import me.unei.configuration.reflection.NBTCompoundReflection;
 
 public final class TagCompound extends Tag implements INBTCompound {
@@ -39,7 +41,7 @@ public final class TagCompound extends Tag implements INBTCompound {
             TagCompound.writeEntry(key, tag, output);
         }
 
-        output.writeByte(Tag.TAG_End);
+        output.writeByte(TagType.TAG_End.getId());
     }
 
     @Override
@@ -48,7 +50,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
         byte type;
 
-        while ((type = input.readByte()) != Tag.TAG_End) {
+        while ((type = input.readByte()) != TagType.TAG_End.getId()) {
             String key = input.readUTF();
             Tag tag = Tag.newTag(type);
             tag.read(input);
@@ -138,7 +140,7 @@ public final class TagCompound extends Tag implements INBTCompound {
     			} else {
     				result.put(entry.getKey(), entry.getValue().getAsObject(creator));
     			}
-    		} else if (key.endsWith("Object") && this.hasKeyOfType(key, Tag.TAG_Byte_Array)) {
+    		} else if (key.endsWith("Object") && this.hasKeyOfType(key, TagType.TAG_Byte_Array)) {
     			key = key.substring(0, key.length() - "Object".length());
     			Object r = SerializerHelper.deserialize(this.getByteArray(entry.getKey()));
     			if (r != null) {
@@ -191,7 +193,12 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     @Override
     public byte getTypeId() {
-        return Tag.TAG_Compound;
+        return getType().getId();
+    }
+    
+    @Override
+    public TagType getType() {
+    	return TagType.TAG_Compound;
     }
 
     public void set(String key, INBTTag tag) {
@@ -228,7 +235,7 @@ public final class TagCompound extends Tag implements INBTCompound {
     }
     
     public boolean isUUID(String key) {
-    	return (this.hasKeyOfType(key + "Most", Tag.Number_TAG) && this.hasKeyOfType(key + "Least", Tag.Number_TAG));
+    	return (this.hasKeyOfType(key + "Most", TagType.Number_TAG) && this.hasKeyOfType(key + "Least", TagType.Number_TAG));
     }
 
     public void setFloat(String key, float value) {
@@ -264,8 +271,13 @@ public final class TagCompound extends Tag implements INBTCompound {
     }
 
     public byte getTypeOf(String key) {
+        return getTypeOfTag(key).getId();
+    }
+    
+    @Override
+    public TagType getTypeOfTag(String key) {
         Tag t = this.tags.get(key);
-        return (t != null? t.getTypeId() : Tag.TAG_End);
+        return (t != null? t.getType() : TagType.TAG_End);
     }
 
     public boolean hasKey(String key) {
@@ -277,8 +289,21 @@ public final class TagCompound extends Tag implements INBTCompound {
         if (other == type) {
             return true;
         }
-        if (type == Tag.Number_TAG) {
-            if (other >= Tag.TAG_Byte && other <= Tag.TAG_Double) {
+        if (type == TagType.Number_TAG.getId()) {
+            if (other >= TagType.TAG_Byte.getId() && other <= TagType.TAG_Double.getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasKeyOfType(String key, TagType type) {
+    	TagType other = this.getTypeOfTag(key);
+        if (other == type) {
+            return true;
+        }
+        if (type == TagType.Number_TAG) {
+            if (other.isNumberTag()) {
                 return true;
             }
         }
@@ -287,7 +312,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public byte getByte(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Byte)? 0 : ((TagByte) this.tags.get(key)).getValue();
+            return !this.hasKeyOfType(key, TagType.TAG_Byte)? 0 : ((TagByte) this.tags.get(key)).getValue();
         } catch (ClassCastException exception) {
             return 0;
         }
@@ -295,7 +320,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public short getShort(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Short)? 0 : ((TagShort) this.tags.get(key)).getValue();
+            return !this.hasKeyOfType(key, TagType.TAG_Short)? 0 : ((TagShort) this.tags.get(key)).getValue();
         } catch (ClassCastException exception) {
             return 0;
         }
@@ -303,7 +328,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public int getInt(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Int)? 0 : ((TagInt) this.tags.get(key)).getValue();
+            return !this.hasKeyOfType(key, TagType.TAG_Int)? 0 : ((TagInt) this.tags.get(key)).getValue();
         } catch (ClassCastException exception) {
             return 0;
         }
@@ -311,7 +336,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public long getLong(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Long)? 0L : ((TagLong) this.tags.get(key)).getValue();
+            return !this.hasKeyOfType(key, TagType.TAG_Long)? 0L : ((TagLong) this.tags.get(key)).getValue();
         } catch (ClassCastException exception) {
             return 0L;
         }
@@ -319,7 +344,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public float getFloat(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Float)? 0.0F : ((TagFloat) this.tags.get(key)).getValue();
+            return !this.hasKeyOfType(key, TagType.TAG_Float)? 0.0F : ((TagFloat) this.tags.get(key)).getValue();
         } catch (ClassCastException exception) {
             return 0.0F;
         }
@@ -327,7 +352,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public double getDouble(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Double)? 0.0D : ((TagDouble) this.tags.get(key)).getValue();
+            return !this.hasKeyOfType(key, TagType.TAG_Double)? 0.0D : ((TagDouble) this.tags.get(key)).getValue();
         } catch (ClassCastException exception) {
             return 0.0D;
         }
@@ -335,7 +360,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public String getString(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_String)? "" : this.tags.get(key).getString();
+            return !this.hasKeyOfType(key, TagType.TAG_String)? "" : this.tags.get(key).getString();
         } catch (ClassCastException exception) {
             return "";
         }
@@ -343,39 +368,54 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     public byte[] getByteArray(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Byte_Array)? new byte[0] : ((TagByteArray) this.tags.get(key)).getByteArray();
+            return !this.hasKeyOfType(key, TagType.TAG_Byte_Array)? new byte[0] : ((TagByteArray) this.tags.get(key)).getByteArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Byte_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Byte_Array) + ")", exception);
         }
     }
 
     public int[] getIntArray(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Int_Array)? new int[0] : ((TagIntArray) this.tags.get(key)).getIntArray();
+            return !this.hasKeyOfType(key, TagType.TAG_Int_Array)? new int[0] : ((TagIntArray) this.tags.get(key)).getIntArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Int_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Int_Array) + ")", exception);
         }
     }
 
     public long[] getLongArray(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Long_Array)? new long[0] : ((TagLongArray) this.tags.get(key)).getLongArray();
+            return !this.hasKeyOfType(key, TagType.TAG_Long_Array)? new long[0] : ((TagLongArray) this.tags.get(key)).getLongArray();
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Long_Array) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Long_Array) + ")", exception);
         }
     }
 
     public TagCompound getCompound(String key) {
         try {
-            return !this.hasKeyOfType(key, Tag.TAG_Compound)? new TagCompound() : (TagCompound) this.tags.get(key);
+            return !this.hasKeyOfType(key, TagType.TAG_Compound)? new TagCompound() : (TagCompound) this.tags.get(key);
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") different than expected (" + Tag.getTagName(Tag.TAG_Compound) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getType()) + ") different than expected (" + Tag.getTagName(TagType.TAG_Compound) + ")", exception);
         }
     }
 
     public TagList getList(String key, byte type) {
         try {
-            if (!this.hasKeyOfType(key, Tag.TAG_List)) {
+            if (!this.hasKeyOfType(key, TagType.TAG_List)) {
+                return new TagList();
+            } else {
+                TagList taglist = (TagList) this.tags.get(key);
+
+                return taglist.size() > 0 && taglist.getTagType().getId() != type? new TagList() : taglist;
+            }
+        } catch (ClassCastException exception) {
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getType()) + ") diffenrent as expected (" + Tag.getTagName(TagType.TAG_List) + ")", exception);
+        }
+    }
+    
+    @Override
+    public INBTList getList(String key, TagType type) {
+        try {
+            if (!this.hasKeyOfType(key, TagType.TAG_List)) {
                 return new TagList();
             } else {
                 TagList taglist = (TagList) this.tags.get(key);
@@ -383,7 +423,7 @@ public final class TagCompound extends Tag implements INBTCompound {
                 return taglist.size() > 0 && taglist.getTagType() != type? new TagList() : taglist;
             }
         } catch (ClassCastException exception) {
-            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getTypeId()) + ") diffenrent as expected (" + Tag.getTagName(Tag.TAG_List) + ")", exception);
+            throw new RuntimeException("Type (" + Tag.getTagName(this.tags.get(key).getType()) + ") diffenrent as expected (" + Tag.getTagName(TagType.TAG_List) + ")", exception);
         }
     }
 
@@ -415,6 +455,10 @@ public final class TagCompound extends Tag implements INBTCompound {
     @Override
     public boolean isEmpty() {
         return this.tags.isEmpty();
+    }
+    
+    public void clear() {
+    	this.tags.clear();
     }
 
     @Override
@@ -452,8 +496,8 @@ public final class TagCompound extends Tag implements INBTCompound {
             String key = it.next();
             Tag base = compound.tags.get(key);
 
-            if (base.getTypeId() == 10) {
-                if (this.hasKeyOfType(key, Tag.TAG_Compound)) {
+            if (base.getType() == TagType.TAG_Compound) {
+                if (this.hasKeyOfType(key, TagType.TAG_Compound)) {
                     TagCompound tagcompound = (TagCompound) this.get(key);
 
                     tagcompound.merge((TagCompound) base);
@@ -473,7 +517,7 @@ public final class TagCompound extends Tag implements INBTCompound {
 
     private static void writeEntry(String key, Tag base, DataOutput output) throws IOException {
         output.writeByte(base.getTypeId());
-        if (base.getTypeId() != Tag.TAG_End) {
+        if (base.getType() != TagType.TAG_End) {
             output.writeUTF(key);
             base.write(output);
         }
