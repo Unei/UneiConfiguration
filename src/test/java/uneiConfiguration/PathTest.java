@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import me.unei.configuration.api.fs.PathComponentType;
 @DisplayName("File system tests")
 public class PathTest
 {
-	@SuppressWarnings("deprecation")
 	@DisplayName("FileSystem tests Initialization")
 	@BeforeAll
 	public static void initAll()
@@ -32,7 +30,6 @@ public class PathTest
 		}
 		
 		UneiConfiguration.tryInstanciate();
-		FSUtils.INSTANCE.backup();
 		
 		FSUtils.INSTANCE.callBuilder();
 	}
@@ -270,14 +267,5 @@ public class PathTest
 		assertSame(PathSymbolsType.UNIX, type);
 		
 		fail("Path type detection is not predictable and will most likely fail in production environment");
-	}
-
-	@DisplayName("FileSystem tests clearing")
-	@AfterAll
-	@SuppressWarnings("deprecation")
-	public static void tearDownAll()
-	{
-		UneiConfiguration.INSTANCE.clear();
-		FSUtils.INSTANCE.clear();
 	}
 }
