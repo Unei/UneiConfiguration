@@ -528,8 +528,8 @@ public class SavedTest
 		assertNotNull(config, "Configuration to check must not be null!");
 		logFine(String.format("assertRead started for config %s", config.toString().substring(0, config.toString().indexOf("="))));
 
-		assertEquals(Boolean.TRUE, config.getBoolean("booleanTest.True"), "Failed to read or write boolean value " + Boolean.TRUE + "!");
-		assertEquals(Boolean.FALSE, config.getBoolean("booleanTest.False"), "Failed to read or write boolean value " + Boolean.FALSE + "!");
+		assertTrue(config.getBoolean("booleanTest.True"), "Failed to read or write boolean value " + Boolean.TRUE + "!");
+		assertFalse(config.getBoolean("booleanTest.False"), "Failed to read or write boolean value " + Boolean.FALSE + "!");
 
 		assertEquals((byte)       0, config.getByte("byteTest.Zero"), "Failed to read or write byte value " + 0 + "!");
 		assertEquals((byte)      13, config.getByte("byteTest.Thirteen"), "Failed to read or write byte value " + 13 + "!");
@@ -599,7 +599,8 @@ public class SavedTest
 		assertEquals(Long.MAX_VALUE, config.getLong("longTest.Max"), "Failed to read or write long value " + Long.MAX_VALUE + "!");
 		assertEquals(Long.MIN_VALUE, config.getLong("longTest.Min"), "Failed to read or write long value " + Long.MIN_VALUE + "!");
 
-		assertEquals(                         false, config.contains("stringTest.Null"), "Failed to read or write string value null!");
+		assertFalse(config.contains("stringTest.Null"), "Failed to read or write string value null!");
+		
 		assertEquals(                            "", config.getString("stringTest.Empty"), "Failed to read or write string value \"\"!");
 		assertEquals(       " 0 1 2 3 4 5 6 7 8 9 ", config.getString("stringTest.Spaces"), "Failed to read or write string value \" 0 1 2 3 4 5 6 7 8 9 \"!");
 		assertEquals(                  "0123456789", config.getString("stringTest.Digits"), "Failed to read or write string value \"0123456789\"!");
@@ -614,7 +615,7 @@ public class SavedTest
 			assertEquals(Double.valueOf(42),	((IConfiguration) config).get("untypedTest.Double"), "Failed to read or write untyped value " + 42 + "!");
 			assertEquals("42", 					((IConfiguration) config).get("untypedTest.String"), "Failed to read or write untyped value \"42\"!");
 
-			assertEquals(false, ((IConfiguration) config).contains("byteListTest.Null"), "Failed to read or write byte list value null!");
+			assertFalse(((IConfiguration) config).contains("byteListTest.Null"), "Failed to read or write byte list value null!");
 			assertEquals(new ArrayList<Byte>(), ((IConfiguration) config).getByteList("byteListTest.Empty"), "Failed to read or write byte list value []!");
 			assertEquals(Arrays.asList((byte) 0, (byte) 1, (byte) 2, (byte) 3), ((IConfiguration) config).getByteList("byteListTest.ZeroOneTwoThree"), "Failed to read or write byte list value [0, 1, 2, 3]!");
 			assertEquals(Arrays.asList((byte) 4, (byte) 2), ((IConfiguration) config).getByteList("byteListTest.FourTwo"), "Failed to read or write byte list value [4, 2]!");
@@ -625,7 +626,7 @@ public class SavedTest
 					((IConfiguration) config).getByteList("byteListTest.PiHundredDecimals"), "Failed to read or write byte list value [3, 14, 15..., 79]!");
 			assertEquals(Arrays.asList(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE), ((IConfiguration) config).getByteList("byteListTest.MinZeroMax"), "Failed to read or write byte list value [" + Byte.MIN_VALUE + ", 0, " + Byte.MAX_VALUE + "]!");
 
-			assertEquals(false, ((IConfiguration) config).contains("integerListTest.Null"), "Failed to read or write integer list value null!");
+			assertFalse(((IConfiguration) config).contains("integerListTest.Null"), "Failed to read or write integer list value null!");
 			assertEquals(new ArrayList<Integer>(), ((IConfiguration) config).getIntegerList("integerListTest.Empty"), "Failed to read or write integer list value []!");
 			assertEquals(Arrays.asList(0, 1, 2, 3), ((IConfiguration) config).getIntegerList("integerListTest.ZeroOneTwoThree"), "Failed to read or write integer list value [0, 1, 2, 3]!");
 			assertEquals(Arrays.asList(4, 2), ((IConfiguration) config).getIntegerList("integerListTest.FourTwo"), "Failed to read or write integer list value [4, 2]!");
