@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,12 +71,5 @@ public class ChildishTest
 		assertFalse(cfgChild.canAccess(), "Locking resource should disable write access");
 		assertFalse(cfgParent.canAccess(), "Locking resource should lock even parental hierarchy");
 		assertFalse(thirdTier.canAccess(), "Locking resource should lock even child hierarchy");
-	}
-	
-	@SuppressWarnings("deprecation")
-	@AfterAll
-	public static void endAll()
-	{
-		UneiConfiguration.INSTANCE.clear();
 	}
 }
