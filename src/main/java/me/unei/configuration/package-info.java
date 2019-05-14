@@ -12,7 +12,7 @@
  * - {@link me.unei.configuration.SavedFile SavedFile}<br>
  * </div>
  * 
- * @version 1.2.7
+ * @version 1.3.0
  * @since 0.0.0
  */
 package me.unei.configuration;
