@@ -314,6 +314,10 @@
       <id>CodeMC</id>
       <url>https://repo.codemc.org/repository/maven-public</url>
     </repository>
+    <repository>
+      <id>unei-repo</id>
+      <url>http://unei.gitlab.io/maven/</url>
+    </repository>
   </repositories>
 
   <dependencies>
