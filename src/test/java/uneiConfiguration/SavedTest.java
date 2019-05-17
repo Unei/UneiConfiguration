@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.commons.logging.LoggerFactory;
 
 import me.unei.configuration.UneiConfiguration;
 import me.unei.configuration.api.Configurations;
@@ -41,29 +40,48 @@ import me.unei.configuration.api.exceptions.FileFormatException;
 public class SavedTest
 {
 	private static final String FILE_NAME = "config_test";
+	private static final String CLASS_NAME = SavedTest.class.getName();
 
 	@TempDir
 	static File tempDir;
 
 	private List<IFlatConfiguration> configs;
 
-	private static final org.junit.platform.commons.logging.Logger logger2 = LoggerFactory.getLogger(SavedTest.class);
-	private static final Logger logger = Logger.getLogger("Tests-File");
-
 	public void logFine(String message)
 	{
-		logger2.trace(() -> message);
+		UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "logFine", message);
 	}
 
 	public void logInfo(String message)
 	{
-		logger2.info(() -> message);
+		UneiConfiguration.getInstance().getLogger().logp(Level.INFO, CLASS_NAME, "logInfo", message);
+	}
+	
+	public void logWarn(String message, Throwable t)
+	{
+		if (t == null) {
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "logWarn", message);
+		} else {
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "logWarn", message, t);
+		}
 	}
 
 	@BeforeAll
 	public void configurationTests()
 	{
 		UneiConfiguration.tryInstanciate();
+		
+		try {
+			File logFolder = new File("logs");
+			if (!logFolder.isDirectory()) {
+				logFolder.mkdirs();
+			}
+			UneiConfiguration.getInstance().getLogger().addHandler(new FileHandler("logs/unei.log", 1024 * 1024 * 30, 5, true));
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		assertNotNull(tempDir);
 
@@ -85,7 +103,7 @@ public class SavedTest
 					}
 					catch (IOException e)
 					{
-						logger.log(Level.WARNING, "Failed to close a configuration resource:", e);
+						logWarn("Failed to close a configuration resource:", e);
 					}
 				}
 			}
@@ -114,18 +132,13 @@ public class SavedTest
 		assertEquals(7, configs.size());
 		assertFalse(configs.contains(null));
 	}
-
-	private void resetConfigs()
+	
+	private void closeCloseable()
 	{
-		logFine("Clearing configurations...");
 		if (this.configs == null) return;
 
 		for (IFlatConfiguration config : this.configs)
 		{
-			if (config.getFile().getFile() != null)
-			{
-				config.getFile().getFile().delete();
-			}
 			if (config instanceof Closeable)
 			{
 				try
@@ -134,8 +147,24 @@ public class SavedTest
 				}
 				catch (IOException e)
 				{
-					logger.log(Level.WARNING, "Failed to close a configuration resource:", e);
+					logWarn("Failed to close a configuration resource:", e);
 				}
+			}
+		}
+	}
+
+	private void resetConfigs()
+	{
+		logFine("Clearing configurations...");
+		if (this.configs == null) return;
+
+		closeCloseable();
+		
+		for (IFlatConfiguration config : this.configs)
+		{
+			if (config.getFile().getFile() != null)
+			{
+				config.getFile().getFile().delete();
 			}
 
 			try
@@ -144,7 +173,7 @@ public class SavedTest
 			}
 			catch (FileFormatException ffe)
 			{
-				logger.log(Level.WARNING, "Could not reload empty resource:", ffe);
+				logWarn("Could not reload empty resource:", ffe);
 				fail("Enable to reload configuration resource properly", ffe);
 			}
 		}
@@ -209,7 +238,7 @@ public class SavedTest
 				}
 				catch (IOException e)
 				{
-					logger.log(Level.WARNING, "Failed to close a configuration resource:", e);
+					logWarn("Failed to close a configuration resource:", e);
 				}
 			}
 		}
