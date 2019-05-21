@@ -8,11 +8,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import me.unei.configuration.api.format.INBTList;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.api.format.TagType;
+import me.unei.configuration.formats.ArrayTools;
 import me.unei.configuration.reflection.NBTListReflection;
 
 public final class TagList extends Tag implements INBTList {
@@ -72,9 +71,18 @@ public final class TagList extends Tag implements INBTList {
     			subTag.loadMap((Map<?, ?>)value);
     			this.add(subTag);
     		} else if (value instanceof Iterable) {
-    			TagList subTag = new TagList();
-    			subTag.loadList((Iterable<?>)value);
-    			this.add(subTag);
+    			Class<?> subType = ArrayTools.getIterableParam((Iterable<?>) value);
+    			if (subType.equals(byte.class) || subType.equals(Byte.class)) {
+    				this.add(new TagByteArray(ArrayTools.toBytes(value)));
+    			} else if (subType.equals(int.class) || subType.equals(Integer.class)) {
+    				this.add(new TagIntArray(ArrayTools.toInts(value)));
+    			} else if (subType.equals(long.class) || subType.equals(Long.class)) {
+    				this.add(new TagLongArray(ArrayTools.toLongs(value)));
+    			} else {
+    				TagList subTag = new TagList();
+    				subTag.loadList((Iterable<?>)value);
+    				this.add(subTag);
+    			}
     		} else if (value instanceof Void) {
     			this.add(new TagEnd());
     		} else if (value instanceof Integer) {
@@ -92,15 +100,15 @@ public final class TagList extends Tag implements INBTList {
     		} else if (value instanceof int[]) {
     			this.add(new TagIntArray((int[])value));
     		} else if (value instanceof Integer[]) {
-    			this.add(new TagIntArray(ArrayUtils.toPrimitive((Integer[])value)));
+    			this.add(new TagIntArray(ArrayTools.toPrimitive((Integer[])value)));
     		} else if (value instanceof byte[]) {
     			this.add(new TagByteArray((byte[])value));
     		} else if (value instanceof Byte[]) {
-    			this.add(new TagByteArray(ArrayUtils.toPrimitive((Byte[])value)));
+    			this.add(new TagByteArray(ArrayTools.toPrimitive((Byte[])value)));
     		} else if (value instanceof long[]) {
     			this.add(new TagLongArray((long[])value));
     		} else if (value instanceof Long[]) {
-    			this.add(new TagLongArray(ArrayUtils.toPrimitive((Long[])value)));
+    			this.add(new TagLongArray(ArrayTools.toPrimitive((Long[])value)));
     		}
     	}
     }

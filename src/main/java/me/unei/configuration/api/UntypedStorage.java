@@ -1,5 +1,6 @@
 package me.unei.configuration.api;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,8 +121,17 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
     public List<Byte> getByteList(String path) {
         try {
             List<Byte> list = new ArrayList<Byte>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).byteValue());
+            Object obj = get(path);
+            if (obj instanceof Iterable<?>) {
+            	for (Object value : (Iterable<?>) obj) {
+            		list.add(((Number) value).byteValue());
+            	}
+            } else if (obj.getClass().isArray()) {
+            	for (int i = 0; i < Array.getLength(obj); ++i) {
+            		list.add(((Number) Array.get(obj, i)).byteValue());
+            	}
+            } else {
+            	return null;
             }
             return list;
         } catch (Exception e) {
@@ -132,8 +142,17 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
     public List<Integer> getIntegerList(String path) {
         try {
             List<Integer> list = new ArrayList<Integer>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).intValue());
+            Object obj = get(path);
+            if (obj instanceof Iterable<?>) {
+            	for (Object value : (Iterable<?>) obj) {
+            		list.add(((Number) value).intValue());
+            	}
+            } else if (obj.getClass().isArray()) {
+            	for (int i = 0; i < Array.getLength(obj); ++i) {
+            		list.add(((Number) Array.get(obj, i)).intValue());
+            	}
+            } else {
+            	return null;
             }
             return list;
         } catch (Exception e) {
@@ -144,8 +163,17 @@ public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Config
     public List<Long> getLongList(String path) {
         try {
             List<Long> list = new ArrayList<Long>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).longValue());
+            Object obj = get(path);
+            if (obj instanceof Iterable<?>) {
+            	for (Object value : (Iterable<?>) obj) {
+            		list.add(((Number) value).longValue());
+            	}
+            } else if (obj.getClass().isArray()) {
+            	for (int i = 0; i < Array.getLength(obj); ++i) {
+            		list.add(((Number) Array.get(obj, i)).longValue());
+            	}
+            } else {
+            	return null;
             }
             return list;
         } catch (Exception e) {

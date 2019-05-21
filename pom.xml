@@ -179,6 +179,7 @@
   			<configuration>
   				<testFailureIgnore>true</testFailureIgnore>
   				<reportFormat>plain</reportFormat>
+  				<trimStackTrace>false</trimStackTrace>
   			</configuration>
   		</plugin>
   		<plugin>

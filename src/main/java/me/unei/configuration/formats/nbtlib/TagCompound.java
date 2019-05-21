@@ -13,14 +13,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.exceptions.UnexpectedClassException;
 import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.format.INBTList;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.api.format.TagType;
+import me.unei.configuration.formats.ArrayTools;
 import me.unei.configuration.reflection.NBTCompoundReflection;
 
 public final class TagCompound extends Tag implements INBTCompound {
@@ -59,7 +58,7 @@ public final class TagCompound extends Tag implements INBTCompound {
         }
     }
     
-    public void loadMap(Map<?, ?> datas) throws UnexpectedClassException {
+	public void loadMap(Map<?, ?> datas) throws UnexpectedClassException {
     	this.tags.clear();
     	for (Entry<?, ?> entry : datas.entrySet()) {
     		String key = entry.getKey().toString();
@@ -76,9 +75,22 @@ public final class TagCompound extends Tag implements INBTCompound {
     			subTag.loadMap((Map<?, ?>)value);
     			this.set(key, subTag);
     		} else if (value instanceof Iterable) {
-    			TagList subTag = new TagList();
-    			subTag.loadList((Iterable<?>)value);
-    			this.set(key, subTag);
+    			Class<?> subType = ArrayTools.getIterableParam((Iterable<?>) value);
+    			if (subType == null) {
+    				TagList subTag = new TagList();
+    				subTag.loadList((Iterable<?>)value);
+    				this.set(key, subTag);
+    			} else if (subType.equals(byte.class) || subType.equals(Byte.class)) {
+    				this.setByteArray(key, ArrayTools.toBytes(value));
+    			} else if (subType.equals(int.class) || subType.equals(Integer.class)) {
+    				this.setIntArray(key, ArrayTools.toInts(value));
+    			} else if (subType.equals(long.class) || subType.equals(Long.class)) {
+    				this.setLongArray(key, ArrayTools.toLongs(value));
+    			} else {
+    				TagList subTag = new TagList();
+    				subTag.loadList((Iterable<?>)value);
+    				this.set(key, subTag);
+    			}
     		} else if (value instanceof Integer) {
     			this.setInt(key, (Integer)value);
     		} else if (value instanceof Byte) {
@@ -98,15 +110,15 @@ public final class TagCompound extends Tag implements INBTCompound {
     		} else if (value instanceof int[]) {
     			this.setIntArray(key, (int[])value);
     		} else if (value instanceof Integer[]) {
-    			this.setIntArray(key, ArrayUtils.toPrimitive((Integer[])value));
+    			this.setIntArray(key, ArrayTools.toPrimitive((Integer[])value));
     		} else if (value instanceof byte[]) {
     			this.setByteArray(key, (byte[])value);
     		} else if (value instanceof Byte[]) {
-    			this.setByteArray(key, ArrayUtils.toPrimitive((Byte[])value));
+    			this.setByteArray(key, ArrayTools.toPrimitive((Byte[])value));
     		} else if (value instanceof long[]) {
     			this.setLongArray(key, (long[])value);
     		} else if (value instanceof Long[]) {
-    			this.setLongArray(key, ArrayUtils.toPrimitive((Long[])value));
+    			this.setLongArray(key, ArrayTools.toPrimitive((Long[])value));
     		} else if (value instanceof Serializable) {
     			this.setByteArray(key + "Object", SerializerHelper.serialize(value));
     		} else {

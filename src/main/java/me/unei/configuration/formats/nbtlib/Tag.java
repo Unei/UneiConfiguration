@@ -203,13 +203,13 @@ public abstract class Tag implements INBTTag, Cloneable {
 		public L newList();
 	}
 
-	public static class DefaultObjectCreator implements ObjectCreator<Map<String,Object>, List<Object>> {
+	public static class DefaultObjectCreator implements ObjectCreator<HashMap<String,Object>, ArrayList<Object>> {
 		@Override
-		public Map<String, Object> newMap() {
+		public HashMap<String, Object> newMap() {
 			return new HashMap<>();
 		}
 		@Override
-		public List<Object> newList() {
+		public ArrayList<Object> newList() {
 			return new ArrayList<>();
 		}
 	}
