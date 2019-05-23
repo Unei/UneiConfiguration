@@ -194,12 +194,12 @@ public class SavedTest
 		}
 	}
 	
-	private static final java.util.concurrent.atomic.AtomicInteger fileIdx = new java.util.concurrent.atomic.AtomicInteger(42);
+	/*private static final java.util.concurrent.atomic.AtomicInteger fileIdx = new java.util.concurrent.atomic.AtomicInteger(42);
 	
 	private void saveFolder()
 	{
 		me.unei.configuration.FileUtils.copyDirs(SavedTest.tempDir, new File("./tests" + fileIdx.getAndIncrement()));
-	}
+	}*/
 
 	@Test
 	@Order(2)
@@ -276,7 +276,7 @@ public class SavedTest
 		logFine("Reading from configurations...");
 		assertNotNull(configs, "Test order is not respected");
 
-		saveFolder();
+		/* saveFolder(); */
 		
 		for (IFlatConfiguration config : this.configs)
 		{
