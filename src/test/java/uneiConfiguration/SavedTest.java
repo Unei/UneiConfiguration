@@ -117,20 +117,32 @@ public class SavedTest
 	{
 		logFine("Loading configurations...");
 
+		loadConfigMap();
+
+		resetConfigs();
+
+		assertFalse(configs.contains(null));
+	}
+	
+	private void loadConfigMap()
+	{
+		if (this.configs != null)
+		{
+			this.configs.clear();
+			this.configs = null;
+		}
+		
 		this.configs = new ArrayList<IFlatConfiguration>();
 		this.configs.add(Configurations.newConfig(ConfigurationType.NBT, tempDir, FILE_NAME, null));
 		this.configs.add(Configurations.newConfig(ConfigurationType.YAML, tempDir, FILE_NAME, null));
 		this.configs.add(Configurations.newConfig(ConfigurationType.JSON, tempDir, FILE_NAME, null));
 		this.configs.add(Configurations.newConfig(ConfigurationType.Binary, tempDir, FILE_NAME, null));
 		this.configs.add(Configurations.newConfig(ConfigurationType.Properties, tempDir, FILE_NAME, null));
-		//this.configs.add(Configurations.newConfig(ConfigurationType.SQLite, tempDir, FILE_NAME, "testtable_normal"));
-		//this.configs.add(Configurations.newConfig(ConfigurationType.FlatSQLite, tempDir, FILE_NAME, "testtable_flat"));
-
-		resetConfigs();
+		this.configs.add(Configurations.newConfig(ConfigurationType.SQLite, tempDir, FILE_NAME, "testtable_normal"));
+		this.configs.add(Configurations.newConfig(ConfigurationType.FlatSQLite, tempDir, FILE_NAME, "testtable_flat"));
 
 		assertNotNull(configs);
-		assertEquals(5, configs.size());
-		assertFalse(configs.contains(null));
+		assertEquals(7, configs.size());
 	}
 	
 	private void closeCloseable()
@@ -164,12 +176,15 @@ public class SavedTest
 		{
 			if (config.getFile().getFile() != null)
 			{
+				// Cannot assert file deletion because the SQLite file appears twice and will cause direct failure.
+				/* assertTrue(config.getFile().getFile().delete(), "Could not delete old config file"); */
 				config.getFile().getFile().delete();
 			}
 
 			try
 			{
 				config.reload();
+				logFine("Reloaded config is such: " + config.toString());
 			}
 			catch (FileFormatException ffe)
 			{
@@ -179,12 +194,12 @@ public class SavedTest
 		}
 	}
 	
-	/*private static final java.util.concurrent.atomic.AtomicInteger fileIdx = new java.util.concurrent.atomic.AtomicInteger(42);
+	private static final java.util.concurrent.atomic.AtomicInteger fileIdx = new java.util.concurrent.atomic.AtomicInteger(42);
 	
 	private void saveFolder()
 	{
 		me.unei.configuration.FileUtils.copyDirs(SavedTest.tempDir, new File("./tests" + fileIdx.getAndIncrement()));
-	}*/
+	}
 
 	@Test
 	@Order(2)
@@ -251,7 +266,7 @@ public class SavedTest
 		}
 		this.configs.clear();
 
-		firstLoad();
+		loadConfigMap();
 	}
 
 	@Test
@@ -261,7 +276,7 @@ public class SavedTest
 		logFine("Reading from configurations...");
 		assertNotNull(configs, "Test order is not respected");
 
-		/*saveFolder();*/
+		saveFolder();
 		
 		for (IFlatConfiguration config : this.configs)
 		{

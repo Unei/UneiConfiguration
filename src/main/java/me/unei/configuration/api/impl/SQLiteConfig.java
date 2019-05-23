@@ -338,8 +338,13 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 				statement.addBatch();
 			}
 
-			statement.executeBatch();
-			statement.close();
+            int[] results = statement.executeBatch();
+            statement.close();
+            for (int res : results) {
+            	if (res == PreparedStatement.EXECUTE_FAILED) {
+            		UneiConfiguration.getInstance().getLogger().warning("SQLite configuration saving failed at some point.");
+            	}
+            }
 			statement = this.connection.prepareStatement("DELETE FROM " + table + " WHERE id = ?");
 
 			for (Iterator<Entry<Key, Object>> it = this.data.entryIterator(); it.hasNext(); ) {
@@ -351,8 +356,13 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 				}
 			}
 
-			statement.executeBatch();
-			statement.close();
+            results = statement.executeBatch();
+            statement.close();
+            for (int res : results) {
+            	if (res == PreparedStatement.EXECUTE_FAILED) {
+            		UneiConfiguration.getInstance().getLogger().warning("SQLite configuration saving failed at some point.");
+            	}
+            }
 			UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "save", "Successfully written.");
 		} catch (SQLException e) {
 			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "save", "Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":", e);
@@ -385,6 +395,14 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		}
 		if (this.getType() != StorageType.MAP) {
 			this.data = new StringHashMap<Object>();
+		}
+		if (this.file.getFile() == null) {
+			this.data = new StringHashMap<>();
+			return;
+		}
+		if (!this.file.getFile().exists()) {
+			this.save();
+			return;
 		}
 		try {
 			this.reconnect();

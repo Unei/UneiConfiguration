@@ -19,6 +19,7 @@ import javax.xml.bind.DatatypeConverter;
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IFlatSQLiteConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
+import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig> implements IFlatSQLiteConfiguration {
@@ -192,8 +193,13 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
                 statement.addBatch();
             }
 
-            statement.executeBatch();
+            int[] results = statement.executeBatch();
             statement.close();
+            for (int res : results) {
+            	if (res == PreparedStatement.EXECUTE_FAILED) {
+            		UneiConfiguration.getInstance().getLogger().warning("SQLite configuration saving failed at some point.");
+            	}
+            }
             UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
         } catch (SQLException e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
@@ -205,7 +211,7 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
                     e.printStackTrace();
                 }
             }
-        }/* catch (IOException e) {
+        } catch (Exception e) {
             UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
             e.printStackTrace();
             if (statement != null) {
@@ -215,13 +221,22 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
                     e.printStackTrace();
                 }
             }
-        }*/
+            throw e;
+        }
     }
 
     public void reload() {
         if (!this.canAccess()) {
             return;
         }
+		if (this.file.getFile() == null) {
+			this.data = new StringHashMap<>();
+			return;
+		}
+		if (!this.file.getFile().exists()) {
+			this.save();
+			return;
+		}
         try {
             this.reconnect();
             this.data.clear();
