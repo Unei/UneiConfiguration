@@ -21,6 +21,24 @@ import me.unei.configuration.api.impl.YAMLConfig;
  */
 public final class ConfigurationsImpl extends Configurations
 {
+	public static ConfigurationType getTypeOf(IFlatConfiguration cfg)
+	{
+		try
+		{
+			return cfg.getConfigurationType();
+		}
+		catch (NoSuchMethodError ignored) // Backwards compatibility
+		{
+			if (cfg instanceof FlatConfiguration) {
+				return ((FlatConfiguration<?>) cfg).getConfigurationType();
+			}
+			if (cfg instanceof Configuration) {
+				return ((Configuration<?>) cfg).getConfigurationType();
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * All the flat configuration constructors grouped in one single class.
 	 * 

@@ -253,7 +253,25 @@ public class StorageConverter
 			return result;
 		}
 		return (defaultVal != null) ? defaultVal.get() : null;
-	} 
+	}
+	
+	public static <T> Storage<T> getForType(StorageType type)
+	{
+		switch (type)
+		{
+		case MAP:
+			return new StringHashMap<T>();
+			
+		case LIST:
+			return new AtomicIndexList<T>();
+			
+		case DISCONTINUED_LIST:
+			return new IntegerHashMap<T>();
+
+		default:
+			return null;
+		}
+	}
 	
 	private StorageConverter()
 	{}

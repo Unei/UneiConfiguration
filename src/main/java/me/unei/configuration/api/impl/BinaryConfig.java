@@ -12,7 +12,9 @@ import org.apache.commons.lang.NotImplementedException;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
@@ -24,19 +26,29 @@ import me.unei.configuration.formats.StorageConverter;
 import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfiguration {
+public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfiguration, IInternalStorageUse {
 	
 	public static final String BINARY_FILE_EXT = ".bin";
 	public static final String BINARY_TMP_EXT = ".tmp";
 	
 	private Storage<Object> data = null;
 	
-	final Storage<Object> getData() {
+	public final Storage<Object> getStorageObject() {
 		if (data == null)
 		{
 			data = new StringHashMap<Object>();
 		}
 		return data;
+	}
+	
+	@Override
+	public void setStorageObject(Storage<Object> sto) {
+		this.data = sto;
+		if (this.parent != null && this.parent.data != null) {
+			if (this.parent.getStorageObject().getStorageType() != StorageType.UNDEFINED) {
+				this.parent.data.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.data);
+			}
+		}
 	}
 	
 	public BinaryConfig(SavedFile file, PathSymbolsType symType) {
@@ -68,6 +80,11 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		
 		this.updateNode();
 	}
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.Binary;
+	}
 
 	public static BinaryConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
 		return BinaryConfig.getForPath(new BinaryConfig(folder, fileName, symType), path);
@@ -92,7 +109,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 	@Override
 	protected void updateFromParent() {
 		if (this.parent != null && this.parent.data != null) {
-			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+			if (this.parent.getStorageObject().getStorageType() != StorageType.UNDEFINED) {
 				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
 				Storage<Object> tmp = StorageConverter.allocateBest(me, null, null);
 				if (tmp != null) {
@@ -182,7 +199,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tmp));
 			oos.writeInt(0xdeadbeef);
-			oos.writeObject(getData());
+			oos.writeObject(getStorageObject());
 			oos.writeInt(0xfeebdaed);
 			oos.flush();
 			oos.close();
@@ -248,7 +265,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 	}
 	
 	public Set<String> getKeys() {
-		return this.getData().getKeys();
+		return this.getStorageObject().getKeys();
 	}
 	
 	public boolean contains(String path) {

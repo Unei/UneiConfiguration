@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.InvalidNodeException;
 import me.unei.configuration.api.fs.PathComponent;
@@ -83,6 +84,8 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.nodeName = Integer.toString(index);
 		this.nodeAtomicIndex = new AtomicInteger(index);
 	}
+    
+    public abstract ConfigurationType getConfigurationType();
 	
 	@Override
 	public IConfiguration getAt(int index)

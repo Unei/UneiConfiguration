@@ -23,8 +23,10 @@ import org.yaml.snakeyaml.error.YAMLException;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.IYAMLConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
@@ -37,7 +39,7 @@ import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.formats.Storage.Key;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfiguration {
+public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAMLConfiguration, IInternalStorageUse {
 
     public static final String YAML_FILE_EXT = ".yml";
     public static final String YAML_TMP_EXT = ".tmp";
@@ -65,13 +67,19 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 
     private Storage<Object> nodeData;
     
-    final Storage<Object> getData()
+    public final Storage<Object> getStorageObject()
     {
     	if (nodeData == null)
     	{
     		nodeData = new StringHashMap<>();
     	}
     	return nodeData;
+    }
+    
+    @Override
+    public void setStorageObject(Storage<Object> sto) {
+    	this.nodeData = sto;
+    	propagate();
     }
 
     public YAMLConfig(SavedFile file) {
@@ -114,6 +122,11 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 
         this.updateNode();
     }
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.YAML;
+	}
 
     public static YAMLConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
         return YAMLConfig.getForPath(new YAMLConfig(folder, fileName, symType), path);
@@ -200,7 +213,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
         UneiConfiguration.getInstance().getLogger().fine("Writing YAML to file " + getFileName() + "...");
         try {
             Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
-            YAMLConfig.BEAUTIFIED_YAML.dump(getData(), w);
+            YAMLConfig.BEAUTIFIED_YAML.dump(getStorageObject(), w);
             w.close();
             if (this.file.getFile().exists()) {
                 UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
@@ -234,7 +247,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
             this.save();
             return;
         }
-        this.getData().clear();
+        this.getStorageObject().clear();
         try {
             UneiConfiguration.getInstance().getLogger().fine("Reading YAML from file " + getFileName() + "...");
             Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
@@ -286,7 +299,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 	
 	protected void propagate() {
 		if (this.parent != null && this.parent.nodeData != null) {
-			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+			if (this.parent.getStorageObject().getStorageType() != StorageType.UNDEFINED) {
 				this.parent.nodeData.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.nodeData);
 			}
 		}

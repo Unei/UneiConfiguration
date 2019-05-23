@@ -26,6 +26,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IMySQLConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.MySQLConnectionException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
@@ -84,6 +85,15 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
 
         this.updateNode();
     }
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.MySQL;
+	}
+	
+	public String getTableName() {
+		return this.tableName;
+	}
 
     private void subinit() {
         if (this.parent != null) {

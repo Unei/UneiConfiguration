@@ -26,6 +26,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IJSONConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
@@ -101,6 +102,11 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		super(p_parent, p_nodeIndex);
 
 		this.updateNode();
+	}
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.JSON;
 	}
 
 	public static JSONConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {

@@ -18,6 +18,7 @@ import javax.xml.bind.DatatypeConverter;
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IFlatMySQLConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.MySQLConnectionException;
 import me.unei.configuration.plugin.UneiConfiguration;
@@ -47,6 +48,15 @@ public final class FlatMySQLConfig extends UntypedFlatStorage<FlatMySQLConfig> i
 
         this.subinit();
     }
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.FlatMySQL;
+	}
+	
+	public String getTableName() {
+		return this.tableName;
+	}
 
     private void subinit() {
         try {

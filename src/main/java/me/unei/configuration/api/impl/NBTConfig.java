@@ -8,8 +8,10 @@ import java.util.Set;
 
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
+import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.INBTConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
@@ -30,23 +32,24 @@ import me.unei.configuration.plugin.UneiConfiguration;
  * @version 2.5.0
  * @since 0.0.1
  */
-public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTConfiguration {
+public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTConfiguration, IInternalStorageUse {
 
 	public static final String NBT_FILE_EXT = ".dat";
 	public static final String NBT_TMP_EXT = ".tmp";
 
 	private Storage<Object> data = null;
 
-	final Storage<Object> getData() {
-		if (data == null)
-		{
+	@Override
+	public final Storage<Object> getStorageObject() {
+		if (data == null) {
 			data = new StringHashMap<Object>();
 		}
 		return data;
 	}
-
-	final void setData(Storage<Object> content) {
-		this.data = content;
+	
+	@Override
+	public final void setStorageObject(Storage<Object> sto) {
+		this.data = sto;
 		propagate();
 	}
 
@@ -78,6 +81,11 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		super(p_parent, p_tagIndex);
 
 		this.updateNode();
+	}
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.NBT;
 	}
 
 	public static NBTConfig getForPath(File folder, String fileName, String path, PathSymbolsType symType) {
@@ -141,7 +149,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 	@Override
 	protected void updateFromParent() {
 		if (this.parent != null && this.parent.data != null) {
-			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+			if (this.parent.getStorageObject().getStorageType() != StorageType.UNDEFINED) {
 				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
 				Storage<Object> tmp = StorageConverter.allocateBest(me, null, null);
 				if (tmp != null) {
@@ -158,7 +166,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 	
 	private void propagate() {
 		if (this.parent != null && this.parent.data != null) {
-			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
+			if (this.parent.getStorageObject().getStorageType() != StorageType.UNDEFINED) {
 				this.parent.data.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.data);
 			}
 		}
@@ -179,15 +187,15 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		this.data = null;
 		switch (type) {
 		case MAP:
-			setData(new StringHashMap<Object>());
+			setStorageObject(new StringHashMap<Object>());
 			break;
 
 		case LIST:
-			setData(new AtomicIndexList<Object>());
+			setStorageObject(new AtomicIndexList<Object>());
 			break;
 
 		default:
-			setData(new StringHashMap<Object>());
+			setStorageObject(new StringHashMap<Object>());
 			throw new IllegalArgumentException("Error while setting new NBT node type");
 		}
 	}
@@ -322,7 +330,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		}
 		File tmp = new File(this.file.getFolder(), this.file.getFullName() + NBTConfig.NBT_TMP_EXT);
 		TagCompound compound = new TagCompound();
-		compound.loadMap((StringHashMap<Object>) getData());
+		compound.loadMap((StringHashMap<Object>) getStorageObject());
 		try {
 			UneiConfiguration.getInstance().getLogger().fine("Writing NBT Compound to file " + getFileName() + "...");
 			NBTIO.writeCompressed(compound, new FileOutputStream(tmp));

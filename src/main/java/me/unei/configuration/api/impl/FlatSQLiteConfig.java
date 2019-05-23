@@ -19,6 +19,7 @@ import javax.xml.bind.DatatypeConverter;
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IFlatSQLiteConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
@@ -43,6 +44,15 @@ public final class FlatSQLiteConfig extends UntypedFlatStorage<FlatSQLiteConfig>
     public FlatSQLiteConfig(File folder, String fileName, String tableName) {
         this(new SavedFile(folder, fileName, FlatSQLiteConfig.SQLITE_FILE_EXT), tableName);
     }
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.FlatSQLite;
+	}
+	
+	public String getTableName() {
+		return this.tableName;
+	}
 
     private void subinit() {
         try {

@@ -22,6 +22,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.IFlatCSVConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.UnexpectedClassException;
 import me.unei.configuration.plugin.UneiConfiguration;
@@ -49,6 +50,11 @@ public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSV
 	public CSVConfig(File folder, String fileName)
 	{
 		this(new SavedFile(folder, fileName, CSVConfig.CSV_FILE_EXT));
+	}
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.CSV;
 	}
 	
 	public void save() throws UnexpectedClassException {

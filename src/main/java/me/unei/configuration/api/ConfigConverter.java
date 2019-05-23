@@ -2,8 +2,64 @@ package me.unei.configuration.api;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import me.unei.configuration.api.Configurations.ConfigurationType;
+import me.unei.configuration.api.Configurations.ConfigurationType.ConfigurationTypeCls;
+import me.unei.configuration.api.impl.FlatMySQLConfig;
+import me.unei.configuration.api.impl.FlatSQLiteConfig;
+import me.unei.configuration.api.impl.MySQLConfig;
+import me.unei.configuration.api.impl.SQLiteConfig;
+
 public final class ConfigConverter
 {
+	public static IFlatConfiguration convert(IFlatConfiguration input, ConfigurationType type)
+	{
+		if (type == null || input == null || ConfigurationsImpl.getTypeOf(input) == type)
+		{
+			return input;
+		}
+		
+		String tableName = input.getName();
+		try
+		{
+			if (input instanceof ISQLConfiguration) {
+				tableName = ((ISQLConfiguration) input).getTableName();
+			}
+		}
+		catch (NoSuchMethodError ignored) //TODO: Remove backwards compatibility.
+		{
+			if (input instanceof SQLiteConfig) {
+				tableName = ((SQLiteConfig) input).getTableName();
+			} else if (input instanceof FlatSQLiteConfig) {
+				tableName = ((FlatSQLiteConfig) input).getTableName();
+			} else if (input instanceof MySQLConfig) {
+				tableName = ((MySQLConfig) input).getTableName();
+			} else if (input instanceof FlatMySQLConfig) {
+				tableName = ((FlatMySQLConfig) input).getTableName();
+			}
+		}
+		
+		IFlatConfiguration newInstance = Configurations.newConfig(type, input.getFile(), tableName);
+		
+		if (newInstance == null)
+		{
+			return null;
+		}
+		
+		if ((newInstance instanceof IInternalStorageUse) && (input instanceof IInternalStorageUse))
+		{
+			((IInternalStorageUse) newInstance).setStorageObject(((IInternalStorageUse) input).getStorageObject());
+		}
+		
+		input.lock();
+		
+		return newInstance;
+	}
+	
+	public static <T extends IFlatConfiguration> T changeType(IFlatConfiguration input, ConfigurationTypeCls<T> dest)
+	{
+		return dest.safeCast(convert(input, dest.getType()));
+	}
+	
 	public static boolean copy(IFlatConfiguration from, IFlatConfiguration to)
 	{
 		if (!from.canAccess() || !to.canAccess())

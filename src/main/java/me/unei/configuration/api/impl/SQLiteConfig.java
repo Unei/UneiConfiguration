@@ -29,6 +29,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.ISQLiteConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
@@ -95,6 +96,15 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		// this.connection = this.parent.connection;
 
 		this.updateNode();
+	}
+	
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.SQLite;
+	}
+	
+	public String getTableName() {
+		return this.tableName;
 	}
 
 	private void subinit() {
