@@ -8,14 +8,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Set;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.UntypedStorage;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.NotImplementedException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;

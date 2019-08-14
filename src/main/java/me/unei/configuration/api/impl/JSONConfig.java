@@ -13,8 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -28,6 +26,7 @@ import me.unei.configuration.api.IJSONConfiguration;
 import me.unei.configuration.api.UntypedStorage;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.NotImplementedException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;

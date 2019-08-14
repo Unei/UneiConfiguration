@@ -1,6 +1,10 @@
 package me.unei.configuration;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -20,8 +24,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import me.unei.configuration.api.exceptions.UnexpectedClassException;
-
-import org.apache.commons.lang.SerializationUtils;
 
 /**
  * 
@@ -51,7 +53,13 @@ public final class SerializerHelper
 			return new byte[0];
 		}
 		try {
-			return SerializationUtils.serialize((Serializable)obj);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+			try (ObjectOutputStream out = new ObjectOutputStream(baos)) {
+				out.writeObject(obj);
+			} catch (final IOException e) {
+				throw e;
+			}
+			return baos.toByteArray();
 		} catch (Throwable t) {
 			t.printStackTrace();
 			return new byte[0];
@@ -63,7 +71,13 @@ public final class SerializerHelper
 			return null;
 		}
 		try {
-			return SerializationUtils.deserialize(data);
+			ByteArrayInputStream bais = new ByteArrayInputStream(data);
+			try (ObjectInputStream in = new ObjectInputStream(bais)) {
+				final Object obj = in.readObject();
+				return obj;
+			} catch (final IOException e) {
+				throw e;
+			}
 		} catch (Throwable t) {
 			t.printStackTrace();
 			return null;

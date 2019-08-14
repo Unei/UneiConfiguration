@@ -23,13 +23,12 @@ import java.util.logging.Level;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.ISQLiteConfiguration;
 import me.unei.configuration.api.UntypedStorage;
-import me.unei.configuration.api.Configurations.ConfigurationType;
+import me.unei.configuration.api.exceptions.NotImplementedException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;

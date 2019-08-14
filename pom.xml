@@ -4,7 +4,7 @@
 
   <groupId>me.unei</groupId>
   <artifactId>uneiconfiguration</artifactId>
-  <version>1.3.0</version>
+  <version>1.4.0</version>
   <packaging>jar</packaging>
 
   <name>UneiConfiguration</name>
@@ -16,7 +16,7 @@
     <project.version.minecraft>1.14-R0.1-SNAPSHOT</project.version.minecraft>
     <project.version.bungeecord>1.14-SNAPSHOT</project.version.bungeecord>
     
-    <project.version.unei.configurationAPI>1.3</project.version.unei.configurationAPI>
+    <project.version.unei.configurationAPI>1.4</project.version.unei.configurationAPI>
 
     <manifest.built-by>UneiTeam</manifest.built-by>
     

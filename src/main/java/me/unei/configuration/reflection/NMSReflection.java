@@ -3,8 +3,6 @@ package me.unei.configuration.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.bukkit.Bukkit;
-
 public final class NMSReflection {
 
     private static Class<?> nbtCompressedStreamTools = null;
@@ -17,7 +15,7 @@ public final class NMSReflection {
 
     static {
         if (NMSReflection.canUseNMS()) {
-            String[] array = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",");
+            String[] array = /*Bukkit.getServer().getClass().getPackage().getName()*/"a.a".replace(".", ",").split(",");
             VERSION = (array.length == 4? array[3] : "");
 
             NMSReflection.nbtCompressedStreamTools = NMSReflection.getNMSClass("NBTCompressedStreamTools", true);
@@ -57,12 +55,12 @@ public final class NMSReflection {
     }
 
     public static boolean canUseNMS() {
-        try {
+        /*try {
             Bukkit.getVersion();
             return true;
-        } catch (Throwable t) {
+        } catch (Throwable t) {*/
             return false;
-        }
+        //}
     }
 
     public static Class<?> getNMSClass(String name, boolean logError) {

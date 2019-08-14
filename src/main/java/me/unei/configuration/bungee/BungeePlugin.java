@@ -1,13 +1,13 @@
 package me.unei.configuration.bungee;
 
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import me.unei.configuration.plugin.IBasicPlugin;
 import me.unei.configuration.plugin.IPlugin;
 import me.unei.configuration.plugin.UneiConfiguration;
 import net.md_5.bungee.api.plugin.Plugin;
-
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public final class BungeePlugin extends Plugin implements IPlugin {
 

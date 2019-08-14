@@ -1,6 +1,6 @@
 package me.unei.configuration.api;
 
-import org.apache.commons.lang.NotImplementedException;
+import me.unei.configuration.api.exceptions.NotImplementedException;
 
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.Configurations.ConfigurationType.ConfigurationTypeCls;
