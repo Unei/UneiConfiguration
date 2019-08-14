@@ -8,10 +8,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import me.unei.configuration.ArrayTools;
 import me.unei.configuration.api.format.INBTList;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.api.format.TagType;
-import me.unei.configuration.formats.ArrayTools;
 import me.unei.configuration.reflection.NBTListReflection;
 
 public final class TagList extends Tag implements INBTList {

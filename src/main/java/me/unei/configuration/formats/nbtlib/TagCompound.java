@@ -13,13 +13,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import me.unei.configuration.ArrayTools;
 import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.exceptions.UnexpectedClassException;
 import me.unei.configuration.api.format.INBTCompound;
 import me.unei.configuration.api.format.INBTList;
 import me.unei.configuration.api.format.INBTTag;
 import me.unei.configuration.api.format.TagType;
-import me.unei.configuration.formats.ArrayTools;
 import me.unei.configuration.reflection.NBTCompoundReflection;
 
 public final class TagCompound extends Tag implements INBTCompound {
