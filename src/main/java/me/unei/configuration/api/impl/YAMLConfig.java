@@ -293,6 +293,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 					this.nodeData = new StringHashMap<Object>();
 					sto.set(Key.of(sto.getStorageType(), nodeAtomicIndex, nodeName), this.nodeData);
 				}
+				this.propagate();
 			}
 		}
 	}

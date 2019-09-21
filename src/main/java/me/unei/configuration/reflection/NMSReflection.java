@@ -15,7 +15,7 @@ public final class NMSReflection {
 
     static {
         if (NMSReflection.canUseNMS()) {
-            String[] array = /*Bukkit.getServer().getClass().getPackage().getName()*/"a.a".replace(".", ",").split(",");
+            String[] array = org.bukkit.Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",");
             VERSION = (array.length == 4? array[3] : "");
 
             NMSReflection.nbtCompressedStreamTools = NMSReflection.getNMSClass("NBTCompressedStreamTools", true);
@@ -31,6 +31,11 @@ public final class NMSReflection {
             NBTCompressedStreamToolsReflection.setCSTClass(NMSReflection.nbtCompressedStreamTools);
             
             /* Retrieve numbers */
+            Class<?> numberClass = NMSReflection.getNMSClass("NBTNumber", false);
+            if (numberClass == null) {
+            	numberClass = NMSReflection.getNMSClass("NBTBase.NBTNumber", false);
+            }
+            NBTNumberReflection.setNumberClass(numberClass);
             NBTNumberReflection.setIntClass(NMSReflection.getNMSClass("NBTTagInt", true));
             NBTNumberReflection.setLongClass(NMSReflection.getNMSClass("NBTTagLong", true));
             NBTNumberReflection.setByteClass(NMSReflection.getNMSClass("NBTTagByte", true));
@@ -55,12 +60,12 @@ public final class NMSReflection {
     }
 
     public static boolean canUseNMS() {
-        /*try {
-            Bukkit.getVersion();
+        try {
+            org.bukkit.Bukkit.getVersion();
             return true;
-        } catch (Throwable t) {*/
+        } catch (Throwable t) {
             return false;
-        //}
+        }
     }
 
     public static Class<?> getNMSClass(String name, boolean logError) {

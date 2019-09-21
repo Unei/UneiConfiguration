@@ -58,7 +58,33 @@ public final class TagString extends Tag implements INBTString {
 
     @Override
     public String toString() {
-        return "\"" + this.data.replaceAll("\"", "\\\"") + "\"";
+    	StringBuilder sb = new StringBuilder();
+    	char delimiter = '\0';
+    	
+    	for (int i = 0; i < this.data.length(); ++i) {
+    		char c = this.data.charAt(i);
+    		
+    		if (c == '\\') {
+    			sb.append('\\');
+    		} else if (c == '\'' || c == '"') {
+    			if (delimiter == '\0') {
+    				delimiter = (c == '\'') ? '"' : '\'';
+    			} else if (delimiter == c) {
+    				sb.append('\\');
+    			}
+    		}
+    		
+    		sb.append(c);
+    	}
+    	
+    	if (delimiter == '\0') {
+    		delimiter = '"';
+    	}
+    	
+    	sb.append(delimiter);
+    	sb.insert(0, delimiter);
+    	
+        return sb.toString();
     }
 
     @Override
