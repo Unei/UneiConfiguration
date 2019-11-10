@@ -7,12 +7,19 @@ import java.lang.reflect.Method;
 
 public final class NBTNumberReflection {
 	
+	private static Class<?> nbtNumber = null;
     private static Class<?> nbtTagInt = null;
     private static Class<?> nbtTagByte = null;
     private static Class<?> nbtTagLong = null;
     private static Class<?> nbtTagFloat = null;
     private static Class<?> nbtTagShort = null;
     private static Class<?> nbtTagDouble = null;
+
+    static void setNumberClass(Class<?> type) {
+        if (type != null && NBTNumberReflection.nbtNumber == null) {
+        	NBTNumberReflection.nbtNumber = type;
+        }
+    }
 
     static void setIntClass(Class<?> type) {
         if (type != null && NBTNumberReflection.nbtTagInt == null) {
@@ -48,6 +55,18 @@ public final class NBTNumberReflection {
         if (type != null && NBTNumberReflection.nbtTagDouble == null) {
         	NBTNumberReflection.nbtTagDouble = type;
         }
+    }
+    
+    public static boolean isNBTNumber(Object obj) {
+        if (!NBTBaseReflection.isNBTTag(obj)) {
+            return false;
+        }
+        if (NBTNumberReflection.nbtNumber == null) {
+        	return isNBTNumber0(obj);
+        } else if (NBTNumberReflection.nbtNumber.isAssignableFrom(obj.getClass())) {
+        	return true;
+        }
+        return false;
     }
     
     public static boolean isNBTInteger(Object obj) {
@@ -110,10 +129,7 @@ public final class NBTNumberReflection {
         return false;
     }
 
-    public static boolean isNBTNumber(Object obj) {
-        if (!NBTBaseReflection.isNBTTag(obj)) {
-            return false;
-        }
+    private static boolean isNBTNumber0(Object obj) {
         if (NBTNumberReflection.nbtTagInt != null && NBTNumberReflection.nbtTagInt.isAssignableFrom(obj.getClass())) {
         	return true;
         }
@@ -269,6 +285,7 @@ public final class NBTNumberReflection {
     		} catch (NoSuchMethodException e) {
     			try {
     				Field f = NBTNumberReflection.nbtTagInt.getDeclaredField("data");
+    				f.setAccessible(true);
     				return f.getInt(nmsDouble);
     			} catch (NoSuchFieldException fe) {
     				fe.printStackTrace();
@@ -294,6 +311,7 @@ public final class NBTNumberReflection {
     		} catch (NoSuchMethodException e) {
     			try {
     				Field f = NBTNumberReflection.nbtTagByte.getDeclaredField("data");
+    				f.setAccessible(true);
     				return f.getByte(nmsDouble);
     			} catch (NoSuchFieldException fe) {
     				fe.printStackTrace();
@@ -319,6 +337,7 @@ public final class NBTNumberReflection {
     		} catch (NoSuchMethodException e) {
     			try {
     				Field f = NBTNumberReflection.nbtTagLong.getDeclaredField("data");
+    				f.setAccessible(true);
     				return f.getLong(nmsDouble);
     			} catch (NoSuchFieldException fe) {
     				fe.printStackTrace();
@@ -344,6 +363,7 @@ public final class NBTNumberReflection {
     		} catch (NoSuchMethodException e) {
     			try {
     				Field f = NBTNumberReflection.nbtTagFloat.getDeclaredField("data");
+    				f.setAccessible(true);
     				return f.getFloat(nmsDouble);
     			} catch (NoSuchFieldException fe) {
     				fe.printStackTrace();
@@ -369,6 +389,7 @@ public final class NBTNumberReflection {
     		} catch (NoSuchMethodException e) {
     			try {
     				Field f = NBTNumberReflection.nbtTagShort.getDeclaredField("data");
+    				f.setAccessible(true);
     				return f.getShort(nmsDouble);
     			} catch (NoSuchFieldException fe) {
     				fe.printStackTrace();
@@ -394,6 +415,7 @@ public final class NBTNumberReflection {
     		} catch (NoSuchMethodException e) {
     			try {
     				Field f = NBTNumberReflection.nbtTagDouble.getDeclaredField("data");
+    				f.setAccessible(true);
     				return f.getDouble(nmsDouble);
     			} catch (NoSuchFieldException fe) {
     				fe.printStackTrace();

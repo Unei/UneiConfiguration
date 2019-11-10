@@ -101,6 +101,45 @@ public final class NBTArrayReflection {
     	return null;
     }
     
+    public static int getSize(Object nmsDouble) {
+    	if (NBTArrayReflection.isNBTLongArray(nmsDouble)
+    			|| NBTArrayReflection.isNBTByteArray(nmsDouble)
+    			|| NBTArrayReflection.isNBTIntArray(nmsDouble)) {
+    		try {
+    			Method get = nmsDouble.getClass().getMethod("size");
+    			return (int) get.invoke(nmsDouble);
+    		} catch (NoSuchMethodException e) {
+    			e.printStackTrace();
+    		} catch (InvocationTargetException e) {
+    			if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+    				throw (RuntimeException) e.getCause();
+    			else e.printStackTrace();
+    		} catch (IllegalAccessException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	return -1;
+    }
+    
+    public static void clear(Object nmsDouble) {
+    	if (NBTArrayReflection.isNBTLongArray(nmsDouble)
+    			|| NBTArrayReflection.isNBTByteArray(nmsDouble)
+    			|| NBTArrayReflection.isNBTIntArray(nmsDouble)) {
+    		try {
+    			Method get = nmsDouble.getClass().getMethod("clear");
+    			get.invoke(nmsDouble);
+    		} catch (NoSuchMethodException e) {
+    			e.printStackTrace();
+    		} catch (InvocationTargetException e) {
+    			if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+    				throw (RuntimeException) e.getCause();
+    			else e.printStackTrace();
+    		} catch (IllegalAccessException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    }
+    
     public static Object newLongArray(long[] value) {
     	if (NBTArrayReflection.nbtTagLongArray == null) {
     		return null;

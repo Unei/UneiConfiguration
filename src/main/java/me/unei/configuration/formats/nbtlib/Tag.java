@@ -63,6 +63,10 @@ public abstract class Tag implements INBTTag, Cloneable {
 	abstract Object getAsNMS();
 
 	abstract void getFromNMS(Object nmsObject);
+	
+	public me.unei.configuration.reflection.nbtmirror.MirrorTag getAsMirrorTag() {
+		return me.unei.configuration.reflection.nbtmirror.MirrorTag.wrap(getAsNMS());
+	}
 
 	static Tag newTag(byte type) {
 		switch(type) {

@@ -1,5 +1,6 @@
 package me.unei.configuration.reflection;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -63,13 +64,29 @@ public class NBTStringReflection {
         return null;
     }
 
+    /**
+     * Gets the string stored in the NMS {@code NBTTagString}.
+     * 
+     * @see NBTBaseReflection#getString(Object)
+     * 
+     * @param obj The string NMS tag to get the value from.
+     * @return Returns the string content of the tag.
+     */
     public static String getString(Object obj) {
         if (NBTStringReflection.isNBTString(obj)) {
             try {
-                Method getStr = obj.getClass().getMethod("c_");
+                Method getStr = NMSReflection.getPossibleMethods(obj.getClass(), new String[] { "c_", "asString" });
                 return (String) getStr.invoke(obj);
             } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+    			try {
+    				Field f = NBTStringReflection.nbtTagString.getDeclaredField("data");
+    				f.setAccessible(true);
+    				return String.class.cast(f.get(obj));
+    			} catch (NoSuchFieldException fe) {
+    				fe.printStackTrace();
+    			} catch (IllegalAccessException fe) {
+        			fe.printStackTrace();
+        		}
             } catch (InvocationTargetException e) {
                 if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
                     throw (RuntimeException) e.getCause();

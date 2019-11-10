@@ -65,7 +65,9 @@ public final class TagList extends Tag implements INBTList {
     		if (value instanceof CharSequence) {
     			this.add(new TagString(value.toString()));
     		} else if (value instanceof Tag) {
-    			this.add((Tag)value);
+    			this.add((Tag) value);
+    		} else if (value instanceof me.unei.configuration.reflection.nbtmirror.MirrorTag) {
+    			this.add(((me.unei.configuration.reflection.nbtmirror.MirrorTag) value).localCopy());
     		} else if (value instanceof Map) {
     			TagCompound subTag = new TagCompound();
     			subTag.loadMap((Map<?, ?>)value);
@@ -183,7 +185,11 @@ public final class TagList extends Tag implements INBTList {
     
     @Override
     public void add(INBTTag elem) {
-    	this.add((Tag) elem);
+    	if (elem instanceof Tag) {
+    		this.add((Tag) elem);
+    	} else if (elem instanceof me.unei.configuration.reflection.nbtmirror.MirrorTag) {
+			this.add(((me.unei.configuration.reflection.nbtmirror.MirrorTag) elem).localCopy());
+		}
     }
     
     @Override
@@ -255,7 +261,11 @@ public final class TagList extends Tag implements INBTList {
 
     @Override
     public void set(int idx, INBTTag elem) {
-    	this.set(idx, (Tag)elem);
+    	if (elem instanceof Tag) {
+    		this.set(idx, (Tag) elem);
+    	} else if (elem instanceof me.unei.configuration.reflection.nbtmirror.MirrorTag) {
+			this.set(idx, ((me.unei.configuration.reflection.nbtmirror.MirrorTag) elem).localCopy());
+    	}
     }
 
     public void set(int idx, Tag elem) {

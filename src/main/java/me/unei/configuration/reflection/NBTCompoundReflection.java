@@ -51,7 +51,7 @@ public class NBTCompoundReflection {
             return null;
         }
         try {
-            Method c = NBTCompoundReflection.nbtTagCompound.getMethod("c");
+            Method c = NMSReflection.getPossibleMethods(NBTCompoundReflection.nbtTagCompound, new String[] { "c", "getKeys" });
             return (Set<String>) c.invoke(obj);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();

@@ -70,6 +70,8 @@ public final class TagCompound extends Tag implements INBTCompound {
     			this.setString(key, value.toString());
     		} else if (value instanceof Tag) {
     			this.set(key, (Tag)value);
+    		} else if (value instanceof me.unei.configuration.reflection.nbtmirror.MirrorTag) {
+    			this.set(key, ((me.unei.configuration.reflection.nbtmirror.MirrorTag) value).localCopy());
     		} else if (value instanceof Map) {
     			TagCompound subTag = new TagCompound();
     			subTag.loadMap((Map<?, ?>)value);
@@ -214,7 +216,11 @@ public final class TagCompound extends Tag implements INBTCompound {
     }
 
     public void set(String key, INBTTag tag) {
-        this.set(key, (Tag)tag);
+    	if (tag instanceof Tag) {
+    		this.set(key, (Tag) tag);
+    	} else if (tag instanceof me.unei.configuration.reflection.nbtmirror.MirrorTag) {
+			this.set(key, ((me.unei.configuration.reflection.nbtmirror.MirrorTag) tag).localCopy());
+		}
     }
     
     public void set(String key, Tag tag) {

@@ -107,7 +107,7 @@ public class NBTListReflection {
     public static Object getAsCompound(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
-                Method add = NBTListReflection.nbtTagList.getMethod("get", int.class);
+                Method add = NBTListReflection.nbtTagList.getMethod("getCompound", int.class);
                 return add.invoke(list, idx);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
@@ -120,6 +120,44 @@ public class NBTListReflection {
             }
         }
         return null;
+    }
+
+    @Deprecated
+    public static Object getAsList(Object list, int idx) {
+        if (NBTListReflection.isNBTList(list)) {
+            try {
+                Method add = NBTListReflection.nbtTagList.getMethod("b", int.class);
+                return add.invoke(list, idx);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public static short getAsShort(Object list, int idx) {
+        if (NBTListReflection.isNBTList(list)) {
+            try {
+                Method add = NBTListReflection.nbtTagList.getMethod("d", int.class);
+                return (Short) add.invoke(list, idx);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
     }
 
     @Deprecated
@@ -220,7 +258,7 @@ public class NBTListReflection {
     public static Object getAsNBTBase(Object list, int idx) {
         if (NBTListReflection.isNBTList(list)) {
             try {
-                Method add = NBTListReflection.nbtTagList.getMethod("i", int.class);
+                Method add = NBTListReflection.nbtTagList.getMethod("get", int.class);
                 return add.invoke(list, idx);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
@@ -253,10 +291,27 @@ public class NBTListReflection {
         return 0;
     }
 
+    public static void clear(Object list) {
+        if (NBTListReflection.isNBTList(list)) {
+            try {
+                Method add = NBTListReflection.nbtTagList.getMethod("clear");
+                add.invoke(list);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+                    throw (RuntimeException) e.getCause();
+                else e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static int getTypeInList(Object list) {
         if (NBTListReflection.isNBTList(list)) {
             try {
-                Method add = NBTListReflection.nbtTagList.getMethod("g");
+                Method add = NBTListReflection.nbtTagList.getMethod("a_");
                 return (Integer) add.invoke(list);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
