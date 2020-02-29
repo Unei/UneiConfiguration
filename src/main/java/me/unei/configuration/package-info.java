@@ -1,6 +1,5 @@
 /**
  * Main package for the UneiConfiguration API.
- * 
  * <div>
  * <h3>Sub-packages :</h3>
  * - {@link me.unei.configuration.api api}<br>

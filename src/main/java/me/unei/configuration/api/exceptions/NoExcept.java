@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RetentionPolicy.CLASS)
-@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
-public @interface NoExcept
-{}
+@Target({
+	ElementType.METHOD, ElementType.CONSTRUCTOR
+})
+public @interface NoExcept {
+}

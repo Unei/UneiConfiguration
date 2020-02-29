@@ -14,6 +14,7 @@ import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.UntypedStorage;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.NoFieldException;
 import me.unei.configuration.api.exceptions.NotImplementedException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
@@ -26,60 +27,61 @@ import me.unei.configuration.formats.StringHashMap;
 import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements IConfiguration, IInternalStorageUse {
-	
+
 	public static final String BINARY_FILE_EXT = ".bin";
 	public static final String BINARY_TMP_EXT = ".tmp";
-	
+
 	private Storage<Object> data = null;
-	
+
 	public final Storage<Object> getStorageObject() {
-		if (data == null)
-		{
+		if (data == null) {
 			data = new StringHashMap<Object>();
 		}
 		return data;
 	}
-	
+
 	@Override
 	public void setStorageObject(Storage<Object> sto) {
 		this.data = sto;
+
 		if (this.parent != null && this.parent.data != null) {
+
 			if (this.parent.getStorageObject().getStorageType() != StorageType.UNDEFINED) {
 				this.parent.data.set(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName), this.data);
 			}
 		}
 	}
-	
+
 	public BinaryConfig(SavedFile file, PathSymbolsType symType) {
 		super(file, symType);
-		
+
 		this.init();
 	}
-	
+
 	public BinaryConfig(SavedFile file) {
 		this(file, PathSymbolsType.BUKKIT);
 	}
-	
+
 	public BinaryConfig(File folder, String fileName) {
 		this(folder, fileName, PathSymbolsType.BUKKIT);
 	}
-	
+
 	public BinaryConfig(File folder, String fileName, PathSymbolsType symType) {
 		this(new SavedFile(folder, fileName, BinaryConfig.BINARY_FILE_EXT), symType);
 	}
-	
+
 	public BinaryConfig(BinaryConfig parent, String tagName) {
 		super(parent, tagName);
-		
+
 		this.updateNode();
 	}
-	
+
 	public BinaryConfig(BinaryConfig parent, int index) {
 		super(parent, index);
-		
+
 		this.updateNode();
 	}
-	
+
 	@Override
 	public ConfigurationType getConfigurationType() {
 		return ConfigurationType.Binary;
@@ -99,18 +101,20 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		}
 		return root.getSubSection(path);
 	}
-	
+
 	@Override
 	public StorageType getType() {
 		return (this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED;
 	}
-	
+
 	@Override
 	protected void updateFromParent() {
 		if (this.parent != null && this.parent.data != null) {
+
 			if (this.parent.getStorageObject().getStorageType() != StorageType.UNDEFINED) {
 				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
 				Storage<Object> tmp = StorageConverter.allocateBest(me, null, null);
+
 				if (tmp != null) {
 					this.data = tmp;
 				} else {
@@ -120,52 +124,56 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			}
 		}
 	}
-	
+
 	@Override
 	public void setType(StorageType type) {
-    	if (!this.canAccess()) {
-    		return;
-    	}
-    	throw new NotImplementedException();
+		if (!this.canAccess()) {
+			return;
+		}
+		throw new NotImplementedException();
 	}
-	
+
 	@Override
 	public BinaryConfig getRoot() {
 		return (BinaryConfig) super.getRoot();
 	}
-	
+
 	@Override
 	public BinaryConfig getChild(String name) {
 		if (!this.canAccess()) {
 			return null;
 		}
+
 		if (name == null || name.isEmpty()) {
 			return this;
 		}
 		BinaryConfig child = super.findInChildrens(new Key(name));
+
 		if (child != null) {
 			child.parent = this;
 			return child;
 		}
 		return new BinaryConfig(this, name);
 	}
-	
+
 	@Override
 	public BinaryConfig getAt(int index) {
 		if (!this.canAccess()) {
 			return null;
 		}
+
 		if (index < 0) {
 			return this;
 		}
 		BinaryConfig child = super.findInChildrens(new Key(index));
+
 		if (child != null) {
 			child.parent = this;
 			return child;
 		}
 		return new BinaryConfig(this, index);
 	}
-	
+
 	private BinaryConfig getParentObj(PathComponent.PathComponentsList path) {
 		PathNavigator<BinaryConfig> pn = new PathNavigator<BinaryConfig>(this);
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
@@ -173,7 +181,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		pn.followPath(pathList);
 		return pn.getCurrentNode();
 	}
-	
+
 	private Storage<Object> getParentMap(PathComponent.PathComponentsList path) {
 		PathNavigator<BinaryConfig> pn = new PathNavigator<BinaryConfig>(this);
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
@@ -181,20 +189,23 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		pn.followPath(pathList);
 		return pn.getCurrentNode().data;
 	}
-	
+
 	public void save() {
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent != null) {
 			this.parent.save();
 			return;
 		}
+
 		if (this.file.getFile() == null) {
 			return;
 		}
 		File tmp = new File(this.file.getFolder(), this.file.getFullName() + BinaryConfig.BINARY_TMP_EXT);
 		UneiConfiguration.getInstance().getLogger().fine("Writing Binary to file " + getFileName() + "...");
+
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tmp));
 			oos.writeInt(0xdeadbeef);
@@ -202,104 +213,142 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 			oos.writeInt(0xfeebdaed);
 			oos.flush();
 			oos.close();
+
 			if (this.file.getFile().exists()) {
-				UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
+				UneiConfiguration.getInstance().getLogger()
+						.finer("Replacing already present file " + getFileName() + ".");
 				this.file.getFile().delete();
 			}
 			tmp.renameTo(this.file.getFile());
 			tmp.delete();
 			UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
 		} catch (IOException e) {
-			UneiConfiguration.getInstance().getLogger().warning("An error occured while saving Binary file " + getFileName() + ":");
+			UneiConfiguration.getInstance().getLogger()
+					.warning("An error occured while saving Binary file " + getFileName() + ":");
 			e.printStackTrace();
 		}
 	}
-	
-	public void reload() throws FileFormatException
-	{
+
+	public void reload() throws FileFormatException {
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent != null) {
 			this.parent.reload();
 			return;
 		}
+
 		if (this.file.getFile() == null) {
 			this.data = new StringHashMap<>();
 			return;
 		}
+
 		if (!this.file.getFile().exists()) {
 			this.save();
 			return;
 		}
 		UneiConfiguration.getInstance().getLogger().fine("Reading Binary file " + getFileName() + "...");
 		ObjectInputStream ois = null;
+
 		try {
 			ois = new ObjectInputStream(new FileInputStream(this.file.getFile()));
+
 			if (ois.readInt() != 0xdeadbeef) {
-				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
-				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
+				UneiConfiguration.getInstance().getLogger()
+						.warning("The binary file " + getFileName() + " is not a deadbeef :");
+				throw new FileFormatException("Raw binary", this.file.getFile(),
+						"some dead beef could not be found... sadness");
 			}
 			Object result = ois.readObject();
 			this.data = StorageConverter.allocateBest(result, null, () -> new StringHashMap<>());
+
 			if (ois.readInt() != 0xfeebdaed) {
-				UneiConfiguration.getInstance().getLogger().warning("The binary file " + getFileName() + " is not a deadbeef :");
-				throw new FileFormatException("Raw binary", this.file.getFile(), "some dead beef could not be found... sadness");
+				UneiConfiguration.getInstance().getLogger()
+						.warning("The binary file " + getFileName() + " is not a deadbeef :");
+				throw new FileFormatException("Raw binary", this.file.getFile(),
+						"some dead beef could not be found... sadness");
 			}
 			this.runTreeUpdate();
 			UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
 		} catch (ClassNotFoundException e) {
-			UneiConfiguration.getInstance().getLogger().warning("The object contained in the binary file " + getFileName() + " is not a Map :");
+			UneiConfiguration.getInstance().getLogger()
+					.warning("The object contained in the binary file " + getFileName() + " is not a Map :");
 			e.printStackTrace();
 		} catch (IOException e) {
-			UneiConfiguration.getInstance().getLogger().warning("An error occured while reading Binary file " + getFileName() + ":");
+			UneiConfiguration.getInstance().getLogger()
+					.warning("An error occured while reading Binary file " + getFileName() + ":");
 			e.printStackTrace();
 		} finally {
+
 			if (ois != null) {
+
 				try {
 					ois.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+				}
 			}
 		}
 	}
-	
+
 	public Set<String> getKeys() {
 		return this.getStorageObject().getKeys();
 	}
-	
+
 	public boolean contains(String path) {
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
 		return node.has(list.last().getKey(node.getStorageType()));
 	}
 
+	@Override
 	public Object get(String path) {
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
-		return node.get(list.last().getKey(node.getStorageType()));
+		Key key = list.last().getKey(node.getStorageType());
+
+		if (!node.has(key)) {
+			return null;
+		}
+		return node.get(key);
 	}
-	
+
+	@Override
+	public Object tryGet(String path) throws NoFieldException {
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		Key key = list.last().getKey(node.getStorageType());
+
+		if (!node.has(key)) {
+			throw new NoFieldException(path, getFile(), "No value is associated to this key");
+		}
+		return node.get(key);
+	}
+
 	@Override
 	public BinaryConfig getSubSection(PathComponent.PathComponentsList path) {
 		if (!this.canAccess()) {
 			return null;
 		}
+
 		if (path == null || path.isEmpty()) {
 			return this;
 		}
 		PathNavigator<BinaryConfig> navigator = new PathNavigator<BinaryConfig>(this);
+
 		if (navigator.followPath(path)) {
 			return navigator.getCurrentNode();
 		}
 		return null;
 	}
-	
+
 	public void set(String path, Object value) {
 		if (!this.canAccess()) {
 			return;
 		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
+
 		if (value == null) {
 			node.remove(list.last().getKey(node.getStorageType()));
 		} else {
@@ -311,12 +360,14 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (value == null) {
 			this.remove(path);
 			return;
 		}
+
 		if (!(value instanceof BinaryConfig)) {
-			//TODO ConfigType conversion
+			// TODO ConfigType conversion
 			return;
 		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
@@ -326,11 +377,11 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		bc.validate(node, key);
 		node.data.set(key, bc.data);
 	}
-	
+
 	public void remove(String path) {
 		set(path, null);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "BinaryConfig=" + this.data.toString();

@@ -37,8 +37,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 @DisplayName("load/save/reload and tree state tests")
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
-public class TreeSavedTest
-{
+public class TreeSavedTest {
 	private static final String FILE_NAME = "config_test";
 
 	@TempDir
@@ -48,41 +47,34 @@ public class TreeSavedTest
 
 	private static final Logger logger = LoggerFactory.getLogger(SavedTest.class);
 
-	public void logFine(String message)
-	{
+	public void logFine(String message) {
 		logger.trace(() -> message);
 	}
 
-	public void logInfo(String message)
-	{
+	public void logInfo(String message) {
 		logger.info(() -> message);
 	}
 
 	@BeforeAll
-	public void configurationTests()
-	{
+	public void configurationTests() {
 		UneiConfiguration.tryInstanciate();
-		
+
 		assertNotNull(tempDir);
 
 		logFine(String.format("Temporary path: %s", tempDir.getAbsolutePath()));
 	}
-	
+
 	@AfterAll
-	public void tearDown()
-	{
-		if (this.configs != null)
-		{
-			for (IFlatConfiguration config : this.configs)
-			{
-				if (config instanceof Closeable)
-				{
-					try
-					{
+	public void tearDown() {
+		if (this.configs != null) {
+
+			for (IFlatConfiguration config : this.configs) {
+
+				if (config instanceof Closeable) {
+
+					try {
 						((Closeable) config).close();
-					}
-					catch (IOException e)
-					{
+					} catch (IOException e) {
 						logger.warn(e, () -> "Failed to close a configuration resource:");
 					}
 				}
@@ -90,11 +82,10 @@ public class TreeSavedTest
 			this.configs.clear();
 		}
 	}
-	
+
 	@Test
 	@Order(1)
-	public void firstLoad()
-	{
+	public void firstLoad() {
 		logFine("Loading configurations...");
 
 		this.configs = new ArrayList<IConfiguration>();
@@ -102,35 +93,34 @@ public class TreeSavedTest
 		this.configs.add((IConfiguration) Configurations.newConfig(ConfigurationType.YAML, tempDir, FILE_NAME, null));
 		this.configs.add((IConfiguration) Configurations.newConfig(ConfigurationType.JSON, tempDir, FILE_NAME, null));
 		this.configs.add((IConfiguration) Configurations.newConfig(ConfigurationType.Binary, tempDir, FILE_NAME, null));
-		this.configs.add((IConfiguration) Configurations.newConfig(ConfigurationType.SQLite, tempDir, FILE_NAME, "testtable_normal"));
+		this.configs.add((IConfiguration) Configurations.newConfig(ConfigurationType.SQLite, tempDir, FILE_NAME,
+				"testtable_normal"));
 
 		assertNotNull(configs);
 		assertEquals(5, configs.size());
 		assertFalse(configs.contains(null));
 	}
-	
+
 	@Test
 	@Order(2)
-	public void assertKeepsTree()
-	{
-		for (IConfiguration config : this.configs)
-		{
+	public void assertKeepsTree() {
+		for (IConfiguration config : this.configs) {
 			IConfiguration child1 = config.getSubSection("ChildSub");
-			
+
 			child1.setBoolean("TrueValue", true);
 			child1.set("IntValue", null);
-			
+
 			assertTrue(config.getBoolean("ChildSub.TrueValue"), "Failed to keep track of childrens");
 			assertFalse(child1.contains("IntValue"));
-			
+
 			IConfiguration child2 = config.getSubSection("ChildSub");
-			
+
 			assertTrue(child2.getBoolean("TrueValue"));
-			
+
 			child2.setInteger("IntValue", 42);
-			
+
 			assertEquals(42, child1.getInteger("IntValue"));
-			
+
 			child2.remove("IntValue");
 			child1.remove("TrueValue");
 
@@ -138,44 +128,39 @@ public class TreeSavedTest
 			assertFalse(config.contains("ChildSub.IntValue"));
 		}
 	}
-	
+
 	@Test
 	@Order(3)
-	public void assertReloadKeepsTree()
-	{
-		for (IConfiguration config : this.configs)
-		{
+	public void assertReloadKeepsTree() {
+		for (IConfiguration config : this.configs) {
 			IConfiguration child1 = config.getSubSection("ChildSub");
-			
+
 			child1.setBoolean("TrueValue", true);
 			child1.set("IntValue", null);
-			
+
 			assertTrue(config.getBoolean("ChildSub.TrueValue"), "Failed to keep track of childrens");
 			assertFalse(child1.contains("IntValue"));
-			
+
 			child1.save();
-			
+
 			assertTrue(config.getBoolean("ChildSub.TrueValue"), "Failed to keep track of childrens");
 			assertFalse(child1.contains("IntValue"));
-			
-			try
-			{
+
+			try {
 				config.reload();
-			}
-			catch (FileFormatException ffe)
-			{
+			} catch (FileFormatException ffe) {
 				fail(ffe);
 			}
-			
+
 			assertTrue(config.getBoolean("ChildSub.TrueValue"), "Failed to save configuration");
 			assertFalse(child1.contains("IntValue"));
-			
+
 			child1.setInteger("IntValue", 76294);
-			
+
 			assertEquals(76294, config.getInteger("ChildSub.IntValue"), "Failed to keep tracks of child nodes");
-			
+
 			config.remove("ChildSub.TrueValue");
-			
+
 			assertFalse(child1.contains("TrueValue"), "Failed to keep tracks of parent");
 		}
 	}

@@ -24,165 +24,192 @@ import me.unei.configuration.api.IFlatCSVConfiguration;
 import me.unei.configuration.api.UntypedFlatStorage;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.NoFieldException;
 import me.unei.configuration.api.exceptions.UnexpectedClassException;
 import me.unei.configuration.plugin.UneiConfiguration;
 
-public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSVConfiguration
-{
+public class CSVConfig extends UntypedFlatStorage<CSVConfig> implements IFlatCSVConfiguration {
 	public static final String CSV_FILE_EXT = ".csv";
 	public static final String CSV_TMP_EXT = ".tmp";
-	
+
 	private static final List<String> DEFAULT_HEADER_LINE = Collections.unmodifiableList(Arrays.asList("Key", "Value"));
-	
+
 	private Map<String, Object> data = new HashMap<String, Object>();
 	private List<String> keyLine;
-	
-	public CSVConfig(SavedFile file)
-	{
+
+	public CSVConfig(SavedFile file) {
 		super(file);
-		
+
 		this.keyLine = new ArrayList<String>();
 		this.resetHeaderLine();
-		
+
 		this.init();
 	}
-	
-	public CSVConfig(File folder, String fileName)
-	{
+
+	public CSVConfig(File folder, String fileName) {
 		this(new SavedFile(folder, fileName, CSVConfig.CSV_FILE_EXT));
 	}
-	
+
 	@Override
 	public ConfigurationType getConfigurationType() {
 		return ConfigurationType.CSV;
 	}
-	
+
 	public void save() throws UnexpectedClassException {
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.file.getFile() == null) {
 			return;
 		}
 		File tmp = new File(file.getFolder(), file.getFullName() + CSVConfig.CSV_TMP_EXT);
 		UneiConfiguration.getInstance().getLogger().fine("Writing CSV data to file " + getFileName() + "...");
+
 		try {
 			Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
 			SerializerHelper.writeCSV(w, keyLine, data);
 			w.flush();
 			w.close();
+
 			if (file.getFile().exists()) {
-				UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
+				UneiConfiguration.getInstance().getLogger()
+						.finer("Replacing already present file " + getFileName() + ".");
 				file.getFile().delete();
 			}
 			tmp.renameTo(file.getFile());
 			tmp.delete();
 			UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
 		} catch (IOException e) {
-			UneiConfiguration.getInstance().getLogger().warning("An error occured while saving CSV file " + getFileName() + ":");
+			UneiConfiguration.getInstance().getLogger()
+					.warning("An error occured while saving CSV file " + getFileName() + ":");
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void reload() throws FileFormatException {
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.file.getFile() == null) {
 			return;
 		}
+
 		if (!this.file.getFile().exists()) {
 			this.save();
 			return;
 		}
+
 		try {
 			UneiConfiguration.getInstance().getLogger().fine("Reading CSV from file " + getFileName() + "...");
 			Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
 			Map<String, Object> tmpData = SerializerHelper.readCSV(r, keyLine);
 			r.close();
+
 			if (tmpData != null && !tmpData.isEmpty()) {
 				data.clear();
+
 				for (Entry<String, Object> entry : tmpData.entrySet()) {
 					data.put(entry.getKey(), entry.getValue());
 				}
 			}
 			UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
 		} catch (IOException e) {
-			UneiConfiguration.getInstance().getLogger().warning("An error occured while loading CSV file " + getFileName() + ":");
+			UneiConfiguration.getInstance().getLogger()
+					.warning("An error occured while loading CSV file " + getFileName() + ":");
 			e.printStackTrace();
 		}
 	}
-	
+
 	public List<String> getHeaderLine() {
 		return this.keyLine;
 	}
-	
+
 	public void resetHeaderLine() {
 		this.keyLine.clear();
+
 		for (String elem : CSVConfig.DEFAULT_HEADER_LINE) {
 			this.keyLine.add(elem);
 		}
 	}
-	
+
 	public Set<String> getKeys() {
 		return this.data.keySet();
 	}
-	
+
 	public boolean contains(String key) {
 		return this.data.containsKey(key);
 	}
-	
+
 	public void setString(String key, String value) {
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (value == null) {
 			this.remove(key);
 			return;
 		}
 		data.put(key, value);
 	}
-	
+
 	public void setList(String key, List<String> value) {
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (value == null) {
 			this.remove(key);
 			return;
 		}
 		data.put(key, value);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<String> getList(String key) {
 		if (!data.containsKey(key) || data.get(key) == null) {
 			return Collections.emptyList();
 		}
+
 		if (!(data.get(key) instanceof List)) {
 			return Collections.emptyList();
 		}
+
 		try {
-			return (List<String>)data.get(key);
+			return (List<String>) data.get(key);
 		} catch (ClassCastException e) {
 			return Collections.emptyList();
 		}
 	}
-	
+
 	public String getString(String key) {
 		if (!data.containsKey(key) || data.get(key) == null) {
-			return "";
+			return null;
 		}
 		return data.get(key).toString();
 	}
-	
+
+	@Override
+	public String tryGetString(String key) throws NoFieldException {
+		if (!data.containsKey(key)) {
+			throw new NoFieldException(key, getFile(), "No value available for this key");
+		}
+		Object res = data.get(key);
+
+		if (res == null) {
+			throw new NoFieldException(key, getFile(), "Null value for this key");
+		}
+		return res.toString();
+	}
+
 	public void remove(String key) {
 		if (!this.canAccess()) {
 			return;
 		}
 		data.remove(key);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "CSVConfig=" + this.data.toString();

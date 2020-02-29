@@ -26,6 +26,7 @@ import me.unei.configuration.api.IJSONConfiguration;
 import me.unei.configuration.api.UntypedStorage;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.NoFieldException;
 import me.unei.configuration.api.exceptions.NotImplementedException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
@@ -55,8 +56,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 	private Storage<Object> data = null;
 
 	final Storage<Object> getData() {
-		if (data == null)
-		{
+		if (data == null) {
 			data = new StringHashMap<Object>();
 		}
 		return data;
@@ -102,7 +102,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 
 		this.updateNode();
 	}
-	
+
 	@Override
 	public ConfigurationType getConfigurationType() {
 		return ConfigurationType.JSON;
@@ -133,17 +133,19 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		if (!this.canAccess()) {
 			return null;
 		}
+
 		if (name == null || name.isEmpty()) {
 			return this;
 		}
 		JSONConfig child = super.findInChildrens(new Key(name));
+
 		if (child != null) {
 			child.parent = this;
 			return child;
 		}
 		return new JSONConfig(this, name);
 	}
-	
+
 	@Override
 	public StorageType getType() {
 		return (this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED;
@@ -152,9 +154,11 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 	@Override
 	protected void updateFromParent() {
 		if (this.parent != null && this.parent.data != null) {
+
 			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
 				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
 				Storage<Object> tmp = StorageConverter.allocateBest(me, null, null);
+
 				if (tmp != null) {
 					this.data = tmp;
 				} else {
@@ -177,6 +181,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		PathNavigator<JSONConfig> pn = new PathNavigator<JSONConfig>(this);
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
 		pathList.removeLast();
+
 		if (!pn.followPath(pathList)) {
 			return this;
 		}
@@ -188,6 +193,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		PathNavigator<JSONConfig> pn = new PathNavigator<JSONConfig>(this);
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
 		pathList.removeLast();
+
 		if (!pn.followPath(pathList)) {
 			return data;
 		}
@@ -200,30 +206,36 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent != null) {
 			this.parent.save();
 			return;
 		}
+
 		if (this.file.getFile() == null) {
 			return;
 		}
 		File tmp = new File(this.file.getFolder(), this.file.getFullName() + JSONConfig.JSON_TMP_EXT);
 		UneiConfiguration.getInstance().getLogger().fine("Writing JSON to file " + getFileName() + "...");
+
 		try {
 			Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8);
 			JsonWriter jw = new JsonWriter(w);
 			jw.setIndent("  ");
 			JSONConfig.GSON.toJson(getData(), data.getClass(), jw);
 			jw.close();
+
 			if (this.file.getFile().exists()) {
-				UneiConfiguration.getInstance().getLogger().finer("Replacing already present file " + getFileName() + ".");
+				UneiConfiguration.getInstance().getLogger()
+						.finer("Replacing already present file " + getFileName() + ".");
 				this.file.getFile().delete();
 			}
 			tmp.renameTo(this.file.getFile());
 			tmp.delete();
 			UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
 		} catch (IOException e) {
-			UneiConfiguration.getInstance().getLogger().warning("An error occured while saving JSON file " + getFileName() + ":");
+			UneiConfiguration.getInstance().getLogger()
+					.warning("An error occured while saving JSON file " + getFileName() + ":");
 			e.printStackTrace();
 		}
 	}
@@ -234,28 +246,34 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent != null) {
 			this.parent.reload();
-			//this.synchronize();
+			// this.synchronize();
 			return;
 		}
+
 		if (this.file.getFile() == null) {
 			this.data = new StringHashMap<>();
 			return;
 		}
+
 		if (!this.file.getFile().exists()) {
 			this.save();
 			return;
 		}
+
 		try {
 			UneiConfiguration.getInstance().getLogger().fine("Reading JSON from file " + getFileName() + "...");
 			Reader r = new InputStreamReader(new FileInputStream(file.getFile()), StandardCharsets.UTF_8);
 			Storage<?> tmpData;
+
 			try {
 				tmpData = JSONConfig.GSON.fromJson(r, StringHashMap.class);
 			} catch (JsonSyntaxException jse) {
 				throw new FileFormatException("JSON", file.getFile(), "", jse);
 			}
+
 			if (tmpData != null) {
 				this.data = (Storage<Object>) tmpData;
 			}
@@ -263,7 +281,8 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 			this.runTreeUpdate();
 			UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
 		} catch (IOException e) {
-			UneiConfiguration.getInstance().getLogger().warning("An error occured while loading JSON file " + getFileName() + ":");
+			UneiConfiguration.getInstance().getLogger()
+					.warning("An error occured while loading JSON file " + getFileName() + ":");
 			e.printStackTrace();
 			return;
 		}
@@ -285,7 +304,24 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 	public Object get(String path) {
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
-		return node.get(list.last().getKey(node.getStorageType()));
+		Key key = list.last().getKey(node.getStorageType());
+
+		if (!node.has(key)) {
+			return null;
+		}
+		return node.get(key);
+	}
+
+	@Override
+	public Object tryGet(String path) throws NoFieldException {
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		Key key = list.last().getKey(node.getStorageType());
+
+		if (!node.has(key)) {
+			throw new NoFieldException(path, getFile(), "No value is associated to this key");
+		}
+		return node.get(key);
 	}
 
 	@Override
@@ -293,10 +329,12 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		if (!this.canAccess()) {
 			return null;
 		}
+
 		if (path == null || path.isEmpty()) {
 			return this;
 		}
 		PathNavigator<JSONConfig> navigator = new PathNavigator<JSONConfig>(this);
+
 		if (navigator.followPath(path)) {
 			return navigator.getCurrentNode();
 		}
@@ -310,17 +348,21 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
+
 		if (value == null) {
 			node.remove(list.last().getKey(node.getStorageType()));
 		} else {
+
 			if (value instanceof Double) {
-				if (((Double)value).isInfinite() || ((Double)value).isNaN()) {
+
+				if (((Double) value).isInfinite() || ((Double) value).isNaN()) {
 					node.set(list.last().getKey(node.getStorageType()), value.toString());
 				} else {
 					node.set(list.last().getKey(node.getStorageType()), value);
 				}
 			} else if (value instanceof Float) {
-				if (((Float)value).isInfinite() || ((Float)value).isNaN()) {
+
+				if (((Float) value).isInfinite() || ((Float) value).isNaN()) {
 					node.set(list.last().getKey(node.getStorageType()), value.toString());
 				} else {
 					node.set(list.last().getKey(node.getStorageType()), value);
@@ -336,12 +378,14 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (value == null) {
 			remove(path);
 			return;
 		}
+
 		if (!(value instanceof JSONConfig)) {
-			//TODO ConfigType conversion
+			// TODO ConfigType conversion
 			return;
 		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
@@ -363,6 +407,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		jw.setIndent("  ");
 		JSONConfig.GSON.toJson(data, data.getClass(), jw);
 		String res = null;
+
 		try {
 			res = sw.toString();
 			jw.close();
@@ -390,6 +435,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		}
 		this.data.clear();
 		Map<?, ?> tmpMap = JSONConfig.GSON.fromJson(p_data, Map.class);
+
 		for (Entry<?, ?> e : tmpMap.entrySet()) {
 			this.data.set(new Key(e.getKey()), e.getValue());
 		}

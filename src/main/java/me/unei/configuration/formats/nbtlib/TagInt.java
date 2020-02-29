@@ -11,80 +11,80 @@ import me.unei.configuration.reflection.NBTNumberReflection;
 
 public final class TagInt extends Tag {
 
-    private int data;
+	private int data;
 
-    TagInt() {
-    }
+	TagInt() {
+	}
 
-    public TagInt(int value) {
-        this.data = value;
-    }
+	public TagInt(int value) {
+		this.data = value;
+	}
 
-    @Override
-    void write(DataOutput output) throws IOException {
-        output.writeInt(this.data);
-    }
+	@Override
+	void write(DataOutput output) throws IOException {
+		output.writeInt(this.data);
+	}
 
-    @Override
-    void read(DataInput output) throws IOException {
-        this.data = output.readInt();
-    }
-    
-    Object getAsNMS() {
-    	return NBTNumberReflection.newInt(this.getValue());
-    }
-    
-    void getFromNMS(Object nmsInteger) {
-    	if (NBTNumberReflection.isNBTInteger(nmsInteger)) {
-    		this.data = NBTNumberReflection.getInt(nmsInteger);
-    	}
-    }
+	@Override
+	void read(DataInput output) throws IOException {
+		this.data = output.readInt();
+	}
 
-    @Override
-    public byte getTypeId() {
-        return getType().getId();
-    }
+	Object getAsNMS() {
+		return NBTNumberReflection.newInt(this.getValue());
+	}
 
-    @Override
-    public TagType getType() {
-        return TagType.TAG_Int;
-    }
+	void getFromNMS(Object nmsInteger) {
+		if (NBTNumberReflection.isNBTInteger(nmsInteger)) {
+			this.data = NBTNumberReflection.getInt(nmsInteger);
+		}
+	}
 
-    @Override
-    public String toString() {
-        return Integer.toString(this.data);
-    }
+	@Override
+	public byte getTypeId() {
+		return getType().getId();
+	}
 
-    @Override
-    public int hashCode() {
-        return super.hashCode() ^ this.data;
-    }
+	@Override
+	public TagType getType() {
+		return TagType.TAG_Int;
+	}
 
-    public int getValue() {
-        return this.data;
-    }
-    
-    @Override
-    public Integer getAsObject() {
-    	return this.getAsObject(DEFAULT_CREATOR);
-    }
-    
-    @Override
-    public <M extends Map<String, Object>, L extends List<Object>> Integer getAsObject(ObjectCreator<M, L> creator) {
-    	return Integer.valueOf(this.getValue());
-    }
+	@Override
+	public String toString() {
+		return Integer.toString(this.data);
+	}
 
-    @Override
-    public boolean equals(Object other) {
-        if (!super.equals(other)) {
-            return false;
-        }
-        TagInt tb = (TagInt) other;
-        return (tb.data == this.data);
-    }
+	@Override
+	public int hashCode() {
+		return super.hashCode() ^ this.data;
+	}
 
-    @Override
-    public TagInt clone() {
-        return new TagInt(this.data);
-    }
+	public int getValue() {
+		return this.data;
+	}
+
+	@Override
+	public Integer getAsObject() {
+		return this.getAsObject(DEFAULT_CREATOR);
+	}
+
+	@Override
+	public <M extends Map<String, Object>, L extends List<Object>> Integer getAsObject(ObjectCreator<M, L> creator) {
+		return Integer.valueOf(this.getValue());
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!super.equals(other)) {
+			return false;
+		}
+		TagInt tb = (TagInt) other;
+		return (tb.data == this.data);
+	}
+
+	@Override
+	public TagInt clone() {
+		return new TagInt(this.data);
+	}
 }

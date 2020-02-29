@@ -18,35 +18,31 @@ import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponentType;
 
 @DisplayName("File system tests")
-public class PathTest
-{
+public class PathTest {
 	@DisplayName("FileSystem tests Initialization")
 	@BeforeAll
-	public static void initAll()
-	{
-		if (System.getProperty("unei.test.patheval") == null)
-		{
+	public static void initAll() {
+		if (System.getProperty("unei.test.patheval") == null) {
 			System.setProperty("unei.test.patheval", Boolean.FALSE.toString());
 		}
-		
+
 		UneiConfiguration.tryInstanciate();
-		
+
 		FSUtils.INSTANCE.callBuilder();
 	}
-	
+
 	@Test
 	@DisplayName("UneiConfiguration API instance test")
-	public void testConfigurationInstance()
-	{
-		assertNotNull(UneiConfiguration.getInstance(), "Could not find any instance of UneiConfiguration within the API");
+	public void testConfigurationInstance() {
+		assertNotNull(UneiConfiguration.getInstance(),
+				"Could not find any instance of UneiConfiguration within the API");
 	}
-	
+
 	@Test
 	@DisplayName("UNIX pathToString tests")
-	public void pathToStringTestUnix()
-	{
+	public void pathToStringTestUnix() {
 		IPathComponentsList list = FSUtils.createList(PathSymbolsType.UNIX);
-		
+
 		list.appendRoot();
 		list.appendChild("te.st");
 		list.appendChild("na/me");
@@ -56,16 +52,15 @@ public class PathTest
 		list.appendParent();
 		list.appendIndex(56);
 		list.appendChild("hello");
-		
+
 		assertEquals("/te.st/na\\/me/../in\\\\dex[12]/../[56]/hello", list.toString());
 	}
-	
+
 	@Test
 	@DisplayName("BUKKIT pathToString tests")
-	public void pathToStringTestBukkit()
-	{
+	public void pathToStringTestBukkit() {
 		IPathComponentsList list = FSUtils.createList(PathSymbolsType.BUKKIT);
-		
+
 		list.appendRoot();
 		list.appendChild("te.st");
 		list.appendChild("na/me");
@@ -75,18 +70,18 @@ public class PathTest
 		list.appendParent();
 		list.appendIndex(56);
 		list.appendChild("hello");
-		
+
 		assertEquals(".te\\.st.na/me..in\\\\dex[12]..[56].hello", list.toString());
 	}
-	
+
 	@Test
 	@DisplayName("UNIX stringToPath tests")
-	public void stringToPathTestUnix()
-	{
-		IPathComponentsList list = FSUtils.parsePath("/te.st/na\\/me/../in\\\\dex[12]/../[56]/hello", PathSymbolsType.UNIX);
-		
+	public void stringToPathTestUnix() {
+		IPathComponentsList list = FSUtils.parsePath("/te.st/na\\/me/../in\\\\dex[12]/../[56]/hello",
+				PathSymbolsType.UNIX);
+
 		assertEquals(9, list.size());
-		
+
 		int i = 0;
 
 		IPathComponent current = list.get(i++);
@@ -133,11 +128,11 @@ public class PathTest
 		assertSame(PathComponentType.CHILD, current.getType());
 		assertEquals("hello", current.getValue());
 		assertEquals(-1, current.getIndex());
-		
+
 		list = FSUtils.cleanPath(list);
-		
+
 		assertEquals(5, list.size());
-		
+
 		i = 0;
 
 		current = list.get(i++);
@@ -165,15 +160,15 @@ public class PathTest
 		assertEquals("hello", current.getValue());
 		assertEquals(-1, current.getIndex());
 	}
-	
+
 	@Test
 	@DisplayName("BUKKIT stringToPath tests")
-	public void stringToPathTestBukkit()
-	{
-		IPathComponentsList list = FSUtils.parsePath(".te\\.st.na/me..in\\\\dex[12]..[56].hello", PathSymbolsType.BUKKIT);
-		
+	public void stringToPathTestBukkit() {
+		IPathComponentsList list = FSUtils.parsePath(".te\\.st.na/me..in\\\\dex[12]..[56].hello",
+				PathSymbolsType.BUKKIT);
+
 		assertEquals(9, list.size());
-		
+
 		int i = 0;
 
 		IPathComponent current = list.get(i++);
@@ -220,11 +215,11 @@ public class PathTest
 		assertSame(PathComponentType.CHILD, current.getType());
 		assertEquals("hello", current.getValue());
 		assertEquals(-1, current.getIndex());
-		
+
 		list = FSUtils.cleanPath(list);
-		
+
 		assertEquals(5, list.size());
-		
+
 		i = 0;
 
 		current = list.get(i++);
@@ -252,20 +247,19 @@ public class PathTest
 		assertEquals("hello", current.getValue());
 		assertEquals(-1, current.getIndex());
 	}
-	
+
 	@Test
 	@SuppressWarnings("deprecation")
 	@EnabledIfSystemProperty(named = "unei.test.patheval", matches = "([Tt]rue|[Yy]es|1)")
-	public void testPathEval()
-	{
+	public void testPathEval() {
 		PathSymbolsType type = PathSymbolsType.tryDetectType(".te\\.st.na/me..in\\\\dex[12]..[56].hello..");
-		
+
 		assertSame(PathSymbolsType.BUKKIT, type);
-		
+
 		type = PathSymbolsType.tryDetectType("/te.st/na\\/me/../in\\\\dex[12]/../[56]/hello");
-		
+
 		assertSame(PathSymbolsType.UNIX, type);
-		
+
 		fail("Path type detection is not predictable and will most likely fail in production environment");
 	}
 }

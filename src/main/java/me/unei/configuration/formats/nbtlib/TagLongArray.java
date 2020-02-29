@@ -12,103 +12,105 @@ import me.unei.configuration.reflection.NBTArrayReflection;
 
 public final class TagLongArray extends Tag {
 
-    private long[] data;
+	private long[] data;
 
-    TagLongArray() {
-    }
+	TagLongArray() {
+	}
 
-    public TagLongArray(long[] value) {
-        this.data = value;
-    }
+	public TagLongArray(long[] value) {
+		this.data = value;
+	}
 
-    @Override
-    void write(DataOutput output) throws IOException {
-        output.writeInt(this.data.length);
-        for (int i = 0; i < this.data.length; i++) {
-            output.writeLong(this.data[i]);
-        }
-    }
+	@Override
+	void write(DataOutput output) throws IOException {
+		output.writeInt(this.data.length);
 
-    @Override
-    void read(DataInput input) throws IOException {
-        int len = input.readInt();
-        this.data = new long[len];
-        for (int i = 0; i < this.data.length; i++) {
-            this.data[i] = input.readLong();
-        }
-    }
-    
-    Object getAsNMS() {
-    	return NBTArrayReflection.newLongArray(this.getLongArray());
-    }
-    
-    void getFromNMS(Object nmsLongArray) {
-    	if (NBTArrayReflection.isNBTLongArray(nmsLongArray)) {
-    		this.data = NBTArrayReflection.getLongArray(nmsLongArray);
-    	}
-    }
+		for (int i = 0; i < this.data.length; i++) {
+			output.writeLong(this.data[i]);
+		}
+	}
 
-    @Override
-    public byte getTypeId() {
-        return getType().getId();
-    }
+	@Override
+	void read(DataInput input) throws IOException {
+		int len = input.readInt();
+		this.data = new long[len];
 
-    @Override
-    public TagType getType() {
-        return TagType.TAG_Long_Array;
-    }
+		for (int i = 0; i < this.data.length; i++) {
+			this.data[i] = input.readLong();
+		}
+	}
 
-    @Override
-    public String toString() {
-        String result = "[";
-        long[] aint = this.data;
-        int lgh = aint.length;
+	Object getAsNMS() {
+		return NBTArrayReflection.newLongArray(this.getLongArray());
+	}
 
-        for (int j = 0; j < lgh; ++j) {
-            long k = aint[j];
+	void getFromNMS(Object nmsLongArray) {
+		if (NBTArrayReflection.isNBTLongArray(nmsLongArray)) {
+			this.data = NBTArrayReflection.getLongArray(nmsLongArray);
+		}
+	}
 
-            result += k + ",";
-        }
+	@Override
+	public byte getTypeId() {
+		return getType().getId();
+	}
 
-        return result + "]";
-    }
+	@Override
+	public TagType getType() {
+		return TagType.TAG_Long_Array;
+	}
 
-    @Override
-    public int hashCode() {
-        return super.hashCode() ^ Arrays.hashCode(this.data);
-    }
+	@Override
+	public String toString() {
+		String result = "[";
+		long[] aint = this.data;
+		int lgh = aint.length;
 
-    public int size() {
-        return this.data.length;
-    }
+		for (int j = 0; j < lgh; ++j) {
+			long k = aint[j];
 
-    public long[] getLongArray() {
-        return this.data;
-    }
-    
-    public long[] getAsObject() {
-    	return this.getAsObject(DEFAULT_CREATOR);
-    }
-    
-    @Override
-    public <M extends Map<String, Object>, L extends List<Object>> long[] getAsObject(ObjectCreator<M, L> creator) {
-    	return this.getLongArray();
-    }
+			result += k + ",";
+		}
 
-    @Override
-    public boolean equals(Object other) {
-        if (!super.equals(other)) {
-            return false;
-        }
-        TagLongArray tb = (TagLongArray) other;
-        return Arrays.equals(this.data, tb.data);
-    }
+		return result + "]";
+	}
 
-    @Override
-    public TagLongArray clone() {
-        long[] copy = new long[this.data.length];
+	@Override
+	public int hashCode() {
+		return super.hashCode() ^ Arrays.hashCode(this.data);
+	}
 
-        System.arraycopy(this.data, 0, copy, 0, this.data.length);
-        return new TagLongArray(copy);
-    }
+	public int size() {
+		return this.data.length;
+	}
+
+	public long[] getLongArray() {
+		return this.data;
+	}
+
+	public long[] getAsObject() {
+		return this.getAsObject(DEFAULT_CREATOR);
+	}
+
+	@Override
+	public <M extends Map<String, Object>, L extends List<Object>> long[] getAsObject(ObjectCreator<M, L> creator) {
+		return this.getLongArray();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!super.equals(other)) {
+			return false;
+		}
+		TagLongArray tb = (TagLongArray) other;
+		return Arrays.equals(this.data, tb.data);
+	}
+
+	@Override
+	public TagLongArray clone() {
+		long[] copy = new long[this.data.length];
+
+		System.arraycopy(this.data, 0, copy, 0, this.data.length);
+		return new TagLongArray(copy);
+	}
 }

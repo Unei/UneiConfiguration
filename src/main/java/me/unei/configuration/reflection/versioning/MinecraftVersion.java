@@ -25,29 +25,33 @@ public enum MinecraftVersion {
 	MC1_1(800),
 	MC1_0(700),
 	;
-	
+
 	private final int versionId;
-	
+
 	private MinecraftVersion(int id) {
 		this.versionId = id;
 	}
-	
+
 	public int getVersionId() {
 		return this.versionId;
 	}
-	
+
 	public static MinecraftVersion getActualVersion() {
 		return Unknown;
 	}
-	
-	public static MinecraftVersion selectMinimal(MinecraftVersion...versions) {
+
+	public static MinecraftVersion selectMinimal(MinecraftVersion... versions) {
 		MinecraftVersion current = getActualVersion();
 		MinecraftVersion selected = null;
+
 		for (MinecraftVersion ver : versions) {
+
 			if (ver == current) {
 				return ver;
 			}
+
 			if (ver.getVersionId() < current.getVersionId()) {
+
 				if (selected == null || (ver.getVersionId() > selected.getVersionId())) {
 					selected = ver;
 				}
@@ -55,22 +59,23 @@ public enum MinecraftVersion {
 		}
 		return selected;
 	}
-	
+
 	public <T> T ifThen(MinecraftVersion version, Supplier<T> runnable) {
 		if (this == version) {
 			return runnable.get();
 		}
 		return null;
 	}
-	
+
 	public <T> T selectToExec(Map<MinecraftVersion, Supplier<T>> methods) {
 		Supplier<T> r = methods.get(this);
+
 		if (r != null) {
 			return r.get();
 		}
 		return null;
 	}
-	
+
 	public <T> Map<MinecraftVersion, Supplier<T>> mapForExec(Supplier<T> method) {
 		Map<MinecraftVersion, Supplier<T>> res = new EnumMap<>(MinecraftVersion.class);
 		res.put(this, method);
