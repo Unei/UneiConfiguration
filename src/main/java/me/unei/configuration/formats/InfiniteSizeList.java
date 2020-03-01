@@ -22,8 +22,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 @Deprecated
-public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Cloneable, Serializable, Storage<E>
-{
+public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Cloneable, Serializable, Storage<E> {
 	private static final long serialVersionUID = 3928206292547481992L;
 
 	private static final int DEFAULT_CAPACITY = 10;
@@ -78,7 +77,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean hasValue(E value) {
 		return this.contains(value);
@@ -87,7 +86,9 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	@Override
 	public Set<String> getKeys() {
 		Set<String> r = new HashSet<String>(allocated);
+
 		for (int i = 0; i < elementKeys.length; ++i) {
+
 			if (elementValues[i] != null) {
 				r.add(Integer.toString(elementKeys[i]));
 			}
@@ -95,24 +96,19 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		return r;
 	}
 
-	public static int getIndexForKey(int[] keys, int key)
-	{
+	public static int getIndexForKey(int[] keys, int key) {
 		return Arrays.binarySearch(keys, key);
 	}
 
-	private void freeInsert(int position)
-	{
-		if (elementValues[position] != null)
-		{
+	private void freeInsert(int position) {
+		if (elementValues[position] != null) {
 			System.arraycopy(elementKeys, position, elementKeys, position + 1, elementKeys.length - position - 1);
 			System.arraycopy(elementValues, position, elementValues, position + 1, elementValues.length - position - 1);
 		}
 	}
 
-	private void newKey(int key, int insert_point, E obj)
-	{
-		if ((insert_point + 1) >= elementKeys.length)
-		{
+	private void newKey(int key, int insert_point, E obj) {
+		if ((insert_point + 1) >= elementKeys.length) {
 			grow(insert_point + 2);
 		}
 		freeInsert(insert_point);
@@ -121,17 +117,15 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	}
 
 	private Object insertAt(int key, E obj) {
-		int  index = getIndexForKey(key);
-		if (index < 0)
-		{
+		int index = getIndexForKey(key);
+
+		if (index < 0) {
 			int insert_point = -(index + 1);
 			newKey(key, insert_point, obj);
 			size = Math.max(size, key + 1);
 			++allocated;
 			return null;
-		}
-		else
-		{
+		} else {
 			Object old = elementValues[index];
 			elementValues[index] = obj;
 			size = Math.max(size, key + 1);
@@ -142,12 +136,13 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	/**
 	 * Constructs an empty list with the specified initial capacity.
 	 *
-	 * @param  initialCapacity  the initial capacity of the list
+	 * @param initialCapacity the initial capacity of the list
 	 * @throws IllegalArgumentException if the specified initial capacity
-	 *         is negative
+	 *                                      is negative
 	 */
 	public InfiniteSizeList(int initialCapacity) {
 		super(0);
+
 		if (initialCapacity > 0) {
 			this.elementKeys = new int[initialCapacity];
 			this.elementValues = new Object[initialCapacity];
@@ -155,7 +150,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 			this.elementKeys = EMPTY_ELEMENTKEYS;
 			this.elementValues = EMPTY_ELEMENTVALUES;
 		} else {
-			throw new IllegalArgumentException("Illegal Capacity: "+
+			throw new IllegalArgumentException("Illegal Capacity: " +
 					initialCapacity);
 		}
 	}
@@ -174,15 +169,15 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * necessary, to ensure that it can hold at least the number of elements
 	 * specified by the minimum capacity argument.
 	 *
-	 * @param   minCapacity   the desired minimum capacity
+	 * @param minCapacity the desired minimum capacity
 	 */
 	public void ensureCapacity(int minCapacity) {
 		int minExpand = (elementValues != DEFAULTCAPACITY_EMPTY_ELEMENTVALUES)
 				// any size if not default element table
 				? 0
-						// larger than default for default empty table. It's already
-						// supposed to be at default size.
-						: DEFAULT_CAPACITY;
+				// larger than default for default empty table. It's already
+				// supposed to be at default size.
+				: DEFAULT_CAPACITY;
 
 		if (minCapacity > minExpand) {
 			ensureExplicitCapacity(minCapacity);
@@ -237,9 +232,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	private static int hugeCapacity(int minCapacity) {
 		if (minCapacity < 0) // overflow
 			throw new OutOfMemoryError();
-		return (minCapacity > MAX_ARRAY_SIZE) ?
-				Integer.MAX_VALUE :
-					MAX_ARRAY_SIZE;
+		return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
 	}
 
 	/**
@@ -270,7 +263,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	public int indexOf(Object o) {
 		if (o == null) {
 			for (int i = 0; i < size; i++)
-				if (elementValues[i]==null)
+				if (elementValues[i] == null)
 					return elementKeys[i];
 		} else {
 			for (int i = 0; i < size; i++)
@@ -289,11 +282,11 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 */
 	public int lastIndexOf(Object o) {
 		if (o == null) {
-			for (int i = size-1; i >= 0; i--)
-				if (elementValues[i]==null)
+			for (int i = size - 1; i >= 0; i--)
+				if (elementValues[i] == null)
 					return elementKeys[i];
 		} else {
-			for (int i = size-1; i >= 0; i--)
+			for (int i = size - 1; i >= 0; i--)
 				if (o.equals(elementValues[i]))
 					return elementKeys[i];
 		}
@@ -301,7 +294,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	}
 
 	/**
-	 * Returns a shallow copy of this <tt>ArrayList</tt> instance.  (The
+	 * Returns a shallow copy of this <tt>ArrayList</tt> instance. (The
 	 * elements themselves are not copied.)
 	 *
 	 * @return a clone of this <tt>ArrayList</tt> instance
@@ -317,12 +310,12 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	/**
 	 * Returns an array containing all of the elements in this list
 	 * in proper sequence (from first to last element).
-	 *
-	 * <p>The returned array will be "safe" in that no references to it are
-	 * maintained by this list.  (In other words, this method must allocate
-	 * a new array).  The caller is thus free to modify the returned array.
-	 *
-	 * <p>This method acts as bridge between array-based and collection-based
+	 * <p>
+	 * The returned array will be "safe" in that no references to it are
+	 * maintained by this list. (In other words, this method must allocate
+	 * a new array). The caller is thus free to modify the returned array.
+	 * <p>
+	 * This method acts as bridge between array-based and collection-based
 	 * APIs.
 	 *
 	 * @return an array containing all of the elements in this list in
@@ -331,7 +324,9 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	public Object[] toArray() {
 		Object[] result = new Object[size];
 		Arrays.fill(result, null);
+
 		for (int i = 0; i < elementKeys.length; ++i) {
+
 			if (elementValues[i] != null) {
 				result[elementKeys[i]] = elementValues[i];
 			}
@@ -342,25 +337,26 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	/**
 	 * Returns an array containing all of the elements in this list in proper
 	 * sequence (from first to last element); the runtime type of the returned
-	 * array is that of the specified array.  If the list fits in the
-	 * specified array, it is returned therein.  Otherwise, a new array is
+	 * array is that of the specified array. If the list fits in the
+	 * specified array, it is returned therein. Otherwise, a new array is
 	 * allocated with the runtime type of the specified array and the size of
 	 * this list.
-	 *
-	 * <p>If the list fits in the specified array with room to spare
+	 * <p>
+	 * If the list fits in the specified array with room to spare
 	 * (i.e., the array has more elements than the list), the element in
 	 * the array immediately following the end of the collection is set to
-	 * <tt>null</tt>.  (This is useful in determining the length of the
+	 * <tt>null</tt>. (This is useful in determining the length of the
 	 * list <i>only</i> if the caller knows that the list does not contain
 	 * any null elements.)
 	 *
 	 * @param a the array into which the elements of the list are to
-	 *          be stored, if it is big enough; otherwise, a new array of the
-	 *          same runtime type is allocated for this purpose.
+	 *              be stored, if it is big enough; otherwise, a new array of the
+	 *              same runtime type is allocated for this purpose.
 	 * @return an array containing the elements of the list
-	 * @throws ArrayStoreException if the runtime type of the specified array
-	 *         is not a supertype of the runtime type of every element in
-	 *         this list
+	 * @throws ArrayStoreException  if the runtime type of the specified array
+	 *                                  is not a supertype of the runtime type of
+	 *                                  every element in
+	 *                                  this list
 	 * @throws NullPointerException if the specified array is null
 	 */
 	@SuppressWarnings("unchecked")
@@ -387,6 +383,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		if (index >= elementValues.length) {
 			throw new ConcurrentModificationException();
 		}
+
 		if (index < 0) {
 			return null;
 		}
@@ -402,6 +399,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		if (index >= values.length) {
 			throw new ConcurrentModificationException();
 		}
+
 		if (index < 0) {
 			return null;
 		}
@@ -409,15 +407,14 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <A> A autoCast(Object in)
-	{
+	private static <A> A autoCast(Object in) {
 		return (A) in;
 	}
 
 	/**
 	 * Returns the element at the specified position in this list.
 	 *
-	 * @param  index index of the element to return
+	 * @param index index of the element to return
 	 * @return the element at the specified position in this list
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
@@ -431,7 +428,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * Replaces the element at the specified position in this list with
 	 * the specified element.
 	 *
-	 * @param index index of the element to replace
+	 * @param index   index of the element to replace
 	 * @param element element to be stored at the specified position
 	 * @return the element previously at the specified position
 	 */
@@ -462,7 +459,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * list. Shifts the element currently at that position (if any) and
 	 * any subsequent elements to the right (adds one to their indices).
 	 *
-	 * @param index index at which the specified element is to be inserted
+	 * @param index   index at which the specified element is to be inserted
 	 * @param element element to be inserted
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
@@ -475,10 +472,10 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		insertAt(index, element);
 	}
 
-	private void deleteAt(int index)
-	{
+	private void deleteAt(int index) {
 		if (elementValues[index] != null) {
 			allocated -= 1;
+
 			if (allocated <= 0) {
 				allocated = 0;
 				size = 0;
@@ -503,10 +500,12 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		modCount++;
 		int idx = getIndexForKey(index);
 		E oldValue = elementData0(idx);
+
 		if (idx >= 0) {
 			deleteAt(idx);
 
 			if ((index + 1) == size) {
+
 				if (idx > 0) {
 					int prevIdx = elementKeys[idx - 1];
 					size = (prevIdx + 1);
@@ -521,11 +520,11 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 
 	/**
 	 * Removes the first occurrence of the specified element from this list,
-	 * if it is present.  If the list does not contain the element, it is
-	 * unchanged.  More formally, removes the element with the lowest index
+	 * if it is present. If the list does not contain the element, it is
+	 * unchanged. More formally, removes the element with the lowest index
 	 * <tt>i</tt> such that
 	 * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>
-	 * (if such an element exists).  Returns <tt>true</tt> if this list
+	 * (if such an element exists). Returns <tt>true</tt> if this list
 	 * contained the specified element (or equivalently, if this list
 	 * changed as a result of the call).
 	 *
@@ -548,13 +547,14 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * return the value removed.
 	 */
 	private void fastRemove(int index) {
-
 		modCount++;
 		int idx = getIndexForKey(index);
+
 		if (idx >= 0) {
 			deleteAt(idx);
 
 			if ((index + 1) == size) {
+
 				if (idx > 0) {
 					int prevIdx = elementKeys[idx - 1];
 					size = (prevIdx + 1);
@@ -566,7 +566,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	}
 
 	/**
-	 * Removes all of the elements from this list.  The list will
+	 * Removes all of the elements from this list. The list will
 	 * be empty after this call returns.
 	 */
 	public void clear() {
@@ -579,17 +579,16 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		size = 0;
 	}
 
-	private static int absolute(int in)
-	{
+	private static int absolute(int in) {
 		if (in < 0) {
 			return -(in + 1);
 		}
 		return in;
 	}
 
-	private int getLastIndex()
-	{
+	private int getLastIndex() {
 		for (int i = (elementValues.length - 1); i >= 0; --i) {
+
 			if (elementValues[i] != null) {
 				return i;
 			}
@@ -597,8 +596,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		return -1;
 	}
 
-	private void autoAdjustSize()
-	{
+	private void autoAdjustSize() {
 		int last = getLastIndex();
 
 		if (last >= 0) {
@@ -616,21 +614,21 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * (If {@code toIndex==fromIndex}, this operation has no effect.)
 	 *
 	 * @throws IndexOutOfBoundsException if {@code fromIndex} or
-	 *         {@code toIndex} is out of range
-	 *         ({@code fromIndex < 0 ||
+	 *                                       {@code toIndex} is out of range
+	 *                                       ({@code fromIndex < 0 ||
 	 *          fromIndex >= size() ||
 	 *          toIndex > size() ||
-	 *          toIndex < fromIndex})
+	 *          toIndex < fromIndex}  )
 	 */
 	protected void removeRange(int fromIndex, int toIndex) {
-		if (fromIndex < 0|| fromIndex >= size
-				|| toIndex > size || toIndex < fromIndex)
-		{
+		if (fromIndex < 0 || fromIndex >= size
+				|| toIndex > size || toIndex < fromIndex) {
 			throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + ",toIndex: " + toIndex + ",size: " + size);
 		}
 		modCount++;
 		int fromIdx = absolute(getIndexForKey(fromIndex));
 		int toIdx = absolute(getIndexForKey(toIndex));
+
 		for (int i = fromIdx; i < toIdx; ++i) {
 			deleteAt(i);
 		}
@@ -638,8 +636,8 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	}
 
 	/**
-	 * Checks if the given index is in range.  If not, throws an appropriate
-	 * runtime exception.  This method does *not* check if the index is
+	 * Checks if the given index is in range. If not, throws an appropriate
+	 * runtime exception. This method does *not* check if the index is
 	 * negative: It is always used immediately prior to an array access,
 	 * which throws an ArrayIndexOutOfBoundsException if index is negative.
 	 */
@@ -662,7 +660,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * this "outlining" performs best with both server and client VMs.
 	 */
 	private String outOfBoundsMsg(int index) {
-		return "Index: "+index+", Size: "+size;
+		return "Index: " + index + ", Size: " + size;
 	}
 
 	/**
@@ -674,7 +672,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 *             (each an <tt>Object</tt>) in the proper order.
 	 */
 	private void writeObject(java.io.ObjectOutputStream s)
-			throws java.io.IOException{
+			throws java.io.IOException {
 		// Write out element count, and any hidden stuff
 		int expectedModCount = modCount;
 		s.defaultWriteObject();
@@ -684,7 +682,8 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		s.writeInt(allocated);
 
 		// Write out all elements in the proper order.
-		for (int i=0; i<elementValues.length; i++) {
+		for (int i = 0; i < elementValues.length; i++) {
+
 			if (elementValues[i] != null) {
 				s.writeInt(elementKeys[i]);
 				s.writeObject(elementValues[i]);
@@ -717,8 +716,9 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 
 			int[] b = elementKeys;
 			Object[] a = elementValues;
+
 			// Read in all elements in the proper order.
-			for (int i=0; i<allocated; i++) {
+			for (int i = 0; i < allocated; i++) {
 				b[i] = s.readInt();
 				a[i] = s.readObject();
 			}
@@ -728,8 +728,8 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	/**
 	 * Returns a list iterator over the elements in this list (in proper
 	 * sequence).
-	 *
-	 * <p>The returned list iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
+	 * <p>
+	 * The returned list iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
 	 *
 	 * @see #listIterator(int)
 	 */
@@ -739,8 +739,8 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 
 	/**
 	 * Returns an iterator over the elements in this list in proper sequence.
-	 *
-	 * <p>The returned iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
+	 * <p>
+	 * The returned iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
 	 *
 	 * @return an iterator over the elements in this list in proper sequence
 	 */
@@ -752,11 +752,12 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * An optimized version of AbstractList.Itr
 	 */
 	private class Itr implements Iterator<E> {
-		int cursor;       // index of next element to return
+		int cursor; // index of next element to return
 		int lastRet = -1; // index of last element returned; -1 if no such
 		int expectedModCount = modCount;
 
-		Itr() {}
+		Itr() {
+		}
 
 		public boolean hasNext() {
 			return cursor != size;
@@ -791,9 +792,11 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 			Objects.requireNonNull(consumer);
 			final int size = InfiniteSizeList.this.size;
 			int i = cursor;
+
 			if (i >= size) {
 				return;
 			}
+
 			while (i != size && modCount == expectedModCount) {
 				consumer.accept(InfiniteSizeList.this.elementData1(i++));
 			}
@@ -807,9 +810,11 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 			Objects.requireNonNull(consumer);
 			final int size = InfiniteSizeList.this.size;
 			int i = cursor;
+
 			if (i >= size) {
 				return;
 			}
+
 			while (i != size && modCount == expectedModCount) {
 				consumer.accept(i++, InfiniteSizeList.this.elementData1(i));
 			}
@@ -889,11 +894,14 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		@SuppressWarnings("unchecked")
 		final E[] elementData = (E[]) this.elementValues;
 		final int size = elementData.length;
-		for (int i=0; modCount == expectedModCount && i < size; i++) {
+
+		for (int i = 0; modCount == expectedModCount && i < size; i++) {
+
 			if (elementData[i] != null) {
 				action.accept(elementData[i]);
 			}
 		}
+
 		if (modCount != expectedModCount) {
 			throw new ConcurrentModificationException();
 		}
@@ -903,8 +911,8 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 	 * Creates a <em><a href="Spliterator.html#binding">late-binding</a></em>
 	 * and <em>fail-fast</em> {@link Spliterator} over the elements in this
 	 * list.
-	 *
-	 * <p>The {@code Spliterator} reports {@link Spliterator#SIZED},
+	 * <p>
+	 * The {@code Spliterator} reports {@link Spliterator#SIZED},
 	 * {@link Spliterator#SUBSIZED}, and {@link Spliterator#ORDERED}.
 	 * Overriding implementations should document the reporting of additional
 	 * characteristic values.
@@ -932,9 +940,9 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		 * be worthwhile in practice. To carry this out, we (1) lazily
 		 * initialize fence and expectedModCount until the latest
 		 * point that we need to commit to the state we are checking
-		 * against; thus improving precision.  (This doesn't apply to
+		 * against; thus improving precision. (This doesn't apply to
 		 * SubLists, that create spliterators with current non-lazy
-		 * values).  (2) We perform only a single
+		 * values). (2) We perform only a single
 		 * ConcurrentModificationException check at the end of forEach
 		 * (the most performance-sensitive method). When using forEach
 		 * (as opposed to iterators), we can normally only detect
@@ -942,12 +950,12 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		 * CME-triggering checks apply to all other possible
 		 * violations of assumptions for example null or too-small
 		 * elementData array given its size(), that could only have
-		 * occurred due to interference.  This allows the inner loop
+		 * occurred due to interference. This allows the inner loop
 		 * of forEach to run without any further checks, and
 		 * simplifies lambda-resolution. While this does entail a
 		 * number of checks, note that in the common case of
 		 * list.stream().forEach(a), no checks or other computation
-		 * occur anywhere other than inside forEach itself.  The other
+		 * occur anywhere other than inside forEach itself. The other
 		 * less-often-used methods cannot take advantage of most of
 		 * these streamlinings.
 		 */
@@ -957,7 +965,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		private int fence; // -1 until used; then one past last index
 		private int expectedModCount; // initialized when fence set
 
-		/** Create new spliterator covering the given  range */
+		/** Create new spliterator covering the given range */
 		InfiniteSizeListSpliterator(InfiniteSizeList<E> list, int origin, int fence,
 				int expectedModCount) {
 			this.list = list; // OK if null unless traversed
@@ -969,7 +977,9 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		private int getFence() { // initialize fence to size on first use
 			int hi; // (a specialized variant appears in method forEach)
 			InfiniteSizeList<E> lst;
+
 			if ((hi = fence) < 0) {
+
 				if ((lst = list) == null)
 					hi = fence = 0;
 				else {
@@ -982,15 +992,16 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 
 		public InfiniteSizeListSpliterator<E> trySplit() {
 			int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;
-		return (lo >= mid) ? null : // divide range in half unless too small
-			new InfiniteSizeListSpliterator<E>(list, lo, index = mid,
-			expectedModCount);
+			return (lo >= mid) ? null : // divide range in half unless too small
+					new InfiniteSizeListSpliterator<E>(list, lo, index = mid,
+							expectedModCount);
 		}
 
 		public boolean tryAdvance(Consumer<? super E> action) {
 			if (action == null)
 				throw new NullPointerException();
 			int hi = getFence(), i = index;
+
 			if (i < hi) {
 				index = i + 1;
 				E e = list.elementData1(i);
@@ -1004,18 +1015,23 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 
 		public void forEachRemaining(Consumer<? super E> action) {
 			int i, hi, mc; // hoist accesses and checks from loop
-			InfiniteSizeList<E> lst; Object[] a; int[] b;
+			InfiniteSizeList<E> lst;
+			Object[] a;
+			int[] b;
 			if (action == null)
 				throw new NullPointerException();
+
 			if ((lst = list) != null && (a = lst.elementValues) != null) {
 				b = lst.elementKeys;
+
 				if ((hi = fence) < 0) {
 					mc = lst.modCount;
 					hi = lst.size;
-				}
-				else
+				} else
 					mc = expectedModCount;
+
 				if ((i = index) >= 0 && (index = hi) <= a.length) {
+
 					for (; i < hi; ++i) {
 						E e = elementData(b, a, i);
 						action.accept(e);
@@ -1046,26 +1062,32 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		final BitSet removeSet = new BitSet(size);
 		final int expectedModCount = modCount;
 		final int size = this.elementValues.length;
-		for (int i=0; modCount == expectedModCount && i < size; i++) {
+
+		for (int i = 0; modCount == expectedModCount && i < size; i++) {
 			@SuppressWarnings("unchecked")
 			final E element = (E) elementValues[i];
+
 			if (element != null && filter.test(element)) {
 				removeSet.set(i);
 				removeCount++;
 			}
 		}
+
 		if (modCount != expectedModCount) {
 			throw new ConcurrentModificationException();
 		}
 
 		// shift surviving elements left over the spaces left by removed elements
 		final boolean anyToRemove = removeCount > 0;
+
 		if (anyToRemove) {
-			for (int i=0; i < size; ++i) {
+
+			for (int i = 0; i < size; ++i) {
 				i = removeSet.nextSetBit(i);
 				elementValues[i] = null;
 			}
 			this.autoAdjustSize();
+
 			if (modCount != expectedModCount) {
 				throw new ConcurrentModificationException();
 			}
@@ -1080,24 +1102,25 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		Objects.requireNonNull(operator);
 		final int expectedModCount = modCount;
 		final int size = this.size;
-		for (int i=0; modCount == expectedModCount && i < size; i++) {
+
+		for (int i = 0; modCount == expectedModCount && i < size; i++) {
 			insertAt(i, operator.apply(elementData1(i)));
 		}
+
 		if (modCount != expectedModCount) {
 			throw new ConcurrentModificationException();
 		}
 		modCount++;
 	}
 
-
-	//  String conversion
+	// String conversion
 
 	/**
-	 * Returns a string representation of this collection.  The string
+	 * Returns a string representation of this collection. The string
 	 * representation consists of a list of the collection's elements in the
 	 * order they are returned by its iterator, enclosed in square brackets
-	 * (<tt>"[]"</tt>).  Adjacent elements are separated by the characters
-	 * <tt>", "</tt> (comma and space).  Elements are converted to strings as
+	 * (<tt>"[]"</tt>). Adjacent elements are separated by the characters
+	 * <tt>", "</tt> (comma and space). Elements are converted to strings as
 	 * by {@link String#valueOf(Object)}.
 	 *
 	 * @return a string representation of this collection
@@ -1108,9 +1131,11 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 
 		StringBuilder sb = new StringBuilder();
 		sb.append('[');
+
 		for (int i = 0; i < elementValues.length; ++i) {
 			int idx = elementKeys[i];
 			E e = autoCast(elementValues[i]);
+
 			if (e != null) {
 				sb.append(idx).append('=');
 				sb.append(e == this ? "(this Collection)" : e);
@@ -1126,8 +1151,7 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 		return new EntryIterator((ListItr) listIterator());
 	}
 
-	private class EntryIterator implements Iterator<Map.Entry<Key, E>>
-	{
+	private class EntryIterator implements Iterator<Map.Entry<Key, E>> {
 		private final ListItr originalIt;
 
 		public EntryIterator(ListItr orig) {
@@ -1151,17 +1175,16 @@ public class InfiniteSizeList<E> extends ArrayList<E> implements List<E>, Clonea
 
 		@Override
 		public void forEachRemaining(Consumer<? super Entry<Key, E>> action) {
-			originalIt.specialForEachRemaining((idx, entry) -> action.accept(new KeyEntry(idx, entry, originalIt::set)));
+			originalIt
+					.specialForEachRemaining((idx, entry) -> action.accept(new KeyEntry(idx, entry, originalIt::set)));
 		}
 
-		private class KeyEntry implements Map.Entry<Key, E>
-		{
+		private class KeyEntry implements Map.Entry<Key, E> {
 			private final Key key;
 			private E value;
 			private final Consumer<E> setter;
 
-			public KeyEntry(int key, E value, Consumer<E> setter)
-			{
+			public KeyEntry(int key, E value, Consumer<E> setter) {
 				this.key = new Key(key);
 				this.value = value;
 				this.setter = setter;

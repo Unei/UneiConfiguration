@@ -11,80 +11,80 @@ import me.unei.configuration.reflection.NBTNumberReflection;
 
 public final class TagShort extends Tag {
 
-    private short data;
+	private short data;
 
-    TagShort() {
-    }
+	TagShort() {
+	}
 
-    public TagShort(short value) {
-        this.data = value;
-    }
+	public TagShort(short value) {
+		this.data = value;
+	}
 
-    @Override
-    void write(DataOutput output) throws IOException {
-        output.writeShort(this.data);
-    }
+	@Override
+	void write(DataOutput output) throws IOException {
+		output.writeShort(this.data);
+	}
 
-    @Override
-    void read(DataInput output) throws IOException {
-        this.data = output.readShort();
-    }
-    
-    Object getAsNMS() {
-    	return NBTNumberReflection.newShort(this.getValue());
-    }
-    
-    void getFromNMS(Object nmsShort) {
-    	if (NBTNumberReflection.isNBTShort(nmsShort)) {
-    		this.data = NBTNumberReflection.getShort(nmsShort);
-    	}
-    }
+	@Override
+	void read(DataInput output) throws IOException {
+		this.data = output.readShort();
+	}
 
-    @Override
-    public byte getTypeId() {
-        return getType().getId();
-    }
+	Object getAsNMS() {
+		return NBTNumberReflection.newShort(this.getValue());
+	}
 
-    @Override
-    public TagType getType() {
-        return TagType.TAG_Short;
-    }
+	void getFromNMS(Object nmsShort) {
+		if (NBTNumberReflection.isNBTShort(nmsShort)) {
+			this.data = NBTNumberReflection.getShort(nmsShort);
+		}
+	}
 
-    @Override
-    public String toString() {
-        return Short.toString(this.data) + "s";
-    }
+	@Override
+	public byte getTypeId() {
+		return getType().getId();
+	}
 
-    @Override
-    public int hashCode() {
-        return super.hashCode() ^ this.data;
-    }
+	@Override
+	public TagType getType() {
+		return TagType.TAG_Short;
+	}
 
-    public short getValue() {
-        return this.data;
-    }
-    
-    @Override
-    public Short getAsObject() {
-    	return this.getAsObject(DEFAULT_CREATOR);
-    }
-    
-    @Override
-    public <M extends Map<String, Object>, L extends List<Object>> Short getAsObject(ObjectCreator<M, L> creator) {
-    	return Short.valueOf(this.getValue());
-    }
+	@Override
+	public String toString() {
+		return Short.toString(this.data) + "s";
+	}
 
-    @Override
-    public boolean equals(Object other) {
-        if (!super.equals(other)) {
-            return false;
-        }
-        TagShort tb = (TagShort) other;
-        return (tb.data == this.data);
-    }
+	@Override
+	public int hashCode() {
+		return super.hashCode() ^ this.data;
+	}
 
-    @Override
-    public TagShort clone() {
-        return new TagShort(this.data);
-    }
+	public short getValue() {
+		return this.data;
+	}
+
+	@Override
+	public Short getAsObject() {
+		return this.getAsObject(DEFAULT_CREATOR);
+	}
+
+	@Override
+	public <M extends Map<String, Object>, L extends List<Object>> Short getAsObject(ObjectCreator<M, L> creator) {
+		return Short.valueOf(this.getValue());
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!super.equals(other)) {
+			return false;
+		}
+		TagShort tb = (TagShort) other;
+		return (tb.data == this.data);
+	}
+
+	@Override
+	public TagShort clone() {
+		return new TagShort(this.data);
+	}
 }

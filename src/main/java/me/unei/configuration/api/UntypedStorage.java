@@ -1,199 +1,392 @@
 package me.unei.configuration.api;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.exceptions.NoFieldException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 
 public abstract class UntypedStorage<T extends UntypedStorage<T>> extends Configuration<T> {
 
-    protected UntypedStorage(SavedFile file, PathSymbolsType symType) {
-        super(file, symType);
-    }
+	protected UntypedStorage(SavedFile file, PathSymbolsType symType) {
+		super(file, symType);
+	}
 
-    protected UntypedStorage(T parent, String childName) {
-        super(parent, childName);
-    }
+	protected UntypedStorage(T parent, String childName) {
+		super(parent, childName);
+	}
 
-    protected UntypedStorage(T parent, int idx) {
-        super(parent, idx);
-    }
+	protected UntypedStorage(T parent, int idx) {
+		super(parent, idx);
+	}
 
-    public String getString(String path) {
-    	Object get = get(path);
-    	if (get instanceof String) {
-    		return (String) get;
-    	}
-    	return (get != null ? get.toString() : null);
-        /*try {
-            return (String) get(path);
-        } catch (Exception e) {
-            return "";
-        }*/
-    }
+	@Override
+	public Object get(String path, Object def) {
+		Object res = get(path);
+		return (res != null) ? res : def;
+	}
 
-    public double getDouble(String path) {
-        try {
-            return ((Number) get(path)).doubleValue();
-        } catch (Exception e) {
-            try {
-            	return (Double.valueOf(getString(path)).doubleValue());
-            } catch (NumberFormatException nfe) {
-            	return 0.0D;
-            }
-        }
-    }
+	public String getString(String path) {
+		Object get = get(path);
 
-    public boolean getBoolean(String path) {
-        try {
-            return ((Boolean) get(path)).booleanValue();
-        } catch (Exception e) {
-            try {
-            	return (Boolean.valueOf(getString(path)).booleanValue());
-            } catch (NumberFormatException nfe) {
-            	return false;
-            }
-        }
-    }
+		if (get instanceof String) {
+			return (String) get;
+		}
+		return (get != null ? get.toString() : null);
+	}
 
-    public byte getByte(String path) {
-        try {
-            return ((Number) get(path)).byteValue();
-        } catch (Exception e) {
-            try {
-            	return (Byte.valueOf(getString(path)).byteValue());
-            } catch (NumberFormatException nfe) {
-            	return (byte) 0;
-            }
-        }
-    }
+	@Override
+	public String tryGetString(String key) throws NoFieldException {
+		Object obj = tryGet(key);
 
-    public short getShort(String path) {
-        try {
-            return ((Number) get(path)).shortValue();
-        } catch (Exception e) {
-            try {
-            	return (Short.valueOf(getString(path)).shortValue());
-            } catch (NumberFormatException nfe) {
-            	return (short) 0;
-            }
-        }
-    }
+		if (!(obj instanceof CharSequence)) {
+			throw new NoFieldException(key, getFile(), "The value for this key is not a string");
+		}
+		return obj.toString();
+	}
 
-    public float getFloat(String path) {
-        try {
-            return ((Number) get(path)).floatValue();
-        } catch (Exception e) {
-            try {
-            	return (Float.valueOf(getString(path)).floatValue());
-            } catch (NumberFormatException nfe) {
-            	return 0.0F;
-            }
-        }
-    }
+	public String getString(String path, String def) {
+		String val = getString(path);
+		return (val != null) ? val : def;
+	}
 
-    public int getInteger(String path) {
-        try {
-            return ((Number) get(path)).intValue();
-        } catch (Exception e) {
-            try {
-            	return (Integer.valueOf(getString(path)).intValue());
-            } catch (NumberFormatException nfe) {
-            	return 0;
-            }
-        }
-    }
+	public Double getDouble(String path) {
+		try {
+			return tryGetDouble(path);
+		} catch (NoFieldException e) {
+			return null;
+		}
+	}
 
-    public long getLong(String path) {
-        try {
-            return ((Number) get(path)).longValue();
-        } catch (Exception e) {
-            try {
-            	return (Long.valueOf(getString(path)).longValue());
-            } catch (NumberFormatException nfe) {
-            	return 0L;
-            }
-        }
-    }
+	public double tryGetDouble(String path) throws NoFieldException {
+		Object val = get(path);
 
-    public List<Byte> getByteList(String path) {
-        try {
-            List<Byte> list = new ArrayList<Byte>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).byteValue());
-            }
-            return list;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+		if (val == null) {
+			throw new NoFieldException(path, getFile(), "No value for this key");
+		}
 
-    public List<Integer> getIntegerList(String path) {
-        try {
-            List<Integer> list = new ArrayList<Integer>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).intValue());
-            }
-            return list;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+		if (val instanceof Number) {
+			return ((Number) val).doubleValue();
+		} else {
 
-    public List<Long> getLongList(String path) {
-        try {
-            List<Long> list = new ArrayList<Long>();
-            for (Object value : (List<?>) get(path)) {
-                list.add(((Number) value).longValue());
-            }
-            return list;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+			try {
+				return Double.parseDouble(val.toString());
+			} catch (NumberFormatException nfe) {
+				throw new NoFieldException(path, getFile(), "The value for this key could not be parsed as double");
+			}
+		}
+	}
 
-    public void setString(String path, String value) {
-        set(path, value);
-    }
+	public double getDouble(String path, double def) {
+		Double val = getDouble(path);
+		return (val != null) ? val.doubleValue() : def;
+	}
 
-    public void setDouble(String path, double value) {
-        set(path, value);
-    }
+	public Boolean getBoolean(String path) {
+		try {
+			return tryGetBoolean(path);
+		} catch (NoFieldException nfe) {
+			return null;
+		}
+	}
 
-    public void setBoolean(String path, boolean value) {
-        set(path, value);
-    }
+	public boolean tryGetBoolean(String path) throws NoFieldException {
+		Object val = get(path);
 
-    public void setByte(String path, byte value) {
-        set(path, value);
-    }
+		if (val == null) {
+			throw new NoFieldException(path, getFile(), "No value for this key");
+		}
 
-    public void setShort(String path, short value) {
-        set(path, value);
-    }
+		if (val instanceof Boolean) {
+			return ((Boolean) val).booleanValue();
+		} else if (val instanceof Number) {
+			return ((Number) val).byteValue() == 0 ? false : true;
+		} else if (Boolean.parseBoolean(val.toString())) {
+			return true;
+		}
+		throw new NoFieldException(path, getFile(), "The value could not be parsed as boolean");
+	}
 
-    public void setFloat(String path, float value) {
-        set(path, value);
-    }
+	public boolean getBoolean(String path, boolean def) {
+		Boolean val = getBoolean(path);
+		return (val != null) ? val.booleanValue() : def;
+	}
 
-    public void setInteger(String path, int value) {
-        set(path, value);
-    }
+	public Byte getByte(String path) {
+		try {
+			return tryGetByte(path);
+		} catch (NoFieldException nfe) {
+			return null;
+		}
+	}
 
-    public void setLong(String path, long value) {
-        set(path, value);
-    }
+	public byte tryGetByte(String path) throws NoFieldException {
+		Object val = get(path);
 
-    public void setByteList(String path, List<Byte> value) {
-        set(path, value);
-    }
+		if (val == null) {
+			throw new NoFieldException(path, getFile(), "No value for this key");
+		}
 
-    public void setIntegerList(String path, List<Integer> value) {
-        set(path, value);
-    }
+		if (val instanceof Number) {
+			return ((Number) val).byteValue();
+		} else {
 
-    public void setLongList(String path, List<Long> value) {
-        set(path, value);
-    }
+			try {
+				return Byte.parseByte(val.toString());
+			} catch (NumberFormatException nfe) {
+				throw new NoFieldException(path, getFile(), "The value for this key could not be parsed as byte");
+			}
+		}
+	}
+
+	public byte getByte(String path, byte def) {
+		Byte val = getByte(path);
+		return (val != null) ? val.byteValue() : def;
+	}
+
+	public Short getShort(String path) {
+		try {
+			return tryGetShort(path);
+		} catch (NoFieldException nfe) {
+			return null;
+		}
+	}
+
+	public short tryGetShort(String path) throws NoFieldException {
+		Object val = get(path);
+
+		if (val == null) {
+			throw new NoFieldException(path, getFile(), "No value for this key");
+		}
+
+		if (val instanceof Number) {
+			return ((Number) val).shortValue();
+		} else {
+
+			try {
+				return Short.parseShort(val.toString());
+			} catch (NumberFormatException nfe) {
+				throw new NoFieldException(path, getFile(), "The value for this key could not be parsed as short");
+			}
+		}
+	}
+
+	public short getShort(String path, short def) {
+		Short val = getShort(path);
+		return (val != null) ? val.shortValue() : def;
+	}
+
+	public Float getFloat(String path) {
+		try {
+			return tryGetFloat(path);
+		} catch (NoFieldException nfe) {
+			return null;
+		}
+	}
+
+	public float tryGetFloat(String path) throws NoFieldException {
+		Object val = get(path);
+
+		if (val == null) {
+			throw new NoFieldException(path, getFile(), "No value for this key");
+		}
+
+		if (val instanceof Number) {
+			return ((Number) val).floatValue();
+		} else {
+
+			try {
+				return Float.parseFloat(val.toString());
+			} catch (NumberFormatException nfe) {
+				throw new NoFieldException(path, getFile(), "The value for this key could not be parsed as float");
+			}
+		}
+	}
+
+	public float getFloat(String path, float def) {
+		Float val = getFloat(path);
+		return (val != null) ? val.floatValue() : def;
+	}
+
+	public Integer getInteger(String path) {
+		try {
+			return tryGetInteger(path);
+		} catch (NoFieldException nfe) {
+			return null;
+		}
+	}
+
+	public int tryGetInteger(String path) throws NoFieldException {
+		Object val = get(path);
+
+		if (val == null) {
+			throw new NoFieldException(path, getFile(), "No value for this key");
+		}
+
+		if (val instanceof Number) {
+			return ((Number) val).intValue();
+		} else {
+
+			try {
+				return Integer.parseInt(val.toString());
+			} catch (NumberFormatException nfe) {
+				throw new NoFieldException(path, getFile(), "The value for this key could not be parsed as integer");
+			}
+		}
+	}
+
+	public int getInteger(String path, int def) {
+		Integer val = getInteger(path);
+		return (val != null) ? val.intValue() : def;
+	}
+
+	public Long getLong(String path) {
+		try {
+			return tryGetLong(path);
+		} catch (NoFieldException nfe) {
+			return null;
+		}
+	}
+
+	public long tryGetLong(String path) throws NoFieldException {
+		Object val = get(path);
+
+		if (val == null) {
+			throw new NoFieldException(path, getFile(), "No value for this key");
+		}
+
+		if (val instanceof Number) {
+			return ((Number) val).longValue();
+		} else {
+
+			try {
+				return Long.parseLong(val.toString());
+			} catch (NumberFormatException nfe) {
+				throw new NoFieldException(path, getFile(), "The value for this key could not be parsed as long");
+			}
+		}
+	}
+
+	public long getLong(String path, long def) {
+		Long val = getLong(path);
+		return (val != null) ? val.longValue() : def;
+	}
+
+	public List<Byte> getByteList(String path) {
+		try {
+			List<Byte> list = new ArrayList<Byte>();
+			Object obj = get(path);
+
+			if (obj instanceof Iterable<?>) {
+
+				for (Object value : (Iterable<?>) obj) {
+					list.add(((Number) value).byteValue());
+				}
+			} else if (obj.getClass().isArray()) {
+
+				for (int i = 0; i < Array.getLength(obj); ++i) {
+					list.add(((Number) Array.get(obj, i)).byteValue());
+				}
+			} else {
+				return null;
+			}
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public List<Integer> getIntegerList(String path) {
+		try {
+			List<Integer> list = new ArrayList<Integer>();
+			Object obj = get(path);
+
+			if (obj instanceof Iterable<?>) {
+
+				for (Object value : (Iterable<?>) obj) {
+					list.add(((Number) value).intValue());
+				}
+			} else if (obj.getClass().isArray()) {
+
+				for (int i = 0; i < Array.getLength(obj); ++i) {
+					list.add(((Number) Array.get(obj, i)).intValue());
+				}
+			} else {
+				return null;
+			}
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public List<Long> getLongList(String path) {
+		try {
+			List<Long> list = new ArrayList<Long>();
+			Object obj = get(path);
+
+			if (obj instanceof Iterable<?>) {
+
+				for (Object value : (Iterable<?>) obj) {
+					list.add(((Number) value).longValue());
+				}
+			} else if (obj.getClass().isArray()) {
+
+				for (int i = 0; i < Array.getLength(obj); ++i) {
+					list.add(((Number) Array.get(obj, i)).longValue());
+				}
+			} else {
+				return null;
+			}
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public void setString(String path, String value) {
+		set(path, value);
+	}
+
+	public void setDouble(String path, double value) {
+		set(path, value);
+	}
+
+	public void setBoolean(String path, boolean value) {
+		set(path, value);
+	}
+
+	public void setByte(String path, byte value) {
+		set(path, value);
+	}
+
+	public void setShort(String path, short value) {
+		set(path, value);
+	}
+
+	public void setFloat(String path, float value) {
+		set(path, value);
+	}
+
+	public void setInteger(String path, int value) {
+		set(path, value);
+	}
+
+	public void setLong(String path, long value) {
+		set(path, value);
+	}
+
+	public void setByteList(String path, List<Byte> value) {
+		set(path, value);
+	}
+
+	public void setIntegerList(String path, List<Integer> value) {
+		set(path, value);
+	}
+
+	public void setLongList(String path, List<Long> value) {
+		set(path, value);
+	}
 }

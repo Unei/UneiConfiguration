@@ -19,15 +19,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.ISQLiteConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.exceptions.NoFieldException;
+import me.unei.configuration.api.exceptions.NotImplementedException;
 import me.unei.configuration.api.fs.IPathNavigator.PathSymbolsType;
 import me.unei.configuration.api.fs.PathComponent;
 import me.unei.configuration.api.fs.PathNavigator;
@@ -40,14 +42,15 @@ import me.unei.configuration.plugin.UneiConfiguration;
 
 public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements ISQLiteConfiguration {
 
+	private static final String CLASS_NAME = SQLiteConfig.class.getName();
+
 	public static final String SQLITE_FILE_EXT = ".db";
 	public static final String SQLITE_DRIVER = "org.sqlite.JDBC";
 
 	private Storage<Object> data = null;
 
 	final Storage<Object> getData() {
-		if (data == null)
-		{
+		if (data == null) {
 			data = new StringHashMap<Object>();
 		}
 		return data;
@@ -94,23 +97,34 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		this.updateNode();
 	}
 
+	@Override
+	public ConfigurationType getConfigurationType() {
+		return ConfigurationType.SQLite;
+	}
+
+	public String getTableName() {
+		return this.tableName;
+	}
+
 	private void subinit() {
 		if (this.parent != null) {
 			this.parent.init();
 			return;
 		}
+
 		try {
 			Class.forName(SQLiteConfig.SQLITE_DRIVER);
 		} catch (ClassNotFoundException e) {
-			UneiConfiguration.getInstance().getLogger().warning("Could not load SQLite driver " + SQLiteConfig.SQLITE_DRIVER + ":");
-			e.printStackTrace();
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "subinit",
+					"Could not load SQLite driver " + SQLiteConfig.SQLITE_DRIVER + ":", e);
 			return;
 		}
 		this.file.init();
 		this.reload();
 	}
 
-	public static SQLiteConfig getForPath(File folder, String fileName, String tableName, String path, PathSymbolsType symType) {
+	public static SQLiteConfig getForPath(File folder, String fileName, String tableName, String path,
+			PathSymbolsType symType) {
 		return SQLiteConfig.getForPath(new SQLiteConfig(folder, fileName, tableName, symType), path);
 	}
 
@@ -130,13 +144,15 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			MessageDigest digest = MessageDigest.getInstance("MD5");
 			return DatatypeConverter.printHexBinary(digest.digest(text.getBytes()));
 		} catch (NoSuchAlgorithmException e) {
-			UneiConfiguration.getInstance().getLogger().warning("Could not calculate MD5 hash of " + text + ":");
-			e.printStackTrace();
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "getHash",
+					"Could not calculate MD5 hash of " + text + ":", e);
 		}
 		String hex = DatatypeConverter.printHexBinary(text.getBytes());
+
 		if (hex.length() > 32) {
 			hex = hex.substring(0, 32);
 		}
+
 		while (hex.length() < 32) {
 			hex = "0" + hex;
 		}
@@ -152,10 +168,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!this.canAccess()) {
 			return null;
 		}
+
 		if (name == null || name.isEmpty()) {
 			return this;
 		}
 		SQLiteConfig child = super.findInChildrens(new Key(name));
+
 		if (child != null) {
 			child.parent = this;
 			return child;
@@ -167,6 +185,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
 		pathList.removeLast();
+
 		if (!pn.followPath(pathList)) {
 			return this;
 		}
@@ -178,6 +197,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		PathNavigator<SQLiteConfig> pn = new PathNavigator<SQLiteConfig>(this);
 		PathComponent.PathComponentsList pathList = PathNavigator.cleanPath(path);
 		pathList.removeLast();
+
 		if (!pn.followPath(pathList)) {
 			return data;
 		}
@@ -195,9 +215,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		}
 
 		PreparedStatement statement = null;
+
 		try {
 			statement = this.connection.prepareStatement(query);
+
 			if (parameters != null) {
+
 				for (Entry<Integer, Object> entry : parameters.entrySet()) {
 					statement.setObject(entry.getKey(), entry.getValue());
 				}
@@ -206,6 +229,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			statement.close();
 			return result;
 		} catch (SQLException e) {
+
 			if (statement != null) {
 				statement.close();
 			}
@@ -223,15 +247,19 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		}
 
 		PreparedStatement statement = null;
+
 		try {
 			statement = this.connection.prepareStatement(query);
+
 			if (parameters != null) {
+
 				for (Entry<Integer, Object> entry : parameters.entrySet()) {
 					statement.setObject(entry.getKey(), entry.getValue());
 				}
 			}
 			return statement.executeQuery();
 		} catch (SQLException e) {
+
 			if (statement != null) {
 				statement.close();
 			}
@@ -249,9 +277,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		}
 
 		PreparedStatement statement = null;
+
 		try {
 			statement = this.connection.prepareStatement(query);
+
 			if (parameters != null) {
+
 				for (Entry<Integer, Object> entry : parameters.entrySet()) {
 					statement.setObject(entry.getKey(), entry.getValue());
 				}
@@ -260,6 +291,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			statement.close();
 			return result;
 		} catch (SQLException e) {
+
 			if (statement != null) {
 				statement.close();
 			}
@@ -277,9 +309,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		}
 
 		PreparedStatement statement = null;
+
 		try {
 			statement = this.connection.prepareStatement(query);
+
 			if (parameters != null) {
+
 				for (Entry<Integer, Object> entry : parameters.entrySet()) {
 					statement.setObject(entry.getKey(), entry.getValue());
 				}
@@ -288,6 +323,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			statement.close();
 			return result;
 		} catch (SQLException e) {
+
 			if (statement != null) {
 				statement.close();
 			}
@@ -299,26 +335,34 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent != null) {
 			this.parent.save();
 			return;
 		}
+
 		if (this.connection == null) {
+
 			try {
 				this.reconnect();
 			} catch (SQLException e) {
-				UneiConfiguration.getInstance().getLogger().warning("Could not reload MySQL configuration " + getFileName() + "->" + tableName + ":");
+				UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "save",
+						"Could not reload MySQL configuration " + getFileName() + "->" + tableName + ":", e);
 				return;
 			}
 		}
 		PreparedStatement statement = null;
-		try {
-			UneiConfiguration.getInstance().getLogger().fine("Writing SQL data to SQLite file " + getFileName() + "->" + tableName + "...");
-			String table = this.tableName; // TODO: Escape table name
-			statement = this.connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, k, v) VALUES (?, ?, ?)");
 
-			for (Iterator<Entry<Key, Object>> it = this.getData().entryIterator(); it.hasNext(); ) {
+		try {
+			UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "save",
+					"Writing SQL data to SQLite file " + getFileName() + "->" + tableName + "...");
+			String table = this.tableName; // TODO: Escape table name
+			statement = this.connection
+					.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, k, v) VALUES (?, ?, ?)");
+
+			for (Iterator<Entry<Key, Object>> it = this.getData().entryIterator(); it.hasNext();) {
 				Entry<Key, Object> entry = it.next();
+
 				if (entry.getValue() == null) {
 					continue;
 				}
@@ -337,12 +381,21 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 				statement.addBatch();
 			}
 
-			statement.executeBatch();
+			int[] results = statement.executeBatch();
 			statement.close();
+
+			for (int res : results) {
+
+				if (res == PreparedStatement.EXECUTE_FAILED) {
+					UneiConfiguration.getInstance().getLogger()
+							.warning("SQLite configuration saving failed at some point.");
+				}
+			}
 			statement = this.connection.prepareStatement("DELETE FROM " + table + " WHERE id = ?");
 
-			for (Iterator<Entry<Key, Object>> it = this.data.entryIterator(); it.hasNext(); ) {
+			for (Iterator<Entry<Key, Object>> it = this.data.entryIterator(); it.hasNext();) {
 				Entry<Key, Object> entry = it.next();
+
 				if (entry.getValue() == null) {
 					statement.setString(1, SQLiteConfig.getHash(entry.getKey().getKeyString()));
 					statement.addBatch();
@@ -350,13 +403,23 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 				}
 			}
 
-			statement.executeBatch();
+			results = statement.executeBatch();
 			statement.close();
-			UneiConfiguration.getInstance().getLogger().fine("Successfully written.");
+
+			for (int res : results) {
+
+				if (res == PreparedStatement.EXECUTE_FAILED) {
+					UneiConfiguration.getInstance().getLogger()
+							.warning("SQLite configuration saving failed at some point.");
+				}
+			}
+			UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "save", "Successfully written.");
 		} catch (SQLException e) {
-			UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
-			e.printStackTrace();
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "save",
+					"Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":", e);
+
 			if (statement != null) {
+
 				try {
 					statement.close();
 				} catch (SQLException ex) {
@@ -364,9 +427,11 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 				}
 			}
 		} catch (IOException e) {
-			UneiConfiguration.getInstance().getLogger().warning("Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":");
-			e.printStackTrace();
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "save",
+					"Could not save SQLite configuration " + this.getFileName() + "->" + tableName + ":", e);
+
 			if (statement != null) {
+
 				try {
 					statement.close();
 				} catch (SQLException ex) {
@@ -380,21 +445,37 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent != null) {
 			this.parent.reload();
 			return;
 		}
+
 		if (this.getType() != StorageType.MAP) {
 			this.data = new StringHashMap<Object>();
 		}
+
+		if (this.file.getFile() == null) {
+			this.data = new StringHashMap<>();
+			return;
+		}
+
+		if (!this.file.getFile().exists()) {
+			this.save();
+			return;
+		}
+
 		try {
 			this.reconnect();
 			this.data.clear();
 
-			UneiConfiguration.getInstance().getLogger().fine("Reading SQL data from SQLite file " + getFileName() + "->" + tableName + "...");
+			UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "reload",
+					"Reading SQL data from SQLite file " + getFileName() + "->" + tableName + "...");
 			String table = this.tableName; // TODO: Escape table name
 			ResultSet result = this.query("SELECT * FROM " + table + "", null);
+
 			while (result.next()) {
+
 				try {
 					String key = result.getString("k");
 					byte[] bytes = result.getBytes("v");
@@ -407,21 +488,21 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 
 					this.data.set(new Key(key), value);
 				} catch (IOException e) {
-					UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
-					e.printStackTrace();
+					UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "reload",
+							"Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":", e);
 				} catch (ClassNotFoundException e) {
-					UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
-					e.printStackTrace();
+					UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "reload",
+							"Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":", e);
 				}
 			}
 			Statement statement = result.getStatement();
 			result.close();
 			statement.close();
 			this.runTreeUpdate();
-			UneiConfiguration.getInstance().getLogger().fine("Successfully read.");
+			UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "reload", "Successfully read.");
 		} catch (SQLException e) {
-			UneiConfiguration.getInstance().getLogger().warning("Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":");
-			e.printStackTrace();
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "reload",
+					"Could not reload SQLite configuration " + this.getFileName() + "->" + tableName + ":", e);
 		}
 	}
 
@@ -429,19 +510,23 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent != null) {
 			this.parent.reconnect();
 			return;
 		}
-		
+
 		if (this.file.getFile() == null) {
 			this.data = new StringHashMap<>();
 			this.runTreeUpdate();
 			return;
 		}
-		
-		UneiConfiguration.getInstance().getLogger().fine("Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
+
+		UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "reconnect",
+				"Reconnecting to SQLite file " + getFileName() + "->" + tableName + "...");
+
 		try {
+
 			if (this.connection != null) {
 				this.connection.close();
 			}
@@ -451,13 +536,17 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.file.getFile().getPath());
 
 		PreparedStatement statement = null;
+
 		try {
 			String table = this.tableName; // TODO: Escape table name
-			statement = this.connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + table + " (id VARCHAR(32) UNIQUE PRIMARY KEY, k LONGTEXT, v LONGBLOB)");
+			statement = this.connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + table
+					+ " (id VARCHAR(32) UNIQUE PRIMARY KEY, k LONGTEXT, v LONGBLOB)");
 			statement.execute();
 			statement.close();
-			UneiConfiguration.getInstance().getLogger().fine("Successfully reconnected.");
+			UneiConfiguration.getInstance().getLogger().logp(Level.FINE, CLASS_NAME, "reconnect",
+					"Successfully reconnected.");
 		} catch (SQLException e) {
+
 			if (statement != null) {
 				statement.close();
 			}
@@ -470,29 +559,33 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			this.parent.close();
 			return;
 		}
+
 		if (this.connection == null) {
 			return;
 		}
+
 		try {
 			this.connection.close();
 		} catch (SQLException e) {
-			UneiConfiguration.getInstance().getLogger().warning("Could not close SQLite configuration " + this.getFileName() + "->" + tableName + ":");
-			e.printStackTrace();
+			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "close",
+					"Could not close SQLite configuration " + this.getFileName() + "->" + tableName + ":", e);
 		}
 		this.connection = null;
 	}
-	
+
 	@Override
 	public StorageType getType() {
 		return (this.data != null) ? this.data.getStorageType() : StorageType.UNDEFINED;
 	}
-    
-    @Override
+
+	@Override
 	protected void updateFromParent() {
 		if (this.parent != null && this.parent.data != null) {
+
 			if (this.parent.getData().getStorageType() != StorageType.UNDEFINED) {
 				Object me = this.parent.data.get(Key.of(this.parent.getType(), nodeAtomicIndex, nodeName));
 				Storage<Object> tmp = StorageConverter.allocateBest(me, null, null);
+
 				if (tmp != null) {
 					this.data = tmp;
 				} else {
@@ -510,9 +603,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (this.parent == null && type != this.getType()) {
-			throw new UnsupportedOperationException("Cannot change the type of a NBT root Tag to anything but " + this.getType().name());
+			throw new UnsupportedOperationException(
+					"Cannot change the type of a NBT root Tag to anything but " + this.getType().name());
 		}
+
 		if (type == this.getType()) {
 			return;
 		}
@@ -524,7 +620,9 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			return this.data.getKeys();
 		}
 		Set<String> keys = this.data.getKeys();
+
 		for (Entry<Key, Object> entry : this.data.entryIterable()) {
+
 			if (entry.getValue() == null) {
 				keys.remove(entry.getKey().getKeyString());
 			}
@@ -539,10 +637,28 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		return node.has(key) && node.get(key) != null;
 	}
 
+	@Override
 	public Object get(String path) {
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
-		return node.get(list.last().getKey(node.getStorageType()));
+		Key key = list.last().getKey(node.getStorageType());
+
+		if (!node.has(key)) {
+			return null;
+		}
+		return node.get(key);
+	}
+
+	@Override
+	public Object tryGet(String path) throws NoFieldException {
+		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
+		Storage<Object> node = this.getParentMap(list);
+		Key key = list.last().getKey(node.getStorageType());
+
+		if (!node.has(key)) {
+			throw new NoFieldException(path, getFile(), "No value is associated to this key");
+		}
+		return node.get(key);
 	}
 
 	@Override
@@ -551,6 +667,7 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 			return this;
 		}
 		PathNavigator<SQLiteConfig> navigator = new PathNavigator<SQLiteConfig>(this);
+
 		if (navigator.followPath(path)) {
 			return navigator.getCurrentNode();
 		}
@@ -560,10 +677,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 	public void set(String path, Object value) {
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
+
 		if (this.parent != null && value == null) {
 			node.remove(list.last().getKey(node.getStorageType()));
 		} else {
-			// When a root value is removed, keep a null value in the map so that the save knows it has to delete it from the database
+			// When a root value is removed, keep a null value in the map so that the save
+			// knows it has to delete it from the database
 			node.set(list.last().getKey(node.getStorageType()), value);
 		}
 	}
@@ -572,11 +691,13 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!this.canAccess()) {
 			return;
 		}
+
 		if (value == null) {
 			this.remove(path);
 		}
+
 		if (!(value instanceof SQLiteConfig)) {
-			//TODO ConfigType conversion
+			// TODO ConfigType conversion
 			return;
 		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);

@@ -7,51 +7,55 @@ import java.lang.reflect.Method;
 
 public class NBTCompressedStreamToolsReflection {
 
-    private static Class<?> nbtcst = null;
+	private static Class<?> nbtcst = null;
 
-    static void setCSTClass(Class<?> type) {
-        if (type != null && NBTCompressedStreamToolsReflection.nbtcst == null) {
-            NBTCompressedStreamToolsReflection.nbtcst = type;
-        }
-    }
+	static void setCSTClass(Class<?> type) {
+		if (type != null && NBTCompressedStreamToolsReflection.nbtcst == null) {
+			NBTCompressedStreamToolsReflection.nbtcst = type;
+		}
+	}
 
-    public static boolean isNBTCST(Object obj) {
-        if (NBTCompressedStreamToolsReflection.nbtcst == null) {
-            return false;
-        }
-        return NBTCompressedStreamToolsReflection.nbtcst.isAssignableFrom(obj.getClass());
-    }
+	public static boolean isNBTCST(Object obj) {
+		if (NBTCompressedStreamToolsReflection.nbtcst == null) {
+			return false;
+		}
+		return NBTCompressedStreamToolsReflection.nbtcst.isAssignableFrom(obj.getClass());
+	}
 
-    public static void write(Object nbtCompound, OutputStream os) {
-        if (NBTCompoundReflection.isNBTCompound(nbtCompound)) {
-            try {
-                Method set = NBTCompressedStreamToolsReflection.nbtcst.getMethod("a", NBTCompoundReflection.getClassType(), OutputStream.class);
-                set.invoke(null, nbtCompound, os);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-                    throw (RuntimeException) e.getCause();
-                else e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+	public static void write(Object nbtCompound, OutputStream os) {
+		if (NBTCompoundReflection.isNBTCompound(nbtCompound)) {
 
-    public static Object read(InputStream is) {
-        try {
-            Method set = NBTCompressedStreamToolsReflection.nbtcst.getMethod("a", InputStream.class);
-            return set.invoke(null, is);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
-                throw (RuntimeException) e.getCause();
-            else e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+			try {
+				Method set = NBTCompressedStreamToolsReflection.nbtcst.getMethod("a",
+						NBTCompoundReflection.getClassType(), OutputStream.class);
+				set.invoke(null, nbtCompound, os);
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+					throw (RuntimeException) e.getCause();
+				else
+					e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static Object read(InputStream is) {
+		try {
+			Method set = NBTCompressedStreamToolsReflection.nbtcst.getMethod("a", InputStream.class);
+			return set.invoke(null, is);
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			if (e.getCause() != null && (e.getCause() instanceof RuntimeException))
+				throw (RuntimeException) e.getCause();
+			else
+				e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

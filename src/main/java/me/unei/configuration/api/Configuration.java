@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.InvalidNodeException;
 import me.unei.configuration.api.fs.PathComponent;
@@ -17,25 +18,22 @@ import me.unei.configuration.formats.Storage.Key;
 import me.unei.configuration.formats.Storage;
 import me.unei.configuration.formats.StorageType;
 
-public abstract class Configuration<T extends Configuration<T>> implements IConfiguration
-{
+public abstract class Configuration<T extends Configuration<T>> implements IConfiguration {
 	protected T parent;
-	
+
 	protected final List<WeakReference<T>> childrens;
-	
+
 	protected SavedFile file;
 	private boolean valid = true;
-	
+
 	protected PathSymbolsType symType;
 	protected PathComponent.PathComponentsList fullPath;
-	
+
 	protected String nodeName;
 	protected AtomicInteger nodeAtomicIndex;
-	
-	protected Configuration(SavedFile p_file, PathSymbolsType p_symType)
-	{
-		if (p_file == null)
-		{
+
+	protected Configuration(SavedFile p_file, PathSymbolsType p_symType) {
+		if (p_file == null) {
 			throw new IllegalArgumentException("SavedFile should not be null");
 		}
 		this.parent = null;
@@ -47,11 +45,9 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.nodeName = "";
 		this.nodeAtomicIndex = null;
 	}
-	
-	protected Configuration(T p_parent, String childName)
-	{
-		if (p_parent == null)
-		{
+
+	protected Configuration(T p_parent, String childName) {
+		if (p_parent == null) {
 			throw new IllegalArgumentException("Configuration parent should not be null");
 		}
 		this.parent = p_parent;
@@ -60,19 +56,16 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.symType = p_parent.symType;
 		this.fullPath = Configuration.buildPath(p_parent.fullPath, childName);
 		this.nodeName = (childName != null ? childName : "");
-		try
-		{
+
+		try {
 			int nodeIndex = Integer.valueOf(childName);
 			this.nodeAtomicIndex = new AtomicInteger(nodeIndex);
+		} catch (NumberFormatException ignored) {
 		}
-		catch (NumberFormatException ignored)
-		{}
 	}
-	
-	protected Configuration(T p_parent, int index)
-	{
-		if (p_parent == null)
-		{
+
+	protected Configuration(T p_parent, int index) {
+		if (p_parent == null) {
 			throw new IllegalArgumentException("Configuration parent should not be null");
 		}
 		this.parent = p_parent;
@@ -83,33 +76,31 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.nodeName = Integer.toString(index);
 		this.nodeAtomicIndex = new AtomicInteger(index);
 	}
-	
+
+	public abstract ConfigurationType getConfigurationType();
+
 	@Override
-	public IConfiguration getAt(int index)
-	{
+	public IConfiguration getAt(int index) {
 		return getChild(Integer.toString(index));
 	}
-	
-	protected final void init()
-	{
+
+	protected final void init() {
 		throwInvalid();
 		this.file.init();
-		try
-		{
+
+		try {
 			this.reload();
 			this.updateNode();
-		}
-		catch (FileFormatException e)
-		{
+		} catch (FileFormatException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	protected final void invalidate()
-	{
+
+	protected final void invalidate() {
 		this.valid = false;
 		this.parent = null;
 		this.childrens.forEach(wptr -> {
+
 			if (wptr.get() != null) {
 				wptr.get().invalidate();
 				wptr.clear();
@@ -122,11 +113,12 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.symType = null;
 		this.file = null;
 	}
-	
-	protected final T findInChildrens(final Storage.Key key)
-	{
+
+	protected final T findInChildrens(final Storage.Key key) {
 		Optional<WeakReference<T>> res = this.childrens.parallelStream().filter(elem -> {
+
 			if (elem.get() != null) {
+
 				if (key.getType() == StorageType.MAP) {
 					return elem.get().getName().equalsIgnoreCase(key.getKeyString());
 				} else {
@@ -135,22 +127,19 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 			}
 			return false;
 		}).findAny();
-		if (res.isPresent())
-		{
+
+		if (res.isPresent()) {
 			return res.get().get();
 		}
 		return null;
 	}
-	
-	protected final void validate(T newParent, int index)
-	{
+
+	protected final void validate(T newParent, int index) {
 		validate(newParent, new AtomicInteger(index));
 	}
-	
-	protected final void validate(T newParent, AtomicInteger index)
-	{
-		if (newParent == null)
-		{
+
+	protected final void validate(T newParent, AtomicInteger index) {
+		if (newParent == null) {
 			throw new IllegalArgumentException("Configuration parent should not be null");
 		}
 		this.valid = true;
@@ -161,11 +150,9 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.nodeName = Integer.toString(index.get());
 		this.symType = newParent.symType;
 	}
-	
-	protected final void validate(T newParent, String childName)
-	{
-		if (newParent == null)
-		{
+
+	protected final void validate(T newParent, String childName) {
+		if (newParent == null) {
 			throw new IllegalArgumentException("Configuration parent should not be null");
 		}
 		this.valid = true;
@@ -173,226 +160,191 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.fullPath = Configuration.buildPath(newParent.fullPath, childName);
 		this.file = newParent.file;
 		this.nodeName = (childName != null ? childName : "");
-		try
-		{
+
+		try {
 			int idx = Integer.valueOf(childName);
 			this.nodeAtomicIndex = new AtomicInteger(idx);
+		} catch (NumberFormatException ignored) {
 		}
-		catch (NumberFormatException ignored)
-		{}
 		this.symType = newParent.symType;
 	}
-	
-	protected final void validate(T newParent, Key childKey)
-	{
-		switch (childKey.getType())
-		{
-		case LIST:
-			validate(newParent, childKey.getKeyAtomicInt());
-			break;
-			
-		case DISCONTINUED_LIST:
-			validate(newParent, childKey.getKeyInt());
-			break;
-			
-		case MAP:
-			validate(newParent, childKey.getKeyString());
-			break;
 
-		default:
-			break;
+	protected final void validate(T newParent, Key childKey) {
+		switch (childKey.getType()) {
+			case LIST:
+				validate(newParent, childKey.getKeyAtomicInt());
+				break;
+
+			case DISCONTINUED_LIST:
+				validate(newParent, childKey.getKeyInt());
+				break;
+
+			case MAP:
+				validate(newParent, childKey.getKeyString());
+				break;
+
+			default:
+				break;
 		}
 	}
-	
-	public final boolean isValid()
-	{
+
+	public final boolean isValid() {
 		return this.valid;
 	}
-	
-	public final void throwInvalid() throws InvalidNodeException
-	{
-		if (!this.valid)
-		{
+
+	public final void throwInvalid() throws InvalidNodeException {
+		if (!this.valid) {
 			throw new InvalidNodeException();
 		}
 	}
-	
+
 	// v2 IMPL
-	
-	protected final void runTreeUpdate()
-	{
+
+	protected final void runTreeUpdate() {
 		if (this.parent != null) {
 			this.parent.runTreeUpdate();
 		} else {
 			this.updateNode();
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	protected final void updateNode()
-	{
+	protected final void updateNode() {
 		throwInvalid();
-		if (this.parent != null)
-		{
+
+		if (this.parent != null) {
 			updateFromParent();
 			this.parent.childrens.add(new WeakReference<T>((T) this));
 		}
-		if (!this.childrens.isEmpty())
-		{
+
+		if (!this.childrens.isEmpty()) {
 			List<WeakReference<T>> shallowCopy = new ArrayList<WeakReference<T>>(this.childrens);
 			this.childrens.clear();
 			Iterator<WeakReference<T>> it = shallowCopy.iterator();
-			while (it.hasNext())
-			{
+
+			while (it.hasNext()) {
 				WeakReference<T> elem = it.next();
-				if (elem.isEnqueued() || elem.get() == null)
-				{
+
+				if (elem.isEnqueued() || elem.get() == null) {
 					it.remove();
-				}
-				else
-				{
+				} else {
 					elem.get().updateNode();
 				}
 			}
 		}
 	}
-	
+
 	protected abstract void updateFromParent();
 	//
 
 	@Override
-	public final SavedFile getFile()
-	{
+	public final SavedFile getFile() {
 		return this.file;
 	}
 
 	@Override
-	public final String getFileName()
-	{
-		if (this.parent != null)
-		{
+	public final String getFileName() {
+		if (this.parent != null) {
 			return this.parent.getFileName();
 		}
 		return this.file.getFileName();
 	}
-	
-	PathSymbolsType getPathSymbolsType()
-	{
+
+	PathSymbolsType getPathSymbolsType() {
 		return this.symType;
 	}
 
 	@Override
-	public String getName()
-	{
+	public String getName() {
 		return this.nodeName;
 	}
-	
-	public int getIndex()
-	{
+
+	public int getIndex() {
 		return (this.nodeAtomicIndex != null) ? this.nodeAtomicIndex.get() : -1;
 	}
 
 	@Override
-	public final String getCurrentPath()
-	{
+	public final String getCurrentPath() {
 		return this.fullPath.toString();
 	}
 
 	@Override
-	public final PathComponent.PathComponentsList getRealListPath()
-	{
+	public final PathComponent.PathComponentsList getRealListPath() {
 		return fullPath.clone();
 	}
-	
+
 	@Override
-	public final boolean canAccess()
-	{
-		if (!this.isValid())
-		{
+	public final boolean canAccess() {
+		if (!this.isValid()) {
 			return false;
 		}
-		if (this.parent != null)
-		{
+
+		if (this.parent != null) {
 			return this.parent.canAccess();
 		}
 		return this.file.canAccess();
 	}
 
 	@Override
-	public final void lock()
-	{
-		if (this.isValid())
-		{
-			if (this.parent != null)
-			{
+	public final void lock() {
+		if (this.isValid()) {
+
+			if (this.parent != null) {
 				this.parent.lock();
-			}
-			else
-			{
+			} else {
 				this.file.lock();
 			}
 		}
 	}
 
 	@Override
-	public Configuration<T> getRoot()
-	{
-		if (this.parent != null)
-		{
+	public Configuration<T> getRoot() {
+		if (this.parent != null) {
 			return this.parent.getRoot();
 		}
 		return this;
 	}
 
 	@Override
-	public T getParent()
-	{
+	public T getParent() {
 		return this.parent;
 	}
-	
+
 	@Override
-	public T getSubSection(String path)
-	{
+	public T getSubSection(String path) {
 		return this.getSubSection(PathNavigator.parsePath(path, symType));
 	}
-	
+
 	public abstract T getSubSection(PathComponent.PathComponentsList path);
-	
-	
-	protected static PathComponent.PathComponentsList buildPath(PathComponent.PathComponentsList parent, String child)
-	{
+
+	protected static PathComponent.PathComponentsList buildPath(PathComponent.PathComponentsList parent, String child) {
 		PathComponent.PathComponentsList copy;
-		if (parent == null || parent.isEmpty())
-		{
+
+		if (parent == null || parent.isEmpty()) {
 			copy = new PathComponent.PathComponentsList(parent.getSymbolsType());
 			copy.appendRoot();
-		}
-		else
-		{
+		} else {
 			copy = parent.clone();
 		}
-		if (child == null || child.isEmpty())
-		{
+
+		if (child == null || child.isEmpty()) {
 			return copy;
 		}
 		copy.appendChild(child);
 		return copy;
 	}
 
-	protected static PathComponent.PathComponentsList buildPath(PathComponent.PathComponentsList parent, int index)
-	{
+	protected static PathComponent.PathComponentsList buildPath(PathComponent.PathComponentsList parent, int index) {
 		PathComponent.PathComponentsList copy;
-		if (parent == null || parent.isEmpty())
-		{
+
+		if (parent == null || parent.isEmpty()) {
 			copy = new PathComponent.PathComponentsList(parent.getSymbolsType());
 			copy.appendRoot();
-		}
-		else
-		{
+		} else {
 			copy = parent.clone();
 		}
-		if (index < 0)
-		{
+
+		if (index < 0) {
 			return copy;
 		}
 		copy.appendIndex(index);
