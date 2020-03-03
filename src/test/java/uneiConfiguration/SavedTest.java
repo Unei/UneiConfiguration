@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -33,6 +35,7 @@ import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IFlatConfiguration;
 import me.unei.configuration.api.exceptions.FileFormatException;
+import me.unei.configuration.api.exceptions.NoFieldException;
 
 @DisplayName("load/save/reload tests")
 @TestInstance(Lifecycle.PER_CLASS)
@@ -311,6 +314,7 @@ public class SavedTest {
 				((IConfiguration) config).set("removeTest.Untyped", null);
 				((IConfiguration) config).setByteList("removeTest.ByteList", null);
 				((IConfiguration) config).setIntegerList("removeTest.IntegerList", null);
+				((IConfiguration) config).setLongList("removeTest.LongList", null);
 			}
 
 			checkRemoveTestValues(config, "Failed to set to null %s value!");
@@ -340,6 +344,7 @@ public class SavedTest {
 				config.remove("removeTest.Untyped");
 				config.remove("removeTest.ByteList");
 				config.remove("removeTest.IntegerList");
+				config.remove("removeTest.LongList");
 			}
 
 			checkRemoveTestValues(config, "Failed to cached remove %s value!");
@@ -352,7 +357,7 @@ public class SavedTest {
 	public void removeTestStep4() {
 		for (IFlatConfiguration config : this.configs) {
 			assertNotNull(config);
-			logFine(String.format("assertRemove - step3 (removing) started for config %s",
+			logFine(String.format("assertRemove - step4 (removing) started for config %s",
 					config.toString().substring(0, config.toString().indexOf("="))));
 
 			setRemoveTestValues(config);
@@ -369,6 +374,7 @@ public class SavedTest {
 				config.remove("removeTest.Untyped");
 				config.remove("removeTest.ByteList");
 				config.remove("removeTest.IntegerList");
+				config.remove("removeTest.LongList");
 			}
 
 			checkRemoveTestValues(config, "Failed to cached remove %s value!");
@@ -387,6 +393,49 @@ public class SavedTest {
 		}
 	}
 
+	@Test
+	@Order(11)
+	@DisplayName("RemoveTest - getters returns")
+	public void removeTestStep5() {
+		for (IFlatConfiguration config : this.configs) {
+			assertNotNull(config);
+			logFine(String.format("assertRemove - step5 (getters) started for config %s",
+					config.toString().substring(0, config.toString().indexOf("="))));
+
+			setRemoveTestValues(config);
+
+			config.remove("removeTest.Boolean");
+			config.remove("removeTest.Byte");
+			config.remove("removeTest.Double");
+			config.remove("removeTest.Float");
+			config.remove("removeTest.Integer");
+			config.remove("removeTest.Long");
+			config.remove("removeTest.String");
+
+			if (config instanceof IConfiguration) {
+				config.remove("removeTest.Untyped");
+				config.remove("removeTest.ByteList");
+				config.remove("removeTest.IntegerList");
+				config.remove("removeTest.LongList");
+			}
+
+			checkRemoveTestValues(config, "Failed to cached remove %s value!");
+
+			config.save();
+
+			setRemoveTestValues(config);
+
+			try {
+				config.reload();
+			} catch (FileFormatException ffe) {
+				fail(ffe);
+			}
+
+			checkCannotGetTestValues(config, "Failed to get null on non-existing %s test value!");
+			checkThrowsNoTestValues(config, "Failed to throw exception on non-existing %s test value!");
+		}
+	}
+
 	private void setRemoveTestValues(IFlatConfiguration config) {
 		config.setBoolean("removeTest.Boolean", Boolean.TRUE);
 		config.setByte("removeTest.Byte", (byte) 42);
@@ -401,6 +450,7 @@ public class SavedTest {
 			((IConfiguration) config).setByteList("removeTest.ByteList",
 					Arrays.asList((byte) 0, (byte) 4, (byte) 2, (byte) 0));
 			((IConfiguration) config).setIntegerList("removeTest.IntegerList", Arrays.asList(0, 4, 2, 0));
+			((IConfiguration) config).setLongList("removeTest.LongList", Arrays.asList(0L, 4L, 2L, 0L));
 		}
 
 		assertTrue(config.contains("removeTest.Boolean"), "Failed to write boolean value!");
@@ -415,6 +465,7 @@ public class SavedTest {
 			assertTrue(config.contains("removeTest.Untyped"), "Failed to write untyped value!");
 			assertTrue(config.contains("removeTest.ByteList"), "Failed to write byte list value!");
 			assertTrue(config.contains("removeTest.IntegerList"), "Failed to write integer list value!");
+			assertTrue(config.contains("removeTest.LongList"), "Failed to write long list value!");
 		}
 	}
 
@@ -431,6 +482,41 @@ public class SavedTest {
 			assertFalse(config.contains("removeTest.Untyped"), String.format(msg, "untyped"));
 			assertFalse(config.contains("removeTest.ByteList"), String.format(msg, "byte list"));
 			assertFalse(config.contains("removeTest.IntegerList"), String.format(msg, "integer list"));
+			assertFalse(config.contains("removeTest.LongList"), String.format(msg, "long list"));
+		}
+	}
+
+	private void checkCannotGetTestValues(IFlatConfiguration config, String msg) {
+		assertNull(config.getBoolean("removeTest.Boolean"), String.format(msg, "boolean"));
+		assertNull(config.getByte("removeTest.Byte"), String.format(msg, "byte"));
+		assertNull(config.getDouble("removeTest.Double"), String.format(msg, "double"));
+		assertNull(config.getFloat("removeTest.Float"), String.format(msg, "float"));
+		assertNull(config.getInteger("removeTest.Integer"), String.format(msg, "integer"));
+		assertNull(config.getLong("removeTest.Long"), String.format(msg, "long"));
+		assertNull(config.getString("removeTest.String"), String.format(msg, "string"));
+
+		if (config instanceof IConfiguration) {
+			assertNull(((IConfiguration) config).get("removeTest.Untyped"), String.format(msg, "untyped"));
+			assertNull(((IConfiguration) config).getByteList("removeTest.ByteList"), String.format(msg, "byte list"));
+			assertNull(((IConfiguration) config).getIntegerList("removeTest.IntegerList"), String.format(msg, "integer list"));
+			assertNull(((IConfiguration) config).getLongList("removeTest.LongList"), String.format(msg, "long list"));
+		}
+	}
+
+	private void checkThrowsNoTestValues(IFlatConfiguration config, String msg) {
+		assertThrows(NoFieldException.class, () -> config.tryGetBoolean("removeTest.Boolean"), String.format(msg, "boolean"));
+		assertThrows(NoFieldException.class, () -> config.tryGetByte("removeTest.Byte"), String.format(msg, "byte"));
+		assertThrows(NoFieldException.class, () -> config.tryGetDouble("removeTest.Double"), String.format(msg, "double"));
+		assertThrows(NoFieldException.class, () -> config.tryGetFloat("removeTest.Float"), String.format(msg, "float"));
+		assertThrows(NoFieldException.class, () -> config.tryGetInteger("removeTest.Integer"), String.format(msg, "integer"));
+		assertThrows(NoFieldException.class, () -> config.tryGetLong("removeTest.Long"), String.format(msg, "long"));
+		assertThrows(NoFieldException.class, () -> config.tryGetString("removeTest.String"), String.format(msg, "string"));
+
+		if (config instanceof IConfiguration) {
+			assertThrows(NoFieldException.class, () -> ((IConfiguration) config).tryGet("removeTest.Untyped"), String.format(msg, "untyped"));
+//			assertThrows(NoFieldException.class, () -> ((IConfiguration) config).tryGetByteList("removeTest.ByteList"), String.format(msg, "byte list"));
+//			assertThrows(NoFieldException.class, () -> ((IConfiguration) config).tryGetIntegerList("removeTest.IntegerList"), String.format(msg, "integer list"));
+//			assertThrows(NoFieldException.class, () -> ((IConfiguration) config).tryGetLongList("removeTest.LongList"), String.format(msg, "long list"));
 		}
 	}
 
