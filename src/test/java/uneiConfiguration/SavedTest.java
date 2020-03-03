@@ -419,7 +419,9 @@ public class SavedTest {
 				config.remove("removeTest.LongList");
 			}
 
-			checkRemoveTestValues(config, "Failed to cached remove %s value!");
+
+			checkCannotGetTestValues(config, "Failed to get null on non-existing cached %s test value!");
+			checkThrowsNoTestValues(config, "Failed to throw exception on non-existing cached %s test value!");
 
 			config.save();
 
@@ -431,8 +433,8 @@ public class SavedTest {
 				fail(ffe);
 			}
 
-			checkCannotGetTestValues(config, "Failed to get null on non-existing %s test value!");
-			checkThrowsNoTestValues(config, "Failed to throw exception on non-existing %s test value!");
+			checkCannotGetTestValues(config, "Failed to get null on non-existing saved %s test value!");
+			checkThrowsNoTestValues(config, "Failed to throw exception on non-existing saved %s test value!");
 		}
 	}
 

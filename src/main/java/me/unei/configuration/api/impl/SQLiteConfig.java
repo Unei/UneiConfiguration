@@ -658,7 +658,11 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!node.has(key)) {
 			throw new NoFieldException(path, getFile(), "No value is associated to this key");
 		}
-		return node.get(key);
+		Object obj = node.get(key);
+		if (obj == null) { // Remaining null values (for SQL TABLE DELETIONs)
+			throw new NoFieldException(path, getFile(), "The value for this key has been removed");
+		}
+		return obj;
 	}
 
 	@Override
@@ -675,6 +679,9 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 	}
 
 	public void set(String path, Object value) {
+		if (!this.canAccess()) {
+			return;
+		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
 
