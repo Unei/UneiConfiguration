@@ -189,7 +189,7 @@
   					<disable>false</disable>
   					<version>3.0</version>
   					<usePhrasedFileName>false</usePhrasedFileName>
-  					<usePhrasedTestSuiteClassName>true</usePhrasedTestSuiteClassName>
+  					<usePhrasedTestSuiteClassName>false</usePhrasedTestSuiteClassName>
   					<usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
   					<usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
   				</statelessTestsetReporter>
