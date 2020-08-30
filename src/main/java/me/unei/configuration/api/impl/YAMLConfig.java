@@ -22,6 +22,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.api.Configuration;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.IYAMLConfiguration;
@@ -424,7 +425,7 @@ public final class YAMLConfig extends UntypedStorage<YAMLConfig> implements IYAM
 		YAMLConfig node = this.getForPath(list);
 
 		if (value == null) {
-			node.nodeData.remove(list.last().getKey(node.getType()));
+			Configuration.removeRecursive(node.nodeData, list.last().getKey(node.getType()));
 		} else {
 			node.nodeData.set(list.last().getKey(node.getType()), value);
 		}

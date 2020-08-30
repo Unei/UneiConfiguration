@@ -24,6 +24,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IJSONConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configuration;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.NoFieldException;
@@ -350,7 +351,7 @@ public final class JSONConfig extends UntypedStorage<JSONConfig> implements IJSO
 		Storage<Object> node = this.getParentMap(list);
 
 		if (value == null) {
-			node.remove(list.last().getKey(node.getStorageType()));
+			Configuration.removeRecursive(node, list.last().getKey(node.getStorageType()));
 		} else {
 
 			if (value instanceof Double) {

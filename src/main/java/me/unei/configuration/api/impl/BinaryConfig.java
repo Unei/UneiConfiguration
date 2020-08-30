@@ -12,6 +12,7 @@ import me.unei.configuration.SavedFile;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configuration;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.FileFormatException;
 import me.unei.configuration.api.exceptions.NoFieldException;
@@ -350,7 +351,7 @@ public final class BinaryConfig extends UntypedStorage<BinaryConfig> implements 
 		Storage<Object> node = this.getParentMap(list);
 
 		if (value == null) {
-			node.remove(list.last().getKey(node.getStorageType()));
+			Configuration.removeRecursive(node, list.last().getKey(node.getStorageType()));
 		} else {
 			node.set(list.last().getKey(node.getStorageType()), value);
 		}
