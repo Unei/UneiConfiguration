@@ -18,9 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.xml.bind.DatatypeConverter;
-
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IMySQLConfiguration;
 import me.unei.configuration.api.UntypedStorage;
@@ -138,12 +137,12 @@ public final class MySQLConfig extends UntypedStorage<MySQLConfig> implements IM
 	private static String getHash(String text) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("MD5");
-			return DatatypeConverter.printHexBinary(digest.digest(text.getBytes()));
+			return SerializerHelper.hexbinToString(digest.digest(text.getBytes()));
 		} catch (NoSuchAlgorithmException e) {
 			UneiConfiguration.getInstance().getLogger().warning("Could not calculate MD5 hash of " + text + ":");
 			e.printStackTrace();
 		}
-		String hex = DatatypeConverter.printHexBinary(text.getBytes());
+		String hex = SerializerHelper.hexbinToString(text.getBytes());
 
 		if (hex.length() > 32) {
 			hex = hex.substring(0, 32);

@@ -21,9 +21,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
-import javax.xml.bind.DatatypeConverter;
-
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.ISQLiteConfiguration;
@@ -142,12 +141,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 	private static String getHash(String text) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("MD5");
-			return DatatypeConverter.printHexBinary(digest.digest(text.getBytes()));
+			return SerializerHelper.hexbinToString(digest.digest(text.getBytes()));
 		} catch (NoSuchAlgorithmException e) {
 			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "getHash",
 					"Could not calculate MD5 hash of " + text + ":", e);
 		}
-		String hex = DatatypeConverter.printHexBinary(text.getBytes());
+		String hex = SerializerHelper.hexbinToString(text.getBytes());
 
 		if (hex.length() > 32) {
 			hex = hex.substring(0, 32);
