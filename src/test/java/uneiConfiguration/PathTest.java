@@ -248,6 +248,7 @@ public class PathTest {
 		assertEquals(-1, current.getIndex());
 	}
 
+	@DisplayName("[Unsupported] Path type detection")
 	@Test
 	@SuppressWarnings("deprecation")
 	@EnabledIfSystemProperty(named = "unei.test.patheval", matches = "([Tt]rue|[Yy]es|1)")

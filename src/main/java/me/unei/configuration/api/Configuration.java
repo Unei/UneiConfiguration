@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -113,7 +114,28 @@ public abstract class Configuration<T extends Configuration<T>> implements IConf
 		this.symType = null;
 		this.file = null;
 	}
-
+	
+	protected static final void removeRecursive(Storage<?> node, final Storage.Key key) {
+		Object old = node.get(key);
+		node.remove(key);
+		if (old != null) {
+			invalidateObject(old);
+		}
+	}
+	
+	private static void invalidateObject(Object element) {
+		if (element instanceof Configuration) {
+			((Configuration<?>) element).invalidate();
+		} else if (element instanceof Iterable) {
+			((Iterable<?>) element).forEach(Configuration::invalidateObject);
+		} else if (element instanceof Map) {
+			((Map<?, ?>) element).values().forEach(Configuration::invalidateObject);
+			try {
+				((Map<?, ?>) element).clear();
+			} catch (UnsupportedOperationException ignored) {}
+		}
+	}
+	
 	protected final T findInChildrens(final Storage.Key key) {
 		Optional<WeakReference<T>> res = this.childrens.parallelStream().filter(elem -> {
 

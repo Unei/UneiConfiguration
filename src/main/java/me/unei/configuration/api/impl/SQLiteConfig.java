@@ -21,9 +21,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
-import javax.xml.bind.DatatypeConverter;
-
 import me.unei.configuration.SavedFile;
+import me.unei.configuration.SerializerHelper;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.ISQLiteConfiguration;
@@ -142,12 +141,12 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 	private static String getHash(String text) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("MD5");
-			return DatatypeConverter.printHexBinary(digest.digest(text.getBytes()));
+			return SerializerHelper.hexbinToString(digest.digest(text.getBytes()));
 		} catch (NoSuchAlgorithmException e) {
 			UneiConfiguration.getInstance().getLogger().logp(Level.WARNING, CLASS_NAME, "getHash",
 					"Could not calculate MD5 hash of " + text + ":", e);
 		}
-		String hex = DatatypeConverter.printHexBinary(text.getBytes());
+		String hex = SerializerHelper.hexbinToString(text.getBytes());
 
 		if (hex.length() > 32) {
 			hex = hex.substring(0, 32);
@@ -658,7 +657,11 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 		if (!node.has(key)) {
 			throw new NoFieldException(path, getFile(), "No value is associated to this key");
 		}
-		return node.get(key);
+		Object obj = node.get(key);
+		if (obj == null) { // Remaining null values (for SQL TABLE DELETIONs)
+			throw new NoFieldException(path, getFile(), "The value for this key has been removed");
+		}
+		return obj;
 	}
 
 	@Override
@@ -675,6 +678,9 @@ public final class SQLiteConfig extends UntypedStorage<SQLiteConfig> implements 
 	}
 
 	public void set(String path, Object value) {
+		if (!this.canAccess()) {
+			return;
+		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(path, symType);
 		Storage<Object> node = this.getParentMap(list);
 

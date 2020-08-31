@@ -25,7 +25,7 @@ public class Updater implements IUpdater {
 
 	public static final String MAVEN_GROUPID = "me.unei";
 	public static final String POM_RESOURCE_PATH = "META-INF/maven/<groupId>/<artifactId>/pom.properties";
-	public static final String MAVEN_REPO_URL = "https://unei.gitlab.io/maven/<group>/<artifact>/maven-metadata.xml";
+	public static final String MAVEN_REPO_URL = "https://unei.github.io/maven/<group>/<artifact>/maven-metadata.xml";
 
 	private static final Map<IPlugin, Updater> cachedUpdaters = new HashMap<IPlugin, Updater>();
 //	private static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");

@@ -85,6 +85,7 @@ public class TreeSavedTest {
 
 	@Test
 	@Order(1)
+	@DisplayName("Load configurations for subsequent tests")
 	public void firstLoad() {
 		logFine("Loading configurations...");
 

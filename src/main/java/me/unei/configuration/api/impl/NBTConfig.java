@@ -11,6 +11,7 @@ import me.unei.configuration.api.IConfiguration;
 import me.unei.configuration.api.IInternalStorageUse;
 import me.unei.configuration.api.INBTConfiguration;
 import me.unei.configuration.api.UntypedStorage;
+import me.unei.configuration.api.Configuration;
 import me.unei.configuration.api.Configurations.ConfigurationType;
 import me.unei.configuration.api.exceptions.NoFieldException;
 import me.unei.configuration.api.format.INBTTag;
@@ -435,7 +436,7 @@ public final class NBTConfig extends UntypedStorage<NBTConfig> implements INBTCo
 		}
 		PathComponent.PathComponentsList list = PathNavigator.parsePath(key, symType);
 		Storage<Object> node = this.getParentMap(list);
-		node.remove(list.last().getKey(node.getStorageType()));
+		Configuration.removeRecursive(node, list.last().getKey(node.getStorageType()));
 	}
 
 	@Override
